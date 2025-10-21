@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AcePaste — Paste cleaner</title>
+  <meta name="description" content="Clean pasted text: strip markup, invisible chars, emojis, and cruft.">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="assets/logo.jpg">
+</head>
+<body>
+  <header class="topbar">
+    <h1>AcePaste</h1>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="https://accepaste.xyz" target="_blank" rel="noopener">accepaste.xyz</a>
+      <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="io">
+      <textarea id="input" placeholder="Paste messy text here..."></textarea>
+
+      <div class="panel">
+        <div class="options left">
+          <h3>Options</h3>
+          <label><input type="checkbox" id="opt-zero" checked> Remove zero‑width & NBSP</label>
+          <label><input type="checkbox" id="opt-markdown" checked> Remove Markdown (** ## `[]`())</label>
+          <label><input type="checkbox" id="opt-dashes" checked> Normalize long dashes</label>
+          <label><input type="checkbox" id="opt-smartquotes" checked> Straighten smart quotes</label>
+          <label><input type="checkbox" id="opt-html" checked> Strip HTML tags</label>
+          <label><input type="checkbox" id="opt-urls"> Remove URLs</label>
+          <label><input type="checkbox" id="opt-hashlines" checked> Drop lines starting with #</label>
+          <label><input type="checkbox" id="opt-emojis"> Remove emojis</label>
+          <label><input type="checkbox" id="opt-trimspaces" checked> Collapse extra spaces</label>
+          <label><input type="checkbox" id="opt-blanklines" checked> Remove duplicate blank lines</label>
+        </div>
+
+        <div class="logo-block">
+          <p class="hint">Click logo to clean text</p>
+          <button id="clean" class="logo-btn" title="Clean (or press Ctrl/⌘+Enter)">
+            <img src="assets/logo.jpg" alt="AcePaste logo">
+          </button>
+          <p class="hint">Click logo to clean text</p>
+        </div>
+
+        <div class="options right">
+          <h3>Custom rules</h3>
+          <div id="rules"></div>
+          <div class="rule-row">
+            <select id="rule-type">
+              <option value="replace">Replace</option>
+              <option value="remove">Remove</option>
+              <option value="keep">Keep only</option>
+            </select>
+            <input id="rule-pattern" placeholder="pattern (regex OK)">
+            <input id="rule-repl" placeholder="replacement" />
+            <button id="add-rule" class="ghost">Add</button>
+          </div>
+          <label><input type="checkbox" id="rule-regex" checked> Patterns use regex</label>
+        </div>
+      </div>
+
+      <textarea id="output" placeholder="Clean text appears here..." readonly></textarea>
+      <div id="metrics" class="metrics"></div>
+
+      <div class="quick">
+        <button id="btn-paste" class="action paste">Paste</button>
+        <button id="btn-clear" class="action clear">Clear</button>
+        <button id="btn-copy" class="action copy">Copy</button>
+      </div>
+    </section>
+
+    <section id="how" class="info">
+      <h2>What gets cleaned</h2>
+      <ul>
+        <li>Zero-width characters, non‑breaking spaces</li>
+        <li>Markdown symbols: <code>##</code>, <code>**</code>, backticks, brackets, link syntax</li>
+        <li>Typographic dashes and quotes normalization</li>
+        <li>HTML tags and entities</li>
+        <li>URLs and fragments (optional)</li>
+        <li>Comment lines starting with <code>#</code></li>
+        <li>Emojis and pictographs (optional)</li>
+        <li>Extra spaces and duplicate blank lines</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <small>© 2025 AcePaste. Client-side only. No data leaves your browser.</small>
+  </footer>
+
+  <script>window.ACEP_YEAR = new Date().getFullYear();</script>
+  <script src="app.js"></script>
+</body>
+</html>

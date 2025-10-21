@@ -1,0 +1,108 @@
+/* Futuristic, weird, functional. GitHub Pages friendly. */
+:root {
+  --bg: #0a0b10;
+  --panel: #11131a;
+  --ink: #e6e8ef;
+  --muted: #9aa3b2;
+  --brand: #7c4dff;
+  --accent: #07d1b2;
+  --red: #ff4d4d;
+  --yellow: #ffd24d;
+  --green: #2fd163;
+  --ring: 0 0 0 2px rgba(124,77,255,.35);
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 800px at 80% -10%, rgba(124,77,255,.12), transparent),
+              radial-gradient(900px 600px at -10% 20%, rgba(7,209,178,.1), transparent),
+              var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+}
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px; background: rgba(17,19,26,.7); backdrop-filter: blur(6px);
+  position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.topbar h1 { margin: 0; font-size: 18px; letter-spacing: .6px; color: var(--accent); }
+.topbar nav a { color: var(--muted); margin-left: 14px; text-decoration: none; }
+.topbar nav a:hover { color: var(--ink); }
+
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+
+.io { position: relative; }
+
+textarea {
+  width: 100%; min-height: 180px; border: 1px solid rgba(255,255,255,.08);
+  background: var(--panel); color: var(--ink); padding: 14px; border-radius: var(--radius);
+  outline: none; box-shadow: var(--shadow);
+}
+textarea:focus { box-shadow: var(--shadow), var(--ring); border-color: rgba(124,77,255,.3); }
+
+.panel {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center;
+  margin: 14px 0;
+}
+.options {
+  background: rgba(17,19,26,.8); border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow);
+}
+.options h3 { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+.options label { display: block; margin: 6px 0; font-size: 13px; color: var(--ink); }
+
+.logo-block { text-align: center; }
+.logo-btn {
+  background: transparent; border: none; cursor: pointer; padding: 0; display: inline-block;
+  border-radius: 50%; transition: transform .08s ease;
+}
+.logo-btn:active { transform: scale(.98); }
+.logo-btn img {
+  width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+  border: 3px solid rgba(255,255,255,.12); box-shadow: 0 15px 50px rgba(124,77,255,.35);
+}
+.hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+
+.rule-row { display: grid; grid-template-columns: 110px 1fr 1fr 80px; gap: 6px; margin-top: 6px; }
+.rule { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); padding: 8px; border-radius: 10px; margin: 6px 0; font-size: 13px; display:flex; justify-content:space-between; align-items:center; }
+.rule .kill { background: transparent; border: none; color: var(--muted); cursor: pointer; }
+
+.metrics {
+  margin: 10px 0 0; font-size: 13px; color: var(--muted);
+  background: rgba(17,19,26,.8); border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow);
+}
+
+.quick {
+  position: fixed; right: 16px; top: 50%; transform: translateY(-50%); display: grid; gap: 10px;
+}
+.action {
+  width: 120px; padding: 12px 10px; border: none; border-radius: 14px; color: #091015;
+  font-weight: 700; letter-spacing: .3px; cursor: pointer; box-shadow: var(--shadow);
+  opacity: .9;
+}
+.action:hover { opacity: 1; }
+.action.paste { background: var(--red); }
+.action.clear { background: var(--yellow); }
+.action.copy  { background: var(--green); }
+
+.info {
+  margin-top: 40px;
+  background: rgba(17,19,26,.6); border: 1px solid rgba(255,255,255,.05);
+  border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+}
+.info h2 { margin-top: 0; }
+.info code { background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 6px; }
+
+.foot { text-align: center; color: var(--muted); padding: 20px; }
+
+@media (max-width: 900px) {
+  .panel { grid-template-columns: 1fr; }
+  .quick { position: static; transform: none; grid-template-columns: repeat(3, 1fr); margin-top: 12px; }
+  .action { width: 100%; }
+}
