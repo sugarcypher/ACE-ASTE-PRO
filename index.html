@@ -8,9 +8,59 @@
   <img src="/brand.jpg" class="hero" alt="Ace Logo">
   <label class="lbl">Paste text</label>
   <textarea id="paste" class="ta" rows="8" placeholder="Paste here…"></textarea>
+  
+  <div class="options-panel">
+    <div class="options-top">
+      <label><input type="checkbox" id="removeMarkdown" checked> Remove markdown</label>
+      <label><input type="checkbox" id="removeAIMarkup" checked> Remove AI debris (##, ***, +++)</label>
+      <label><input type="checkbox" id="privacyMode"> Privacy Mode (client-side only)</label>
+    </div>
+    
+    <button id="moreOptions" class="btn-ghost">Advanced options ▾</button>
+    <div id="advanced" class="advanced hidden">
+      <div class="option-group">
+        <div class="group-title">Invisible / Junk</div>
+        <label><input type="checkbox" id="collapseSpaces" checked> Collapse extra spaces</label>
+        <label><input type="checkbox" id="collapseNewlines" checked> Collapse 3+ newlines</label>
+        <label><input type="checkbox" id="trimPerLine" checked> Trim per line</label>
+        <label><input type="checkbox" id="removeHtml"> Remove HTML tags</label>
+      </div>
+      
+      <div class="option-group">
+        <div class="group-title">Code / AI Cleanup</div>
+        <label><input type="checkbox" id="removeComments" checked> Remove comments (#, //, /* */, <!-- -->)</label>
+      </div>
+      
+      <div class="option-group">
+        <div class="group-title">Case Transform</div>
+        <div class="case-options">
+          <label><input type="radio" name="caseTx" value="" checked> None</label>
+          <label><input type="radio" name="caseTx" value="upper"> UPPERCASE</label>
+          <label><input type="radio" name="caseTx" value="lower"> lowercase</label>
+          <label><input type="radio" name="caseTx" value="capitalize"> Capitalize Each Word</label>
+          <label><input type="radio" name="caseTx" value="title"> Title Case</label>
+        </div>
+      </div>
+      
+      <div class="option-group">
+        <div class="group-title">Custom Find/Replace</div>
+        <input id="customFind" class="input-small" placeholder="Find text or /regex/">
+        <input id="customReplace" class="input-small" placeholder="Replace with (empty to remove)">
+        <label><input type="checkbox" id="customRegex"> Use regex</label>
+      </div>
+    </div>
+  </div>
+  
   <button id="cleanBtn" class="btn">Clean my paste</button>
   <label class="lbl">Cleaned output</label>
   <textarea id="cleaned" class="ta" rows="8" placeholder="Cleaned output…" readonly></textarea>
 </main>
+<footer class="footer">
+  <small>
+    <a href="/privacy.html">Privacy Policy</a> | 
+    <a href="/security.html">Security & Terms</a> | 
+    © 2025 Ace Paste Cleaner Pro. Client-side processing. No data stored.
+  </small>
+</footer>
 <script src="/app.js"></script>
 </body></html>
