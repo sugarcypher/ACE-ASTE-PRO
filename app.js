@@ -1,15 +1,51 @@
 // Ace Paste Cleaner Pro - Client-side text cleaning
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('cleanBtn').addEventListener('click', cleanText);
-  document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
-  document.getElementById('clearBtn').addEventListener('click', clearFields);
-  document.getElementById('moreOptions').addEventListener('click', () => {
-    const adv = document.getElementById('advanced');
-    const btn = document.getElementById('moreOptions');
-    adv.classList.toggle('hidden');
-    btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
-  });
+  // Initialize dark mode
+  initDarkMode();
+  
+  // Event listeners
+  const cleanBtn = document.getElementById('cleanBtn');
+  const pasteBtn = document.getElementById('pasteBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const moreOptions = document.getElementById('moreOptions');
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  
+  if (cleanBtn) cleanBtn.addEventListener('click', cleanText);
+  if (pasteBtn) pasteBtn.addEventListener('click', pasteFromClipboard);
+  if (clearBtn) clearBtn.addEventListener('click', clearFields);
+  if (moreOptions) {
+    moreOptions.addEventListener('click', () => {
+      const adv = document.getElementById('advanced');
+      const btn = document.getElementById('moreOptions');
+      adv.classList.toggle('hidden');
+      btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
+    });
+  }
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+  }
 });
+
+function initDarkMode() {
+  const isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) {
+    document.body.classList.add('dark-mode');
+    updateDarkModeIcon(true);
+  }
+}
+
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  updateDarkModeIcon(isDark);
+}
+
+function updateDarkModeIcon(isDark) {
+  const toggle = document.getElementById('darkModeToggle');
+  if (toggle) {
+    toggle.textContent = isDark ? '☀️' : '🌙';
+  }
+}
 
 async function pasteFromClipboard() {
   const pasteField = document.getElementById('paste');
