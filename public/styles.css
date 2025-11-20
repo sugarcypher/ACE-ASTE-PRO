@@ -1,0 +1,9 @@
+body{margin:0;background:#eef5fb;color:#0b0d12;font-family:system-ui,Inter,Segoe UI,Arial}
+.hdr{position:sticky;top:0;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(10,60,120,.15)}
+.domain{color:#53677f;font-size:14px;margin-left:auto}
+.logo{height:28px;border-radius:8px}
+.wrap{max-width:800px;margin:24px auto;padding:0 16px}
+.hero{display:block;margin:10px auto 18px;max-width:320px;border-radius:12px;box-shadow:0 10px 24px rgba(10,60,120,.18)}
+.lbl{color:#53677f;margin:6px 0;display:block}
+.ta{width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(10,60,120,.2);border-radius:12px;padding:12px}
+.btn{margin:10px 0 14px 0;display:block;width:100%;padding:12px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer}
