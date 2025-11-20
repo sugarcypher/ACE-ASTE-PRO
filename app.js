@@ -158,7 +158,12 @@ function cleanText() {
       text = text.replace(/#\s*(italic|bold|comment)[^\n]*/gi, '');
       text = text.replace(/\/\/[^\n]*/g, '');
       text = text.replace(/\/\*[\s\S]*?\*\//g, '');
-      text = text.replace(/<!--[\s\S]*?-->/g, '');
+      // Remove HTML comments recursively until no more matches
+      let prevText;
+      do {
+        prevText = text;
+        text = text.replace(/<!--[\s\S]*?-->/g, '');
+      } while (text !== prevText);
     }
     
     // Case transform
