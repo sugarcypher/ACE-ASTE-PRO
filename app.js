@@ -1,11 +1,30 @@
 // Ace Paste Cleaner Pro - Client-side text cleaning
 document.getElementById('cleanBtn').addEventListener('click', cleanText);
+document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
+document.getElementById('clearBtn').addEventListener('click', clearFields);
 document.getElementById('moreOptions').addEventListener('click', () => {
   const adv = document.getElementById('advanced');
   const btn = document.getElementById('moreOptions');
   adv.classList.toggle('hidden');
   btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
 });
+
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('paste').value = text;
+    document.getElementById('paste').focus();
+  } catch (err) {
+    alert('Unable to access clipboard. Please paste manually (Ctrl+V / Cmd+V).');
+    console.error('Clipboard access error:', err);
+  }
+}
+
+function clearFields() {
+  document.getElementById('paste').value = '';
+  document.getElementById('cleaned').value = '';
+  document.getElementById('paste').focus();
+}
 
 function cleanText() {
   let text = document.getElementById('paste').value;
