@@ -66,8 +66,27 @@ function cleanText() {
   
   // Remove markdown
   if (document.getElementById('removeMarkdown').checked) {
+    // Remove markdown headers
     text = text.replace(/(?:^|\s)(#{1,6})\s/gm, ' ');
-    text = text.replace(/\*\*|__|\*|_|`{1,3}|~~|\[|\]|\(|\)|>/g, '');
+    // Remove markdown bold/italic (only when used as markdown, not regular punctuation)
+    text = text.replace(/\*\*([^*]+)\*\*/g, '$1'); // Bold: **text**
+    text = text.replace(/\*([^*\n]+?)\*/g, '$1'); // Italic: *text* (but not if it's just a single asterisk)
+    text = text.replace(/__([^_]+)__/g, '$1'); // Bold: __text__
+    text = text.replace(/_([^_\n\s]+?)_/g, '$1'); // Italic: _text_ (but not underscores in words)
+    // Remove code blocks and inline code
+    text = text.replace(/```[\s\S]*?```/g, ''); // Code blocks
+    text = text.replace(/`([^`]+)`/g, '$1'); // Inline code
+    // Remove strikethrough
+    text = text.replace(/~~([^~]+)~~/g, '$1');
+    // Remove markdown links [text](url) but keep the text
+    text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+    // Remove markdown images ![alt](url)
+    text = text.replace(/!\[([^\]]*)\]\([^\)]+\)/g, '');
+    // Remove blockquote markers at start of lines
+    text = text.replace(/^>\s+/gm, '');
+    // Remove markdown list markers
+    text = text.replace(/^[\s]*[-*+]\s+/gm, '');
+    text = text.replace(/^[\s]*\d+\.\s+/gm, '');
   }
   
   // Remove AI markup
