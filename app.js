@@ -1,22 +1,52 @@
 // Ace Paste Cleaner Pro - Client-side text cleaning
-document.getElementById('cleanBtn').addEventListener('click', cleanText);
-document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
-document.getElementById('clearBtn').addEventListener('click', clearFields);
-document.getElementById('moreOptions').addEventListener('click', () => {
-  const adv = document.getElementById('advanced');
-  const btn = document.getElementById('moreOptions');
-  adv.classList.toggle('hidden');
-  btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cleanBtn').addEventListener('click', cleanText);
+  document.getElementById('pasteBtn').addEventListener('click', pasteFromClipboard);
+  document.getElementById('clearBtn').addEventListener('click', clearFields);
+  document.getElementById('moreOptions').addEventListener('click', () => {
+    const adv = document.getElementById('advanced');
+    const btn = document.getElementById('moreOptions');
+    adv.classList.toggle('hidden');
+    btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
+  });
 });
 
 async function pasteFromClipboard() {
+  const pasteField = document.getElementById('paste');
+  
+  // Try modern Clipboard API first
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    try {
+      const text = await navigator.clipboard.readText();
+      pasteField.value = text;
+      pasteField.focus();
+      return;
+    } catch (err) {
+      console.warn('Clipboard API failed, trying fallback:', err);
+    }
+  }
+  
+  // Fallback: Focus the field and prompt user to paste manually
+  pasteField.focus();
+  pasteField.select();
+  
+  // Try to trigger paste event
   try {
-    const text = await navigator.clipboard.readText();
-    document.getElementById('paste').value = text;
-    document.getElementById('paste').focus();
-  } catch (err) {
-    alert('Unable to access clipboard. Please paste manually (Ctrl+V / Cmd+V).');
-    console.error('Clipboard access error:', err);
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: new DataTransfer()
+    });
+    document.execCommand('paste');
+  } catch (e) {
+    // If that fails, show helpful message
+    const currentValue = pasteField.value;
+    pasteField.placeholder = 'Click here and press Ctrl+V (Cmd+V on Mac) to paste';
+    pasteField.focus();
+    
+    setTimeout(() => {
+      if (pasteField.value === currentValue) {
+        pasteField.placeholder = 'Paste here…';
+      }
+    }, 2000);
   }
 }
 

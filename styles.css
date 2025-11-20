@@ -7,10 +7,10 @@ body{margin:0;background:#eef5fb;color:#0b0d12;font-family:system-ui,Inter,Segoe
 .lbl{color:#53677f;margin:6px 0;display:block}
 .ta{width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(10,60,120,.2);border-radius:12px;padding:12px;box-sizing:border-box;font-family:inherit;font-size:14px}
 .button-group{display:flex;gap:10px;margin:10px 0 14px 0}
-.btn{margin:0;flex:1;padding:12px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer;font-size:16px;font-weight:500}
+.btn{margin:0;flex:1;padding:12px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer;font-size:16px;font-weight:500;color:#0b0d12}
 .btn:hover{background:linear-gradient(#f0f9fc,#d8f0f5)}
-.btn-secondary{flex:0 0 auto;padding:12px 20px;border-radius:12px;border:1px solid rgba(10,60,120,.3);background:rgba(255,255,255,.8);cursor:pointer;font-size:14px;font-weight:500;color:#0b0d12}
-.btn-secondary:hover{background:rgba(255,255,255,1);border-color:rgba(10,60,120,.5)}
+.btn-secondary{flex:0 0 auto;padding:12px 20px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer;font-size:16px;font-weight:500;color:#0b0d12;min-width:100px}
+.btn-secondary:hover{background:linear-gradient(#f0f9fc,#d8f0f5)}
 .options-panel{margin:12px 0;padding:16px;background:rgba(255,255,255,.6);border-radius:12px;border:1px solid rgba(10,60,120,.1)}
 .options-top{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
 .options-top label{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
