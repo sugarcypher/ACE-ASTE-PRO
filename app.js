@@ -150,7 +150,7 @@ function cleanText() {
     
     // Remove HTML tags
     if (document.getElementById('removeHtml').checked) {
-      text = text.replace(/<[^>\n]+>/g, '');
+      text = text.replace(/<|>/g, '');
     }
     
     // Remove comments
