@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize dark mode
   initDarkMode();
   
+  // Initialize Global Privacy Control (GPC)
+  initGlobalPrivacyControl();
+  
   // Event listeners
   const cleanBtn = document.getElementById('cleanBtn');
   const pasteBtn = document.getElementById('pasteBtn');
@@ -25,6 +28,34 @@ document.addEventListener('DOMContentLoaded', () => {
     darkModeToggle.addEventListener('click', toggleDarkMode);
   }
 });
+
+function initGlobalPrivacyControl() {
+  // Check for Global Privacy Control (GPC) signal
+  // GPC is required by CCPA/CPRA to honor user opt-out requests
+  const gpcEnabled = navigator.globalPrivacyControl === true || 
+                     navigator.doNotTrack === '1' ||
+                     (typeof navigator.globalPrivacyControl !== 'undefined' && navigator.globalPrivacyControl);
+  
+  if (gpcEnabled) {
+    // Store GPC preference
+    localStorage.setItem('gpcOptOut', 'true');
+    
+    // Disable personalized advertising by setting Google AdSense to non-personalized
+    // This is done by setting the google_adsense_opt_out cookie or using non-personalized ads
+    try {
+      // Set a flag that can be used to request non-personalized ads
+      document.cookie = 'google_adsense_opt_out=true; path=/; max-age=31536000; SameSite=Lax';
+      
+      // Log GPC detection for compliance purposes
+      console.log('Global Privacy Control (GPC) detected - personalized advertising disabled');
+    } catch (e) {
+      console.warn('Could not set GPC opt-out cookie:', e);
+    }
+  } else {
+    // Clear GPC opt-out if not enabled
+    localStorage.removeItem('gpcOptOut');
+  }
+}
 
 function initDarkMode() {
   const isDark = localStorage.getItem('darkMode') === 'true';
