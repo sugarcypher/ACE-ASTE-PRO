@@ -27,6 +27,38 @@ document.addEventListener('DOMContentLoaded', () => {
   if (darkModeToggle) {
     darkModeToggle.addEventListener('click', toggleDarkMode);
   }
+  
+  // Termly consent preferences link handler
+  const consentLinks = document.querySelectorAll('.termly-display-preferences');
+  consentLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Try Termly's API methods
+      if (window.termly && typeof window.termly.openPreferences === 'function') {
+        window.termly.openPreferences();
+      } else if (window.termly && typeof window.termly.showPreferences === 'function') {
+        window.termly.showPreferences();
+      } else if (window.termly && typeof window.termly.displayPreferences === 'function') {
+        window.termly.displayPreferences();
+      } else {
+        // Fallback: try to trigger Termly's banner or redirect to main page
+        if (window.location.pathname !== '/') {
+          window.location.href = '/#termly-preferences';
+        } else {
+          // On main page, try to find and click Termly's preferences button
+          const termlyPrefsBtn = document.querySelector('[data-termly-preferences]') || 
+                                 document.querySelector('.termly-preferences-button') ||
+                                 document.querySelector('[onclick*="termly"]');
+          if (termlyPrefsBtn) {
+            termlyPrefsBtn.click();
+          } else {
+            // Last resort: show alert
+            alert('Please use the cookie consent banner to manage your preferences, or visit the main page.');
+          }
+        }
+      }
+    });
+  });
 });
 
 function initGlobalPrivacyControl() {

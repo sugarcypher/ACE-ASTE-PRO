@@ -220,6 +220,16 @@ document.addEventListener('DOMContentLoaded', () => {
       darkModeToggle.textContent = isDark ? '☀️' : '🌙';
     });
   }
+  
+  // Termly consent preferences link handler
+  const consentLinks = document.querySelectorAll('.termly-display-preferences');
+  consentLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Redirect to main page where Termly is loaded
+      window.location.href = '/';
+    });
+  });
 });
 </script>
 <footer class="footer">
