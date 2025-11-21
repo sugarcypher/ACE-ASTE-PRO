@@ -185,8 +185,12 @@ function clearFields() {
 }
 
 function cleanText() {
-  let text = document.getElementById('paste').value;
-  if (!text) return;
+  try {
+    let text = document.getElementById('paste').value;
+    if (!text) {
+      document.getElementById('cleaned').value = '';
+      return;
+    }
   
   // Always remove zero-width characters (core function)
   const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
@@ -259,20 +263,23 @@ function cleanText() {
     }
     
     // Case transform
-    const caseTx = document.querySelector('input[name="caseTx"]:checked').value;
-    if (caseTx === 'upper') text = text.toUpperCase();
-    else if (caseTx === 'lower') text = text.toLowerCase();
-    else if (caseTx === 'capitalize') {
-      text = text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-    } else if (caseTx === 'title') {
-      const skip = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
-      text = text.split(' ').map((w, i) => {
-        const lower = w.toLowerCase();
-        if (i === 0 || !skip.includes(lower)) {
-          return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-        }
-        return lower;
-      }).join(' ');
+    const caseTxRadio = document.querySelector('input[name="caseTx"]:checked');
+    if (caseTxRadio) {
+      const caseTx = caseTxRadio.value;
+      if (caseTx === 'upper') text = text.toUpperCase();
+      else if (caseTx === 'lower') text = text.toLowerCase();
+      else if (caseTx === 'capitalize') {
+        text = text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      } else if (caseTx === 'title') {
+        const skip = ['a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+        text = text.split(' ').map((w, i) => {
+          const lower = w.toLowerCase();
+          if (i === 0 || !skip.includes(lower)) {
+            return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+          }
+          return lower;
+        }).join(' ');
+      }
     }
     
     // Remove punctuation
@@ -309,4 +316,8 @@ function cleanText() {
   }
   
   document.getElementById('cleaned').value = text;
+  } catch (error) {
+    console.error('Error cleaning text:', error);
+    alert('An error occurred while cleaning the text. Please check the console for details.');
+  }
 }
