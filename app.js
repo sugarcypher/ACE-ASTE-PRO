@@ -214,6 +214,21 @@ function cleanText() {
       }).join(' ');
     }
     
+    // Remove punctuation
+    const punctuationSelect = document.getElementById('removePunctuation');
+    if (punctuationSelect) {
+      const selectedPunctuation = Array.from(punctuationSelect.selectedOptions).map(opt => opt.value);
+      if (selectedPunctuation.length > 0) {
+        // Escape special regex characters
+        const escaped = selectedPunctuation.map(p => {
+          // Escape special regex characters: . * + ? ^ $ { } [ ] \ | ( )
+          return p.replace(/[.*+?^${}()[\]\\|]/g, '\\$&');
+        });
+        const punctuationRegex = new RegExp('[' + escaped.join('') + ']', 'g');
+        text = text.replace(punctuationRegex, '');
+      }
+    }
+    
     // Custom find/replace
     const find = document.getElementById('customFind').value;
     const replace = document.getElementById('customReplace').value;
