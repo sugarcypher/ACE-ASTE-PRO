@@ -396,54 +396,74 @@ function cleanText() {
 
 function displayCleaningReport(report, originalLength, finalLength, totalRemoved) {
   const reportDiv = document.getElementById('cleaningReport');
-  if (!reportDiv) return;
-  
-  if (totalRemoved === 0) {
-    reportDiv.classList.add('hidden');
-    reportDiv.innerHTML = '';
+  if (!reportDiv) {
+    console.error('Cleaning report div not found!');
     return;
   }
   
+  // Always show the report when cleaning happens
   reportDiv.classList.remove('hidden');
   
   let html = '<h3>Cleaning Report</h3><ul>';
+  let hasItems = false;
   
   if (report.zeroWidth > 0) {
     html += `<li class="report-item"><span class="report-label">Invisible characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
+    hasItems = true;
   }
   if (report.emojis > 0) {
     html += `<li class="report-item"><span class="report-label">Emojis removed</span><span class="report-count">${report.emojis} chars</span></li>`;
+    hasItems = true;
   }
   if (report.formatting > 0) {
     html += `<li class="report-item"><span class="report-label">Formatting characters removed</span><span class="report-count">${report.formatting} chars</span></li>`;
+    hasItems = true;
   }
   if (report.markdown > 0) {
     html += `<li class="report-item"><span class="report-label">Markdown formatting removed</span><span class="report-count">${report.markdown} chars</span></li>`;
+    hasItems = true;
   }
   if (report.aiMarkup > 0) {
     html += `<li class="report-item"><span class="report-label">AI markup removed</span><span class="report-count">${report.aiMarkup} chars</span></li>`;
+    hasItems = true;
   }
   if (report.spaces > 0) {
     html += `<li class="report-item"><span class="report-label">Extra spaces collapsed</span><span class="report-count">${report.spaces} chars</span></li>`;
+    hasItems = true;
   }
   if (report.newlines > 0) {
     html += `<li class="report-item"><span class="report-label">Extra newlines collapsed</span><span class="report-count">${report.newlines} chars</span></li>`;
+    hasItems = true;
   }
   if (report.html > 0) {
     html += `<li class="report-item"><span class="report-label">HTML tags removed</span><span class="report-count">${report.html} chars</span></li>`;
+    hasItems = true;
   }
   if (report.comments > 0) {
     html += `<li class="report-item"><span class="report-label">Comments removed</span><span class="report-count">${report.comments} chars</span></li>`;
+    hasItems = true;
   }
   if (report.punctuation > 0) {
     html += `<li class="report-item"><span class="report-label">Punctuation removed</span><span class="report-count">${report.punctuation} chars</span></li>`;
+    hasItems = true;
   }
   if (report.custom > 0) {
     html += `<li class="report-item"><span class="report-label">Custom replacements</span><span class="report-count">${report.custom} chars</span></li>`;
+    hasItems = true;
+  }
+  
+  if (!hasItems) {
+    html += '<li class="report-item"><span class="report-label">No changes detected</span></li>';
   }
   
   html += '</ul>';
-  html += `<div class="report-total">Total: ${originalLength} → ${finalLength} characters (${totalRemoved} removed, ${((totalRemoved/originalLength)*100).toFixed(1)}%)</div>`;
+  
+  if (totalRemoved !== 0 || originalLength !== finalLength) {
+    const percentage = originalLength > 0 ? ((totalRemoved/originalLength)*100).toFixed(1) : '0.0';
+    html += `<div class="report-total">Total: ${originalLength} → ${finalLength} characters (${totalRemoved > 0 ? totalRemoved + ' removed' : 'no change'}, ${percentage}%)</div>`;
+  } else {
+    html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
+  }
   
   reportDiv.innerHTML = html;
 }
