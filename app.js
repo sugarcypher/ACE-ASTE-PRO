@@ -181,6 +181,11 @@ async function pasteFromClipboard() {
 function clearFields() {
   document.getElementById('paste').value = '';
   document.getElementById('cleaned').value = '';
+  const reportDiv = document.getElementById('cleaningReport');
+  if (reportDiv) {
+    reportDiv.classList.add('hidden');
+    reportDiv.innerHTML = '';
+  }
   document.getElementById('paste').focus();
 }
 
@@ -189,15 +194,36 @@ function cleanText() {
     let text = document.getElementById('paste').value;
     if (!text) {
       document.getElementById('cleaned').value = '';
+      const reportDiv = document.getElementById('cleaningReport');
+      if (reportDiv) {
+        reportDiv.classList.add('hidden');
+        reportDiv.innerHTML = '';
+      }
       return;
     }
   
+  const originalLength = text.length;
+  const report = {
+    zeroWidth: 0,
+    markdown: 0,
+    aiMarkup: 0,
+    spaces: 0,
+    newlines: 0,
+    html: 0,
+    comments: 0,
+    punctuation: 0,
+    custom: 0
+  };
+  
   // Always remove zero-width characters (core function)
   const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
+  const zwMatches = text.match(zwRe);
+  report.zeroWidth = zwMatches ? zwMatches.length : 0;
   text = text.replace(zwRe, '');
   
   // Remove markdown
   if (document.getElementById('removeMarkdown').checked) {
+    const beforeMarkdown = text.length;
     // Remove markdown headers
     text = text.replace(/(?:^|\s)(#{1,6})\s/gm, ' ');
     // Remove markdown bold/italic (only when used as markdown, not regular punctuation)
@@ -219,11 +245,14 @@ function cleanText() {
     // Remove markdown list markers
     text = text.replace(/^[\s]*[-*+]\s+/gm, '');
     text = text.replace(/^[\s]*\d+\.\s+/gm, '');
+    report.markdown = beforeMarkdown - text.length;
   }
   
   // Remove AI markup
   if (document.getElementById('removeAIMarkup').checked) {
+    const beforeAI = text.length;
     text = text.replace(/(\*{2,}|\*{3,}|#{2,}|\+{2,}|={2,}|-{2,}|_{2,})/g, '');
+    report.aiMarkup = beforeAI - text.length;
   }
   
   // Advanced options
@@ -231,12 +260,16 @@ function cleanText() {
   if (!adv.classList.contains('hidden')) {
     // Collapse spaces
     if (document.getElementById('collapseSpaces').checked) {
+      const beforeSpaces = text.length;
       text = text.replace(/[ \t]+/g, ' ');
+      report.spaces = beforeSpaces - text.length;
     }
     
     // Collapse newlines
     if (document.getElementById('collapseNewlines').checked) {
+      const beforeNewlines = text.length;
       text = text.replace(/\n{3,}/g, '\n\n');
+      report.newlines = beforeNewlines - text.length;
     }
     
     // Trim per line
@@ -246,11 +279,14 @@ function cleanText() {
     
     // Remove HTML tags
     if (document.getElementById('removeHtml').checked) {
+      const beforeHTML = text.length;
       text = text.replace(/<|>/g, '');
+      report.html = beforeHTML - text.length;
     }
     
     // Remove comments
     if (document.getElementById('removeComments').checked) {
+      const beforeComments = text.length;
       text = text.replace(/#\s*(italic|bold|comment)[^\n]*/gi, '');
       text = text.replace(/\/\/[^\n]*/g, '');
       text = text.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -260,6 +296,7 @@ function cleanText() {
         prevText = text;
         text = text.replace(/<!--[\s\S]*?-->/g, '');
       } while (text !== prevText);
+      report.comments = beforeComments - text.length;
     }
     
     // Case transform
@@ -287,6 +324,7 @@ function cleanText() {
     if (punctuationSelect) {
       const selectedPunctuation = Array.from(punctuationSelect.selectedOptions).map(opt => opt.value);
       if (selectedPunctuation.length > 0) {
+        const beforePunctuation = text.length;
         // Escape special regex characters
         const escaped = selectedPunctuation.map(p => {
           // Escape special regex characters: . * + ? ^ $ { } [ ] \ | ( )
@@ -294,6 +332,7 @@ function cleanText() {
         });
         const punctuationRegex = new RegExp('[' + escaped.join('') + ']', 'g');
         text = text.replace(punctuationRegex, '');
+        report.punctuation = beforePunctuation - text.length;
       }
     }
     
@@ -303,21 +342,77 @@ function cleanText() {
     const useRegex = document.getElementById('customRegex').checked;
     if (find) {
       try {
+        const beforeCustom = text.length;
         if (useRegex) {
           const regex = new RegExp(find, 'g');
           text = text.replace(regex, replace || '');
         } else {
           text = text.split(find).join(replace || '');
         }
+        report.custom = beforeCustom - text.length;
       } catch (e) {
         console.error('Regex error:', e);
       }
     }
   }
   
+  const finalLength = text.length;
+  const totalRemoved = originalLength - finalLength;
+  
+  // Display the report
+  displayCleaningReport(report, originalLength, finalLength, totalRemoved);
+  
   document.getElementById('cleaned').value = text;
   } catch (error) {
     console.error('Error cleaning text:', error);
     alert('An error occurred while cleaning the text. Please check the console for details.');
   }
+}
+
+function displayCleaningReport(report, originalLength, finalLength, totalRemoved) {
+  const reportDiv = document.getElementById('cleaningReport');
+  if (!reportDiv) return;
+  
+  if (totalRemoved === 0) {
+    reportDiv.classList.add('hidden');
+    reportDiv.innerHTML = '';
+    return;
+  }
+  
+  reportDiv.classList.remove('hidden');
+  
+  let html = '<h3>Cleaning Report</h3><ul>';
+  
+  if (report.zeroWidth > 0) {
+    html += `<li class="report-item"><span class="report-label">Zero-width characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
+  }
+  if (report.markdown > 0) {
+    html += `<li class="report-item"><span class="report-label">Markdown formatting removed</span><span class="report-count">${report.markdown} chars</span></li>`;
+  }
+  if (report.aiMarkup > 0) {
+    html += `<li class="report-item"><span class="report-label">AI markup removed</span><span class="report-count">${report.aiMarkup} chars</span></li>`;
+  }
+  if (report.spaces > 0) {
+    html += `<li class="report-item"><span class="report-label">Extra spaces collapsed</span><span class="report-count">${report.spaces} chars</span></li>`;
+  }
+  if (report.newlines > 0) {
+    html += `<li class="report-item"><span class="report-label">Extra newlines collapsed</span><span class="report-count">${report.newlines} chars</span></li>`;
+  }
+  if (report.html > 0) {
+    html += `<li class="report-item"><span class="report-label">HTML tags removed</span><span class="report-count">${report.html} chars</span></li>`;
+  }
+  if (report.comments > 0) {
+    html += `<li class="report-item"><span class="report-label">Comments removed</span><span class="report-count">${report.comments} chars</span></li>`;
+  }
+  if (report.punctuation > 0) {
+    html += `<li class="report-item"><span class="report-label">Punctuation removed</span><span class="report-count">${report.punctuation} chars</span></li>`;
+  }
+  if (report.custom > 0) {
+    html += `<li class="report-item"><span class="report-label">Custom replacements</span><span class="report-count">${report.custom} chars</span></li>`;
+  }
+  
+  html += '</ul>';
+  html += `<div class="report-total">Total: ${originalLength} → ${finalLength} characters (${totalRemoved} removed, ${((totalRemoved/originalLength)*100).toFixed(1)}%)</div>`;
+  
+  reportDiv.innerHTML = html;
 }
