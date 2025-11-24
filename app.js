@@ -207,6 +207,8 @@ function cleanText() {
     zeroWidth: 0,
     markdown: 0,
     aiMarkup: 0,
+    emojis: 0,
+    formatting: 0,
     spaces: 0,
     newlines: 0,
     html: 0,
@@ -215,11 +217,34 @@ function cleanText() {
     custom: 0
   };
   
-  // Always remove zero-width characters (core function)
-  const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
-  const zwMatches = text.match(zwRe);
-  report.zeroWidth = zwMatches ? zwMatches.length : 0;
-  text = text.replace(zwRe, '');
+  // Remove zero-width characters (if enabled)
+  if (document.getElementById('removeInvisible').checked) {
+    const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
+    const zwMatches = text.match(zwRe);
+    report.zeroWidth = zwMatches ? zwMatches.length : 0;
+    text = text.replace(zwRe, '');
+  }
+  
+  // Remove emojis (if enabled)
+  if (document.getElementById('removeEmojis').checked) {
+    const beforeEmojis = text.length;
+    // Comprehensive emoji regex pattern - covers all major emoji ranges
+    const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2190}-\u{21FF}]|[\u{2300}-\u{23FF}]|[\u{24C2}-\u{1F251}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]/gu;
+    // Also remove emoji sequences (flags, skin tone modifiers, etc.)
+    const emojiSequenceRegex = /[\u{1F3FB}-\u{1F3FF}]|[\u{1F9B0}-\u{1F9B3}]|[\u{200D}]/gu;
+    text = text.replace(emojiRegex, '').replace(emojiSequenceRegex, '');
+    report.emojis = beforeEmojis - text.length;
+  }
+  
+  // Remove formatting (if enabled) - removes rich text formatting characters
+  if (document.getElementById('removeFormatting').checked) {
+    const beforeFormatting = text.length;
+    // Remove various formatting characters: soft hyphens, non-breaking spaces (keep regular spaces), zero-width joiners, etc.
+    text = text.replace(/[\u00AD\u2000-\u200B\u2028-\u2029\uFEFF]/g, '');
+    // Remove non-breaking spaces but keep regular spaces
+    text = text.replace(/\u00A0/g, ' ');
+    report.formatting = beforeFormatting - text.length;
+  }
   
   // Remove markdown
   if (document.getElementById('removeMarkdown').checked) {
@@ -384,7 +409,13 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   let html = '<h3>Cleaning Report</h3><ul>';
   
   if (report.zeroWidth > 0) {
-    html += `<li class="report-item"><span class="report-label">Zero-width characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
+    html += `<li class="report-item"><span class="report-label">Invisible characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
+  }
+  if (report.emojis > 0) {
+    html += `<li class="report-item"><span class="report-label">Emojis removed</span><span class="report-count">${report.emojis} chars</span></li>`;
+  }
+  if (report.formatting > 0) {
+    html += `<li class="report-item"><span class="report-label">Formatting characters removed</span><span class="report-count">${report.formatting} chars</span></li>`;
   }
   if (report.markdown > 0) {
     html += `<li class="report-item"><span class="report-label">Markdown formatting removed</span><span class="report-count">${report.markdown} chars</span></li>`;
