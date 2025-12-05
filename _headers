@@ -10,7 +10,7 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Cross-Origin-Opener-Policy: same-origin-allow-popups
   Cross-Origin-Embedder-Policy: require-corp
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://app.termly.io https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://pagead2.googlesyndication.com; frame-src 'self' https://app.termly.io https://googleads.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-712bfa754fe3855d3d08005957bf0fddfe3ec7d3614533ee83580505b56092ce' 'sha256-42990002847620bd43394d03506c00174cf9f20728e4f8e0bdd34280b13d37d4' https://app.termly.io https://pagead2.googlesyndication.com 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://pagead2.googlesyndication.com; frame-src 'self' https://app.termly.io https://googleads.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;
 
 # HSTS (HTTP Strict Transport Security)
 # Start with low max-age for testing, then increase

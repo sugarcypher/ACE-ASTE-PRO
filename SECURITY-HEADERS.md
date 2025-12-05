@@ -5,14 +5,14 @@ This document describes the security headers implemented for acepaste.xyz to pro
 ## Implemented Headers
 
 ### Content Security Policy (CSP)
-**Status**: ✅ Implemented via meta tag
+**Status**: ✅ Implemented via meta tag and HTTP header (in `_headers`)
 
 The CSP restricts which resources can be loaded and executed, significantly reducing XSS attack risk.
 
 **Current Policy**:
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline' https://app.termly.io https://pagead2.googlesyndication.com;
+script-src 'self' 'sha256-712bfa754fe3855d3d08005957bf0fddfe3ec7d3614533ee83580505b56092ce' 'sha256-42990002847620bd43394d03506c00174cf9f20728e4f8e0bdd34280b13d37d4' https://app.termly.io https://pagead2.googlesyndication.com 'strict-dynamic';
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: https:;
 font-src 'self' data:;
@@ -27,14 +27,23 @@ upgrade-insecure-requests;
 
 **Directives Explained**:
 - `default-src 'self'`: Only allow resources from same origin by default
-- `script-src`: Allows inline scripts (for dark mode init, loadCSS) and external scripts from Termly and AdSense
+- `script-src`: 
+  - `'self'`: Allows scripts from same origin
+  - `'sha256-...'`: SHA-256 hashes for inline scripts (loadCSS polyfill and dark mode init)
+  - `https://app.termly.io https://pagead2.googlesyndication.com`: External scripts from Termly and AdSense
+  - `'strict-dynamic'`: Allows scripts loaded by trusted scripts (e.g., AdSense inline scripts created dynamically)
+  - **No `'unsafe-inline'`**: Removed for better security - using hashes instead
 - `style-src`: Allows inline styles (critical CSS) and stylesheets from same origin
 - `img-src`: Allows images from same origin, data URIs, and HTTPS sources
 - `frame-src`: Allows embedding Termly consent UI and AdSense iframes
 - `object-src 'none'`: Blocks plugins (Flash, etc.)
 - `frame-ancestors`: Not supported in meta tags - must be set via HTTP header (see `_headers` file)
 
-**Future Enhancement**: Consider using nonces for inline scripts to remove `'unsafe-inline'` from script-src.
+**Security Improvements**:
+- ✅ Removed `'unsafe-inline'` from `script-src` - using SHA-256 hashes instead
+- ✅ Added `'strict-dynamic'` to allow dynamically loaded scripts from trusted sources
+- ✅ CSP defined in HTTP header (primary) and meta tag (fallback for GitHub Pages)
+- ✅ Host allowlists replaced with hashes for inline scripts (more secure)
 
 ### X-Frame-Options
 **Status**: ⚠️ Requires server/CDN configuration (not supported in meta tags)
@@ -133,9 +142,9 @@ Use these tools to verify headers are working:
 
 ## Security Checklist
 
-- [x] Content Security Policy (CSP) - Meta tag
-- [x] X-Frame-Options - Meta tag
-- [x] Cross-Origin-Opener-Policy (COOP) - Meta tag
+- [x] Content Security Policy (CSP) - HTTP header + meta tag (with SHA-256 hashes, no 'unsafe-inline')
+- [x] X-Frame-Options - HTTP header (requires CDN/proxy)
+- [x] Cross-Origin-Opener-Policy (COOP) - Meta tag + HTTP header
 - [ ] X-Content-Type-Options - Requires CDN/proxy
 - [ ] Referrer-Policy - Requires CDN/proxy
 - [ ] Permissions-Policy - Requires CDN/proxy
