@@ -4,71 +4,44 @@
  * This worker:
  * 1. Intercepts requests to /ads.txt
  * 2. Fetches from upstream service (srv.adstxtmanager.com)
- * 3. Falls back to static content if upstream fails
+ * 3. Falls back to KV storage content if upstream fails
  * 4. Caches successful responses for performance
  * 
  * To deploy:
  * 1. Go to Cloudflare Dashboard → Workers & Pages
  * 2. Create a new Worker
- * 3. Paste this code
- * 4. Add route: acepaste.xyz/ads.txt
+ * 3. Create a KV namespace named "ADS_FALLBACK"
+ * 4. Bind the KV namespace to your worker (Settings → Variables → KV Namespace Bindings)
+ * 5. Paste this code
+ * 6. Add route: acepaste.xyz/ads.txt
+ * 
+ * To update fallback content:
+ * - Use Cloudflare Dashboard → Workers & Pages → KV
+ * - Or use Wrangler CLI: wrangler kv:key put "ads.txt" --value="your content" --binding=ADS_FALLBACK
  */
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    
-    // Only handle /ads.txt requests
+
     if (url.pathname === "/ads.txt") {
       const upstream = "https://srv.adstxtmanager.com/19390/acepaste.xyz";
-      const fallback = `# ads.txt fallback
-# This is served when the upstream service is unavailable
-# Update this with your actual ads.txt content
 
-# Placeholder - replace with actual ads.txt content
-# Example format:
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0`;
+      // Minimal fallback – overwritten at runtime by your refresh script
+      const fallback = await env.ADS_FALLBACK.get("ads.txt", "text") 
+        || "EZOIC-ADS-TXT-FALLBACK";
 
       try {
-        // Try to fetch from upstream with caching
-        const response = await fetch(upstream, {
-          cf: {
-            cacheEverything: true,
-            cacheTtl: 3600, // Cache for 1 hour
-          },
-          headers: {
-            'User-Agent': request.headers.get('User-Agent') || 'Cloudflare-Worker',
-          },
-        });
+        const res = await fetch(upstream, { cf: { cacheEverything: true } });
+        if (res.ok) return res;
+      } catch (_) {}
 
-        // If successful and has content, return it
-        if (response.ok) {
-          const text = await response.text();
-          if (text && text.length > 10) {
-            return new Response(text, {
-              headers: {
-                'Content-Type': 'text/plain',
-                'Cache-Control': 'public, max-age=3600',
-              },
-            });
-          }
-        }
-      } catch (error) {
-        // Upstream failed, use fallback
-        console.error('ads.txt upstream failed:', error);
-      }
-
-      // Serve fallback
       return new Response(fallback, {
-        headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'public, max-age=300', // Cache fallback for 5 minutes
-        },
+        headers: { "Content-Type": "text/plain" }
       });
     }
 
-    // For all other requests, pass through
     return fetch(request);
-  },
+  }
 };
 

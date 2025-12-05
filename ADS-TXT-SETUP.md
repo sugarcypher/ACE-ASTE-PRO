@@ -41,22 +41,33 @@ GitHub Pages is a static hosting service and doesn't support:
    - Worker: Select your worker (`ads-txt-handler`)
    - Click **Save**
 
-### Step 3: Update Fallback Content
+### Step 3: Set Up KV Storage for Fallback
 
-1. **Edit Worker Code**
-   - In the Worker editor, find the `fallback` variable
-   - Replace placeholder content with your actual ads.txt content
-   - Example:
-   ```javascript
-   const fallback = `google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
-example.com, pub-1111111111111111, RESELLER`;
+1. **Create KV Namespace**
+   - Go to **Workers & Pages** → **KV**
+   - Click **Create a namespace**
+   - Name: `ADS_FALLBACK`
+   - Click **Add**
+
+2. **Bind KV to Worker**
+   - Go to your Worker → **Settings** → **Variables**
+   - Scroll to **KV Namespace Bindings**
+   - Click **Add binding**
+   - Variable name: `ADS_FALLBACK`
+   - KV namespace: Select `ADS_FALLBACK`
+   - Click **Save**
+
+3. **Add Fallback Content to KV**
+   - Go to **Workers & Pages** → **KV** → `ADS_FALLBACK`
+   - Click **Add entry**
+   - Key: `ads.txt`
+   - Value: Your fallback ads.txt content (e.g., `EZOIC-ADS-TXT-FALLBACK` or actual ads.txt content)
+   - Click **Save**
+
+   **Or use Wrangler CLI**:
+   ```bash
+   wrangler kv:key put "ads.txt" --value="your fallback content" --binding=ADS_FALLBACK
    ```
-
-2. **Or Use KV Storage (Advanced)**
-   - Create a KV namespace: **Workers & Pages** → **KV**
-   - Bind it to your worker
-   - Store fallback content in KV
-   - Update worker to read from KV
 
 ### Step 4: Test
 
@@ -108,9 +119,10 @@ If you just want to redirect to the upstream service:
 - **Timeout**: 3 seconds (in worker)
 
 ### Fallback Behavior
-- If upstream fails or times out → serve fallback content
-- Fallback is cached for 5 minutes
-- Successful upstream responses cached for 1 hour
+- If upstream fails or times out → serve fallback content from KV storage
+- Fallback content stored in KV namespace `ADS_FALLBACK` with key `ads.txt`
+- Fallback can be updated via Cloudflare Dashboard or Wrangler CLI without redeploying worker
+- Successful upstream responses cached by Cloudflare edge
 
 ### Caching
 - **Upstream responses**: 1 hour (3600 seconds)
