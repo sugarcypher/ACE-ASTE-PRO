@@ -78,7 +78,7 @@ GitHub Pages is a static hosting service and doesn't support:
 
 2. **Check upstream is working**
    ```bash
-   curl https://srv.adstxtmanager.com/19390/acepaste.xyz
+   curl https://srv.adstxtmanager.com/81161/acepaste.xyz
    ```
 
 3. **Test fallback** (temporarily break upstream URL in worker to test)
@@ -130,7 +130,7 @@ If you're using nginx (self-hosted or VPS), add this to your nginx configuration
 
 ```nginx
 location = /ads.txt {
-    proxy_pass https://srv.adstxtmanager.com/19390/acepaste.xyz;
+    proxy_pass https://srv.adstxtmanager.com/81161/acepaste.xyz;
     proxy_set_header Host srv.adstxtmanager.com;
 
     error_page 502 503 504 = @ads_fallback;
@@ -163,7 +163,7 @@ If you just want to redirect to the upstream service:
 2. **Configure Redirect**
    - URL Pattern: `acepaste.xyz/ads.txt`
    - Setting: **Forwarding URL** (301 Permanent Redirect)
-   - Destination: `https://srv.adstxtmanager.com/19390/acepaste.xyz`
+   - Destination: `https://srv.adstxtmanager.com/81161/acepaste.xyz`
    - Click **Save and Deploy**
 
 **Pros**: Simple, no code needed  
@@ -194,7 +194,7 @@ If you don't want to use Cloudflare Workers, you can create a static `ads.txt` f
 ## Configuration Details
 
 ### Upstream Service
-- **URL**: `https://srv.adstxtmanager.com/19390/acepaste.xyz`
+- **URL**: `https://srv.adstxtmanager.com/81161/acepaste.xyz`
 - **Purpose**: Centralized ads.txt management
 - **Timeout**: 3 seconds (in worker)
 

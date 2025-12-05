@@ -1,0 +1,7 @@
+# Netlify-style redirects file
+# Note: GitHub Pages does NOT support this file format
+# This is for Netlify hosting only
+# For GitHub Pages, use Cloudflare Page Rules or Cloudflare Worker
+
+/ads.txt  https://srv.adstxtmanager.com/81161/acepaste.xyz  301
+

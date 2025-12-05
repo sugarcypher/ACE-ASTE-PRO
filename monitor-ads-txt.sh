@@ -12,7 +12,7 @@
 
 set -e
 
-UPSTREAM_URL="https://srv.adstxtmanager.com/19390/acepaste.xyz"
+UPSTREAM_URL="https://srv.adstxtmanager.com/81161/acepaste.xyz"
 FALLBACK_FILE="ads-fallback.txt"
 
 echo "🔍 Checking ads.txt sync status..."

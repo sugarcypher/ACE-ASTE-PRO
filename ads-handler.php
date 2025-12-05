@@ -13,7 +13,7 @@
  * For GitHub Pages: Use Cloudflare Worker (see cloudflare-worker-ads.txt.js)
  */
 
-$remote = "https://srv.adstxtmanager.com/19390/acepaste.xyz";
+$remote = "https://srv.adstxtmanager.com/81161/acepaste.xyz";
 $fallback = __DIR__ . "/ads-fallback.txt";
 
 // Try to fetch from upstream

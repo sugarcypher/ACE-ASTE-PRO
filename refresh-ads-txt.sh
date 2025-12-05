@@ -4,7 +4,7 @@
 
 set -e
 
-URL="https://srv.adstxtmanager.com/19390/acepaste.xyz"
+URL="https://srv.adstxtmanager.com/81161/acepaste.xyz"
 LOCAL="ads-fallback.txt"
 
 echo "🔄 Refreshing ads.txt fallback..."

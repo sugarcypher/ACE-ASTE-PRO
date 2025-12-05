@@ -25,7 +25,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/ads.txt") {
-      const upstream = "https://srv.adstxtmanager.com/19390/acepaste.xyz";
+      const upstream = "https://srv.adstxtmanager.com/81161/acepaste.xyz";
 
       // Minimal fallback – overwritten at runtime by your refresh script
       const fallback = await env.ADS_FALLBACK.get("ads.txt", "text") 
