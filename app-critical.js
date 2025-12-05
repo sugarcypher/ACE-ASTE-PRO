@@ -3,6 +3,39 @@
 // Cache DOM elements to reduce repeated queries
 let elements = {};
 
+// Trusted Types policy for safe HTML sanitization
+// This prevents DOM-based XSS attacks by controlling what can be set via innerHTML
+let trustedTypesPolicy = null;
+if (window.trustedTypes && window.trustedTypes.createPolicy) {
+  trustedTypesPolicy = window.trustedTypes.createPolicy('default', {
+    createHTML: (string) => {
+      // Sanitize HTML: remove script tags and event handlers
+      // For our use case, we only use safe HTML elements (h3, ul, li, span, div)
+      // with class attributes and text content
+      let sanitized = string
+        // Remove script tags
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        // Remove event handlers (onclick, onerror, etc.)
+        .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+        // Remove javascript: URLs
+        .replace(/javascript:/gi, '')
+        // Remove data: URLs that could be scripts
+        .replace(/data:text\/html/gi, '');
+      return sanitized;
+    }
+  });
+}
+
+// Helper function to safely set innerHTML using Trusted Types
+function setInnerHTML(element, html) {
+  if (trustedTypesPolicy) {
+    element.innerHTML = trustedTypesPolicy.createHTML(html);
+  } else {
+    // Fallback for browsers without Trusted Types support
+    element.innerHTML = html;
+  }
+}
+
 function getElement(id) {
   if (!elements[id]) {
     elements[id] = document.getElementById(id);
@@ -122,7 +155,7 @@ function clearFields() {
   cleanedField.value = '';
   if (reportDiv) {
     reportDiv.classList.add('hidden');
-    reportDiv.innerHTML = '';
+    setInnerHTML(reportDiv, '');
   }
   pasteField.focus();
 }
@@ -169,11 +202,11 @@ function cleanText() {
     let text = pasteField.value;
     if (!text) {
       cleanedField.value = '';
-      const reportDiv = getElement('cleaningReport');
-      if (reportDiv) {
-        reportDiv.classList.add('hidden');
-        reportDiv.innerHTML = '';
-      }
+    const reportDiv = getElement('cleaningReport');
+    if (reportDiv) {
+      reportDiv.classList.add('hidden');
+      setInnerHTML(reportDiv, '');
+    }
       return;
     }
   
@@ -394,6 +427,6 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   } else {
     html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
   }
-  reportDiv.innerHTML = html;
+  setInnerHTML(reportDiv, html);
 }
 

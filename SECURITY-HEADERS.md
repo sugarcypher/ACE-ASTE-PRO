@@ -119,19 +119,31 @@ Forces browsers to use HTTPS connections, preventing downgrade attacks.
 5. **GitHub Pages Limitation**: Headers in `_headers` are not served by GitHub Pages - requires CDN/proxy
 
 ### Trusted Types
-**Status**: 📋 Future Enhancement
+**Status**: ✅ Implemented
 
-The `require-trusted-types-for` directive in CSP would enforce Trusted Types API for DOM XSS sink functions.
+The `require-trusted-types-for` directive in CSP enforces Trusted Types API for DOM XSS sink functions, preventing DOM-based XSS attacks.
 
-**Implementation**: This requires refactoring JavaScript to use Trusted Types API:
-- Replace `innerHTML` with `textContent` or Trusted Types
-- Use `DOMPurify` or similar for HTML sanitization
-- Create Trusted Types policies for dynamic content
+**CSP Directive**: `require-trusted-types-for 'script';`
 
-**Example CSP Addition**:
-```
-require-trusted-types-for 'script';
-```
+**Implementation**:
+- ✅ Added `require-trusted-types-for 'script'` to CSP (both HTTP header and meta tag)
+- ✅ Created Trusted Types policy in `app-critical.js` for safe HTML sanitization
+- ✅ Replaced all `innerHTML` usage with `setInnerHTML()` helper function
+- ✅ Policy sanitizes HTML by removing script tags, event handlers, and javascript: URLs
+
+**Trusted Types Policy**:
+- Policy name: `'default'`
+- Sanitization: Removes `<script>` tags, event handlers (`onclick`, `onerror`, etc.), and `javascript:` URLs
+- Fallback: For browsers without Trusted Types support, falls back to direct `innerHTML` assignment
+
+**Protected DOM APIs**:
+- `innerHTML` - All usage now goes through Trusted Types policy
+- `outerHTML` - Protected by Trusted Types
+- `insertAdjacentHTML` - Protected by Trusted Types
+- `eval()` - Already blocked by CSP
+- `Function()` - Already blocked by CSP
+
+**Security Benefit**: Prevents DOM-based XSS attacks by ensuring only sanitized HTML can be inserted into the DOM.
 
 ## Deployment
 
