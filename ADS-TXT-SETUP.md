@@ -273,8 +273,23 @@ Or use GitHub Actions to run it periodically (see `.github/workflows/` for examp
 
 ## Files
 
-- `cloudflare-worker-ads.txt.js` - Worker code
+- `cloudflare-worker-ads.txt.js` - **Cloudflare Worker code (recommended for GitHub Pages)**
 - `refresh-ads-txt.sh` - Script to refresh fallback content
 - `ads-fallback.txt` - Local fallback content (updated by refresh script)
+- `.htaccess` - Apache rewrite rules (self-hosted only)
+- `ads-handler.php` - PHP handler (self-hosted only)
+- `nginx-ads.txt.conf` - Nginx configuration (self-hosted only)
 - `ADS-TXT-SETUP.md` - This guide
+
+## Solution Comparison
+
+| Solution | GitHub Pages | Self-Hosted | Complexity |
+|----------|--------------|-------------|------------|
+| **Cloudflare Worker** | ✅ Yes | ✅ Yes | Medium |
+| **Apache + PHP** | ❌ No | ✅ Yes | Low |
+| **Nginx Proxy** | ❌ No | ✅ Yes | Low |
+| **Static File** | ✅ Yes | ✅ Yes | Very Low |
+| **Cloudflare Page Rules** | ✅ Yes | ✅ Yes | Very Low |
+
+**Recommendation**: Use Cloudflare Worker for GitHub Pages (most flexible and reliable).
 
