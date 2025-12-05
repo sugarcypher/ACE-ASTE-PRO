@@ -3,50 +3,12 @@
 // Cache DOM elements to reduce repeated queries
 let elements = {};
 
-// Trusted Types policy for safe HTML sanitization and script URL creation
-// This prevents DOM-based XSS attacks by controlling what can be set via innerHTML and script.src
+// Trusted Types policy is created inline in the head before third-party scripts load
+// This ensures the policy exists when Termly, Ezoic, and Gatekeeper scripts try to create script elements
+// We just need to get a reference to the policy for our own use
 let trustedTypesPolicy = null;
-if (window.trustedTypes && window.trustedTypes.createPolicy) {
-  trustedTypesPolicy = window.trustedTypes.createPolicy('default', {
-    createHTML: (string) => {
-      // Sanitize HTML: remove script tags and event handlers
-      // For our use case, we only use safe HTML elements (h3, ul, li, span, div)
-      // with class attributes and text content
-      let sanitized = string
-        // Remove script tags
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        // Remove event handlers (onclick, onerror, etc.)
-        .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-        // Remove javascript: URLs
-        .replace(/javascript:/gi, '')
-        // Remove data: URLs that could be scripts
-        .replace(/data:text\/html/gi, '');
-      return sanitized;
-    },
-    createScriptURL: (url) => {
-      // Allow script URLs from trusted third-party domains
-      // This is needed for Termly, Ezoic, and Gatekeeper scripts that dynamically create script elements
-      const trustedDomains = [
-        'https://app.termly.io',
-        'https://cmp.gatekeeperconsent.com',
-        'https://the.gatekeeperconsent.com',
-        'https://privacy.gatekeeperconsent.com',
-        'https://www.ezojs.com',
-        'http://www.ezojs.com',
-        'https://acepaste.xyz',
-        'http://acepaste.xyz'
-      ];
-      
-      // Check if URL starts with a trusted domain
-      const isTrusted = trustedDomains.some(domain => url.startsWith(domain));
-      if (isTrusted) {
-        return url;
-      }
-      
-      // Reject untrusted URLs
-      throw new Error('Untrusted script URL: ' + url);
-    }
-  });
+if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
+  trustedTypesPolicy = window.trustedTypes.defaultPolicy;
 }
 
 // Helper function to safely set innerHTML using Trusted Types
