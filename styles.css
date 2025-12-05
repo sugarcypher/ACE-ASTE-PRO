@@ -38,8 +38,8 @@ body.dark-mode .btn-secondary:hover{background:linear-gradient(#3a3a3a,#2a2a2a)}
 .options-panel{margin:12px 0;padding:16px;background:rgba(255,255,255,.6);border-radius:12px;border:1px solid rgba(10,60,120,.1);transition:background-color 0.3s ease,border-color 0.3s ease}
 body.dark-mode .options-panel{background:rgba(40,40,40,.6);border-color:rgba(255,255,255,.1)}
 .options-top{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
-.options-top label{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
-.options-top input[type="checkbox"]{cursor:pointer}
+.options-top label{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;min-height:44px;padding:4px 0}
+.options-top input[type="checkbox"]{cursor:pointer;min-width:44px;min-height:44px;width:44px;height:44px;flex-shrink:0}
 .btn-ghost{background:none;border:none;color:#2c3e50;cursor:pointer;padding:6px 0;font-size:13px;text-decoration:underline;transition:color 0.3s ease}
 .btn-ghost:hover{color:#0b0d12}
 body.dark-mode .btn-ghost{color:#b8b8b8}
@@ -50,11 +50,12 @@ body.dark-mode .advanced{border-top-color:rgba(255,255,255,.1)}
 .option-group{margin-bottom:20px}
 .group-title{font-weight:600;margin-bottom:8px;color:#0b0d12;font-size:14px;transition:color 0.3s ease}
 body.dark-mode .group-title{color:#e0e0e0}
-.option-group label{display:block;margin:6px 0;font-size:13px;cursor:pointer;transition:color 0.3s ease}
+.option-group label{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px;cursor:pointer;transition:color 0.3s ease;min-height:44px;padding:4px 0}
 body.dark-mode .option-group label{color:#d0d0d0}
-.option-group input[type="checkbox"],.option-group input[type="radio"]{margin-right:6px;cursor:pointer}
+.option-group input[type="checkbox"],.option-group input[type="radio"]{margin-right:6px;cursor:pointer;min-width:44px;min-height:44px;width:44px;height:44px;flex-shrink:0}
 .case-options{display:flex;flex-wrap:wrap;gap:12px}
-.case-options label{display:flex;align-items:center}
+.case-options label{display:flex;align-items:center;min-height:44px;padding:4px 0;gap:8px}
+.case-options input[type="radio"]{min-width:44px;min-height:44px;width:44px;height:44px;flex-shrink:0}
 .input-small{width:100%;padding:8px;border:1px solid rgba(10,60,120,.2);border-radius:8px;margin:6px 0;font-size:13px;box-sizing:border-box;background:rgba(255,255,255,.9);color:#0b0d12;transition:all 0.3s ease}
 body.dark-mode .input-small{background:rgba(40,40,40,.9);border-color:rgba(255,255,255,.2);color:#e0e0e0}
 select.input-small{min-height:100px}
@@ -94,3 +95,4 @@ body.dark-mode .cleaning-report li{color:#b8b8b8}
 body.dark-mode .cleaning-report .report-count{color:#5a9fd2}
 .cleaning-report .report-total{margin-top:12px;padding-top:12px;border-top:1px solid rgba(10,60,120,.1);font-weight:600;color:#0b0d12;transition:border-color 0.3s ease,color 0.3s ease}
 body.dark-mode .cleaning-report .report-total{border-top-color:rgba(255,255,255,.1);color:#e0e0e0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
