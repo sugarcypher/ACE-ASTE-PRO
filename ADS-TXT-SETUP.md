@@ -150,19 +150,46 @@ location @ads_fallback {
 
 **Note**: This requires nginx with proxy module enabled (usually included by default).
 
-## Alternative: Redirect (Simple)
+## Alternative: 301 Redirect (Simple)
 
 If you just want to redirect to the upstream service:
 
-1. **Create `ads.txt` with redirect URL**
-   - GitHub Pages doesn't support server-side redirects
-   - You'd need to use a meta redirect (not ideal for ads.txt)
+### Cloudflare Page Rules (Recommended)
 
-2. **Better**: Use Cloudflare Page Rules
-   - Go to **Rules** → **Page Rules**
-   - Create rule: `acepaste.xyz/ads.txt`
-   - Setting: **Forwarding URL** (301 Permanent)
+1. **Go to Cloudflare Dashboard**
+   - Navigate to **Rules** → **Page Rules**
+   - Click **Create Page Rule**
+
+2. **Configure Redirect**
+   - URL Pattern: `acepaste.xyz/ads.txt`
+   - Setting: **Forwarding URL** (301 Permanent Redirect)
    - Destination: `https://srv.adstxtmanager.com/19390/acepaste.xyz`
+   - Click **Save and Deploy**
+
+**Pros**: Simple, no code needed  
+**Cons**: No fallback if upstream fails
+
+### S3 Fallback Option
+
+If using AWS S3 for fallback storage:
+
+- **S3 Bucket**: `s3://acepaste-fallback/ads.txt`
+- Upload `ads-fallback.txt` to S3 bucket
+- Use in Cloudflare Worker or nginx configuration to fetch from S3 if upstream fails
+
+## Alternative: Static ads.txt File
+
+If you don't want to use Cloudflare Workers, you can create a static `ads.txt` file:
+
+1. **Create `ads.txt` in repository root**
+   ```txt
+   google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+   ```
+
+2. **Commit and push**
+   - GitHub Pages will serve it at `acepaste.xyz/ads.txt`
+
+**Limitation**: This won't proxy to the upstream service - it's just a static file.
 
 ## Configuration Details
 
@@ -263,6 +290,31 @@ Set up a cron job to automatically refresh the fallback:
 
 Or use GitHub Actions to run it periodically (see `.github/workflows/` for examples).
 
+### Monitoring Script
+
+Use `monitor-ads-txt.sh` to detect when upstream and fallback differ:
+
+```bash
+./monitor-ads-txt.sh
+```
+
+This script:
+- Fetches upstream ads.txt
+- Compares hash with local fallback
+- Alerts if they differ (indicating fallback needs update)
+- Logs results to `ads-txt-monitor.log`
+
+**Set up monitoring cron job**:
+```bash
+# Check every 6 hours
+0 */6 * * * cd /path/to/ACE-ASTE-PRO && ./monitor-ads-txt.sh
+```
+
+**Configure alerts** (uncomment in script):
+- Email notification
+- Slack webhook
+- Custom webhook
+
 ## Notes
 
 - **Free Cloudflare plan** supports Workers (100,000 requests/day)
@@ -275,6 +327,7 @@ Or use GitHub Actions to run it periodically (see `.github/workflows/` for examp
 
 - `cloudflare-worker-ads.txt.js` - **Cloudflare Worker code (recommended for GitHub Pages)**
 - `refresh-ads-txt.sh` - Script to refresh fallback content
+- `monitor-ads-txt.sh` - Script to monitor upstream/fallback sync status
 - `ads-fallback.txt` - Local fallback content (updated by refresh script)
 - `.htaccess` - Apache rewrite rules (self-hosted only)
 - `ads-handler.php` - PHP handler (self-hosted only)
