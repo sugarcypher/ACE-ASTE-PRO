@@ -62,11 +62,12 @@ select.input-small{min-height:100px}
 select.input-small option{padding:4px}
 .footer{margin-top:auto;padding:20px;text-align:center;background:rgba(255,255,255,.5);border-top:1px solid rgba(10,60,120,.1);transition:background-color 0.3s ease,border-color 0.3s ease}
 body.dark-mode .footer{background:rgba(30,30,30,.5);border-top-color:rgba(255,255,255,.1)}
-.footer small{color:#2c3e50;font-size:12px;transition:color 0.3s ease}
-body.dark-mode .footer small{color:#b8b8b8}
-.footer a{color:#0a7ac2;text-decoration:none;transition:color 0.3s ease}
-.footer a:hover{text-decoration:underline}
-body.dark-mode .footer a{color:#5a9fd2}
+.footer small{color:#1a1f26;font-size:12px;transition:color 0.3s ease}
+body.dark-mode .footer small{color:#d0d0d0}
+.footer a{color:#005a8f;text-decoration:none;transition:color 0.3s ease}
+.footer a:hover{color:#003d5f;text-decoration:underline}
+body.dark-mode .footer a{color:#7bb3e0}
+body.dark-mode .footer a:hover{color:#9cc5e8}
 .uses-section{margin:40px 0;padding:24px;background:rgba(255,255,255,.6);border-radius:12px;border:1px solid rgba(10,60,120,.1);transition:background-color 0.3s ease,border-color 0.3s ease}
 body.dark-mode .uses-section{background:rgba(40,40,40,.6);border-color:rgba(255,255,255,.1)}
 .uses-title{color:#0b0d12;font-size:28px;font-weight:600;margin:0 0 24px 0;text-align:center;transition:color 0.3s ease}
@@ -76,10 +77,10 @@ body.dark-mode .uses-title{color:#e0e0e0}
 .use-item:hover{background:rgba(255,255,255,.6);border-color:rgba(10,166,194,.2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(10,60,120,.1)}
 body.dark-mode .use-item{background:rgba(50,50,50,.4);border-color:rgba(255,255,255,.08)}
 body.dark-mode .use-item:hover{background:rgba(50,50,50,.6);border-color:rgba(100,166,194,.2);box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.use-heading{color:#0a7ac2;font-size:18px;font-weight:600;margin:0 0 10px 0;transition:color 0.3s ease}
-body.dark-mode .use-heading{color:#5a9fd2}
-.use-description{color:#2c3e50;font-size:14px;line-height:1.6;margin:0;transition:color 0.3s ease}
-body.dark-mode .use-description{color:#b8b8b8}
+.use-heading{color:#005a8f;font-size:18px;font-weight:600;margin:0 0 10px 0;transition:color 0.3s ease}
+body.dark-mode .use-heading{color:#7bb3e0}
+.use-description{color:#1a1f26;font-size:14px;line-height:1.6;margin:0;transition:color 0.3s ease}
+body.dark-mode .use-description{color:#d0d0d0}
 @media (max-width:768px){.uses-grid{grid-template-columns:1fr}.uses-section{padding:20px 16px}}
 .cleaning-report{margin:16px 0;padding:16px;background:rgba(255,255,255,.6);border-radius:12px;border:1px solid rgba(10,60,120,.1);transition:background-color 0.3s ease,border-color 0.3s ease}
 body.dark-mode .cleaning-report{background:rgba(40,40,40,.6);border-color:rgba(255,255,255,.1)}
