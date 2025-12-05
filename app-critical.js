@@ -3,8 +3,8 @@
 // Cache DOM elements to reduce repeated queries
 let elements = {};
 
-// Trusted Types policy for safe HTML sanitization
-// This prevents DOM-based XSS attacks by controlling what can be set via innerHTML
+// Trusted Types policy for safe HTML sanitization and script URL creation
+// This prevents DOM-based XSS attacks by controlling what can be set via innerHTML and script.src
 let trustedTypesPolicy = null;
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   trustedTypesPolicy = window.trustedTypes.createPolicy('default', {
@@ -22,6 +22,29 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
         // Remove data: URLs that could be scripts
         .replace(/data:text\/html/gi, '');
       return sanitized;
+    },
+    createScriptURL: (url) => {
+      // Allow script URLs from trusted third-party domains
+      // This is needed for Termly, Ezoic, and Gatekeeper scripts that dynamically create script elements
+      const trustedDomains = [
+        'https://app.termly.io',
+        'https://cmp.gatekeeperconsent.com',
+        'https://the.gatekeeperconsent.com',
+        'https://privacy.gatekeeperconsent.com',
+        'https://www.ezojs.com',
+        'http://www.ezojs.com',
+        'https://acepaste.xyz',
+        'http://acepaste.xyz'
+      ];
+      
+      // Check if URL starts with a trusted domain
+      const isTrusted = trustedDomains.some(domain => url.startsWith(domain));
+      if (isTrusted) {
+        return url;
+      }
+      
+      // Reject untrusted URLs
+      throw new Error('Untrusted script URL: ' + url);
     }
   });
 }
