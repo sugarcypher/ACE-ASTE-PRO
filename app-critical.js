@@ -71,8 +71,16 @@ document.addEventListener('DOMContentLoaded', () => {
     moreOptions.addEventListener('click', () => {
       const adv = getElement('advanced');
       const btn = getElement('moreOptions');
-      adv.classList.toggle('hidden');
-      btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
+      // Read state BEFORE modifying DOM to avoid forced reflow
+      const isHidden = adv.classList.contains('hidden');
+      // Batch DOM writes together
+      if (isHidden) {
+        adv.classList.remove('hidden');
+        btn.textContent = 'Advanced options ▴';
+      } else {
+        adv.classList.add('hidden');
+        btn.textContent = 'Advanced options ▾';
+      }
     });
   }
   
@@ -131,11 +139,15 @@ function clearFields() {
   const pasteField = getElement('paste');
   const cleanedField = getElement('cleaned');
   const reportDiv = getElement('cleaningReport');
+  // Batch all DOM writes together
   pasteField.value = '';
   cleanedField.value = '';
   if (reportDiv) {
-    reportDiv.classList.add('hidden');
-    setInnerHTML(reportDiv, '');
+    // Batch class and innerHTML changes together
+    requestAnimationFrame(() => {
+      reportDiv.classList.add('hidden');
+      setInnerHTML(reportDiv, '');
+    });
   }
   pasteField.focus();
 }
@@ -148,27 +160,37 @@ async function copyToClipboard() {
     alert('Nothing to copy. Clean some text first!');
     return;
   }
+  // Read textContent BEFORE any DOM writes to avoid forced reflow
+  const originalText = copyBtn.textContent;
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(text);
-      const originalText = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
-      copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+      // Batch style changes together
+      requestAnimationFrame(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+      });
       setTimeout(() => {
-        copyBtn.textContent = originalText;
-        copyBtn.style.background = '';
+        requestAnimationFrame(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.background = '';
+        });
       }, 2000);
       return;
     }
     cleanedField.select();
     cleanedField.setSelectionRange(0, 99999);
     document.execCommand('copy');
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = 'Copied!';
-    copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+    // Batch style changes together
+    requestAnimationFrame(() => {
+      copyBtn.textContent = 'Copied!';
+      copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+    });
     setTimeout(() => {
-      copyBtn.textContent = originalText;
-      copyBtn.style.background = '';
+      requestAnimationFrame(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.style.background = '';
+      });
     }, 2000);
   } catch (err) {
     alert('Failed to copy to clipboard. Please select and copy manually.');
@@ -182,11 +204,14 @@ function cleanText() {
     let text = pasteField.value;
     if (!text) {
       cleanedField.value = '';
-    const reportDiv = getElement('cleaningReport');
-    if (reportDiv) {
-      reportDiv.classList.add('hidden');
-      setInnerHTML(reportDiv, '');
-    }
+      const reportDiv = getElement('cleaningReport');
+      if (reportDiv) {
+        // Batch DOM writes together
+        requestAnimationFrame(() => {
+          reportDiv.classList.add('hidden');
+          setInnerHTML(reportDiv, '');
+        });
+      }
       return;
     }
   
@@ -350,7 +375,7 @@ function cleanText() {
 function displayCleaningReport(report, originalLength, finalLength, totalRemoved) {
   const reportDiv = getElement('cleaningReport');
   if (!reportDiv) return;
-  reportDiv.classList.remove('hidden');
+  // Build HTML first, then batch DOM writes together to avoid forced reflows
   let html = '<h3>Cleaning Report</h3><ul>';
   let hasItems = false;
   if (report.zeroWidth > 0) {
@@ -407,6 +432,11 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   } else {
     html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
   }
-  setInnerHTML(reportDiv, html);
+  // Batch DOM writes: remove hidden class and set innerHTML together
+  // Use requestAnimationFrame to ensure these happen in the same frame
+  requestAnimationFrame(() => {
+    reportDiv.classList.remove('hidden');
+    setInnerHTML(reportDiv, html);
+  });
 }
 
