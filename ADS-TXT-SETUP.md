@@ -166,16 +166,62 @@ After setup, verify:
 - Verify fallback is valid ads.txt format
 - Test by temporarily breaking upstream URL
 
+## Updating Fallback Content
+
+### Automatic Refresh Script
+
+Use the provided script to automatically fetch and update the fallback:
+
+```bash
+./refresh-ads-txt.sh
+```
+
+This script:
+1. Fetches latest ads.txt from upstream
+2. Saves to `ads-fallback.txt` locally
+3. Uploads to Cloudflare KV automatically
+
+**Prerequisites**:
+- Wrangler CLI installed: `npm install -g wrangler`
+- Logged in to Cloudflare: `npx wrangler login`
+- KV namespace `ADS_FALLBACK` exists and is bound to your worker
+
+### Manual Update
+
+1. **Via Cloudflare Dashboard**:
+   - Go to **Workers & Pages** → **KV** → `ADS_FALLBACK`
+   - Edit the `ads.txt` entry
+   - Update value with new content
+   - Click **Save**
+
+2. **Via Wrangler CLI**:
+   ```bash
+   npx wrangler kv:key put ads.txt --value="your content here" --binding=ADS_FALLBACK
+   ```
+
+### Scheduled Refresh (Optional)
+
+Set up a cron job to automatically refresh the fallback:
+
+```bash
+# Add to crontab (runs daily at 2 AM)
+0 2 * * * cd /path/to/ACE-ASTE-PRO && ./refresh-ads-txt.sh
+```
+
+Or use GitHub Actions to run it periodically (see `.github/workflows/` for examples).
+
 ## Notes
 
 - **Free Cloudflare plan** supports Workers (100,000 requests/day)
 - **Performance**: Worker adds ~10-50ms latency (negligible)
 - **Reliability**: Fallback ensures ads.txt is always available
 - **Caching**: Reduces load on upstream service
+- **KV Updates**: Can be updated without redeploying worker
 
 ## Files
 
 - `cloudflare-worker-ads.txt.js` - Worker code
-- `ads-fallback.txt` - Fallback content (reference only, not used by worker)
+- `refresh-ads-txt.sh` - Script to refresh fallback content
+- `ads-fallback.txt` - Local fallback content (updated by refresh script)
 - `ADS-TXT-SETUP.md` - This guide
 
