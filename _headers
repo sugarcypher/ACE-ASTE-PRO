@@ -19,26 +19,66 @@
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
-# Cache static assets for 1 year
+# Cache static assets for 1 year (versioned URLs are immutable)
+# Versioned assets can be cached indefinitely since the version changes when content changes
 /styles.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/styles.css?v=*
   Cache-Control: public, max-age=31536000, immutable
 
 /app-critical.js
   Cache-Control: public, max-age=31536000, immutable
 
+/app-critical.js?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
 /app-termly.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/app-termly.js?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand.jpg?v=*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.jpg
   Cache-Control: public, max-age=31536000, immutable
 
+/*.jpg?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
 /*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.png?v=*
   Cache-Control: public, max-age=31536000, immutable
 
 /*.webp
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache HTML for shorter period
+/*.webp?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache HTML for shorter period (no versioning, so shorter cache)
 /*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/index.html
   Cache-Control: public, max-age=3600, must-revalidate
 
