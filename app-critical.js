@@ -41,6 +41,27 @@ function updateDarkModeIcon(isDark) {
   }
 }
 
+// Lazy load third-party scripts after page load to reduce initial bundle size
+function loadEzoicScript() {
+  if (window.ezoicLoaded) return;
+  window.ezoicLoaded = true;
+  window.ezstandalone = window.ezstandalone || {};
+  ezstandalone.cmd = ezstandalone.cmd || [];
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = '//www.ezojs.com/ezoic/sa.min.js';
+  document.head.appendChild(script);
+}
+
+function loadTermlyScript() {
+  if (window.termlyLoaded) return;
+  window.termlyLoaded = true;
+  const script = document.createElement('script');
+  script.defer = true;
+  script.src = 'https://app.termly.io/resource-blocker/da56ec80-6621-4889-a102-bf6598ab88ae?autoBlock=on';
+  document.head.appendChild(script);
+}
+
 // Basic event listeners - load on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   // Update dark mode icon on load (dark mode class already applied)
@@ -55,6 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
+  
+  // Lazy load Ezoic after page is interactive (reduces initial JS by ~52KB)
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      loadEzoicScript();
+    }, { timeout: 2000 });
+  } else {
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(loadEzoicScript, 2000);
+  }
+  
+  // Lazy load Termly only when user interacts with consent (reduces initial JS by ~162KB)
+  // Termly will be loaded when user clicks consent preferences link
   
   // Core button handlers - cache elements
   const cleanBtn = getElement('cleanBtn');
@@ -84,11 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Lazy load Termly handler only when consent link is clicked
+  // Lazy load Termly resource blocker and handler only when consent link is clicked
   const consentLinks = document.querySelectorAll('.termly-display-preferences');
   consentLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      // Load Termly resource blocker script first (if not already loaded)
+      loadTermlyScript();
       // Load Termly handler script only when needed
       if (!window.termlyHandlerLoaded) {
         const script = document.createElement('script');
@@ -105,6 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { once: true });
   });
+  
+  // Also load Termly on user interaction (scroll, click, etc.) for consent banner
+  let termlyInteractionLoaded = false;
+  const loadTermlyOnInteraction = () => {
+    if (!termlyInteractionLoaded) {
+      termlyInteractionLoaded = true;
+      loadTermlyScript();
+      // Remove listeners after first interaction
+      document.removeEventListener('scroll', loadTermlyOnInteraction, { passive: true });
+      document.removeEventListener('click', loadTermlyOnInteraction, { passive: true });
+      document.removeEventListener('touchstart', loadTermlyOnInteraction, { passive: true });
+    }
+  };
+  // Load Termly on first user interaction (for consent banner)
+  document.addEventListener('scroll', loadTermlyOnInteraction, { passive: true, once: true });
+  document.addEventListener('click', loadTermlyOnInteraction, { passive: true, once: true });
+  document.addEventListener('touchstart', loadTermlyOnInteraction, { passive: true, once: true });
 });
 
 function initGlobalPrivacyControl() {
