@@ -97,6 +97,32 @@ If you don't want to use Cloudflare Workers, you can create a static `ads.txt` f
 
 **Limitation**: This won't proxy to the upstream service - it's just a static file.
 
+## Alternative: Nginx Configuration (Self-Hosted)
+
+If you're using nginx (self-hosted or VPS), add this to your nginx configuration:
+
+```nginx
+location = /ads.txt {
+    proxy_pass https://srv.adstxtmanager.com/19390/acepaste.xyz;
+    proxy_set_header Host srv.adstxtmanager.com;
+
+    error_page 502 503 504 = @ads_fallback;
+}
+
+location @ads_fallback {
+    default_type text/plain;
+    alias /var/www/ads-fallback.txt;
+}
+```
+
+**Setup Steps**:
+1. Create fallback file: `/var/www/ads-fallback.txt`
+2. Add the configuration to your nginx server block
+3. Test configuration: `nginx -t`
+4. Reload nginx: `systemctl reload nginx`
+
+**Note**: This requires nginx with proxy module enabled (usually included by default).
+
 ## Alternative: Redirect (Simple)
 
 If you just want to redirect to the upstream service:
