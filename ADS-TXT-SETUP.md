@@ -97,6 +97,33 @@ If you don't want to use Cloudflare Workers, you can create a static `ads.txt` f
 
 **Limitation**: This won't proxy to the upstream service - it's just a static file.
 
+## Alternative: Apache + PHP (Self-Hosted)
+
+If you're using Apache with PHP (self-hosted or VPS):
+
+1. **Copy files to your web root**:
+   - `.htaccess` - Apache rewrite rules
+   - `ads-handler.php` - PHP handler script
+   - `ads-fallback.txt` - Fallback content
+
+2. **Ensure mod_rewrite is enabled**:
+   ```bash
+   sudo a2enmod rewrite
+   sudo systemctl restart apache2
+   ```
+
+3. **Set proper permissions**:
+   ```bash
+   chmod 644 .htaccess ads-handler.php ads-fallback.txt
+   ```
+
+4. **Test**:
+   ```bash
+   curl http://your-domain.com/ads.txt
+   ```
+
+**Note**: GitHub Pages does NOT support Apache or PHP. Use Cloudflare Worker for GitHub Pages.
+
 ## Alternative: Nginx Configuration (Self-Hosted)
 
 If you're using nginx (self-hosted or VPS), add this to your nginx configuration:
