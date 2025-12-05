@@ -1,0 +1,24 @@
+# GitHub Pages headers for caching and compression
+# Note: GitHub Pages doesn't support custom headers directly
+# These would need to be configured at CDN/proxy level (Cloudflare, etc.)
+
+# Cache static assets for 1 year
+/styles.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/app.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache HTML for shorter period
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
