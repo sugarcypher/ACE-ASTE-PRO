@@ -1,5 +1,15 @@
 // Critical JavaScript - loads immediately
 // Dark mode toggle (dark mode class already applied via inline script for FOUC prevention)
+// Cache DOM elements to reduce repeated queries
+let elements = {};
+
+function getElement(id) {
+  if (!elements[id]) {
+    elements[id] = document.getElementById(id);
+  }
+  return elements[id];
+}
+
 function toggleDarkMode() {
   const isDark = document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', isDark);
@@ -7,7 +17,7 @@ function toggleDarkMode() {
 }
 
 function updateDarkModeIcon(isDark) {
-  const toggle = document.getElementById('darkModeToggle');
+  const toggle = getElement('darkModeToggle');
   if (toggle) {
     toggle.textContent = isDark ? '☀️' : '🌙';
   }
@@ -20,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDarkModeIcon(isDark);
   
   // Dark mode toggle
-  const darkModeToggle = document.getElementById('darkModeToggle');
+  const darkModeToggle = getElement('darkModeToggle');
   if (darkModeToggle) {
     darkModeToggle.addEventListener('click', toggleDarkMode);
   }
@@ -28,12 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
   
-  // Core button handlers
-  const cleanBtn = document.getElementById('cleanBtn');
-  const pasteBtn = document.getElementById('pasteBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const copyBtn = document.getElementById('copyBtn');
-  const moreOptions = document.getElementById('moreOptions');
+  // Core button handlers - cache elements
+  const cleanBtn = getElement('cleanBtn');
+  const pasteBtn = getElement('pasteBtn');
+  const clearBtn = getElement('clearBtn');
+  const copyBtn = getElement('copyBtn');
+  const moreOptions = getElement('moreOptions');
   
   if (cleanBtn) cleanBtn.addEventListener('click', cleanText);
   if (pasteBtn) pasteBtn.addEventListener('click', pasteFromClipboard);
@@ -41,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
   if (moreOptions) {
     moreOptions.addEventListener('click', () => {
-      const adv = document.getElementById('advanced');
-      const btn = document.getElementById('moreOptions');
+      const adv = getElement('advanced');
+      const btn = getElement('moreOptions');
       adv.classList.toggle('hidden');
       btn.textContent = adv.classList.contains('hidden') ? 'Advanced options ▾' : 'Advanced options ▴';
     });
@@ -80,9 +90,8 @@ function initGlobalPrivacyControl() {
     localStorage.setItem('gpcOptOut', 'true');
     try {
       document.cookie = 'google_adsense_opt_out=true; path=/; max-age=31536000; SameSite=Lax';
-      console.log('Global Privacy Control (GPC) detected - personalized advertising disabled');
     } catch (e) {
-      console.warn('Could not set GPC opt-out cookie:', e);
+      // Silent fail - GPC opt-out cookie setting failed
     }
   } else {
     localStorage.removeItem('gpcOptOut');
@@ -90,7 +99,7 @@ function initGlobalPrivacyControl() {
 }
 
 async function pasteFromClipboard() {
-  const pasteField = document.getElementById('paste');
+  const pasteField = getElement('paste');
   if (navigator.clipboard && navigator.clipboard.readText) {
     try {
       const text = await navigator.clipboard.readText();
@@ -98,7 +107,7 @@ async function pasteFromClipboard() {
       pasteField.focus();
       return;
     } catch (err) {
-      console.warn('Clipboard API failed:', err);
+      // Clipboard API failed - fallback to manual paste
     }
   }
   pasteField.focus();
@@ -106,18 +115,21 @@ async function pasteFromClipboard() {
 }
 
 function clearFields() {
-  document.getElementById('paste').value = '';
-  document.getElementById('cleaned').value = '';
-  const reportDiv = document.getElementById('cleaningReport');
+  const pasteField = getElement('paste');
+  const cleanedField = getElement('cleaned');
+  const reportDiv = getElement('cleaningReport');
+  pasteField.value = '';
+  cleanedField.value = '';
   if (reportDiv) {
     reportDiv.classList.add('hidden');
     reportDiv.innerHTML = '';
   }
-  document.getElementById('paste').focus();
+  pasteField.focus();
 }
 
 async function copyToClipboard() {
-  const cleanedField = document.getElementById('cleaned');
+  const cleanedField = getElement('cleaned');
+  const copyBtn = getElement('copyBtn');
   const text = cleanedField.value;
   if (!text) {
     alert('Nothing to copy. Clean some text first!');
@@ -126,7 +138,6 @@ async function copyToClipboard() {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(text);
-      const copyBtn = document.getElementById('copyBtn');
       const originalText = copyBtn.textContent;
       copyBtn.textContent = 'Copied!';
       copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
@@ -139,7 +150,6 @@ async function copyToClipboard() {
     cleanedField.select();
     cleanedField.setSelectionRange(0, 99999);
     document.execCommand('copy');
-    const copyBtn = document.getElementById('copyBtn');
     const originalText = copyBtn.textContent;
     copyBtn.textContent = 'Copied!';
     copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
@@ -148,17 +158,18 @@ async function copyToClipboard() {
       copyBtn.style.background = '';
     }, 2000);
   } catch (err) {
-    console.error('Failed to copy:', err);
     alert('Failed to copy to clipboard. Please select and copy manually.');
   }
 }
 
 function cleanText() {
   try {
-    let text = document.getElementById('paste').value;
+    const pasteField = getElement('paste');
+    const cleanedField = getElement('cleaned');
+    let text = pasteField.value;
     if (!text) {
-      document.getElementById('cleaned').value = '';
-      const reportDiv = document.getElementById('cleaningReport');
+      cleanedField.value = '';
+      const reportDiv = getElement('cleaningReport');
       if (reportDiv) {
         reportDiv.classList.add('hidden');
         reportDiv.innerHTML = '';
@@ -181,14 +192,14 @@ function cleanText() {
     custom: 0
   };
   
-  if (document.getElementById('removeInvisible').checked) {
+  if (getElement('removeInvisible').checked) {
     const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
     const zwMatches = text.match(zwRe);
     report.zeroWidth = zwMatches ? zwMatches.length : 0;
     text = text.replace(zwRe, '');
   }
   
-  if (document.getElementById('removeEmojis').checked) {
+  if (getElement('removeEmojis').checked) {
     const beforeEmojis = text.length;
     const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2190}-\u{21FF}]|[\u{2300}-\u{23FF}]|[\u{24C2}-\u{1F251}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]/gu;
     const emojiSequenceRegex = /[\u{1F3FB}-\u{1F3FF}]|[\u{1F9B0}-\u{1F9B3}]|[\u{200D}]/gu;
@@ -196,14 +207,14 @@ function cleanText() {
     report.emojis = beforeEmojis - text.length;
   }
   
-  if (document.getElementById('removeFormatting').checked) {
+  if (getElement('removeFormatting').checked) {
     const beforeFormatting = text.length;
     text = text.replace(/[\u00AD\u2000-\u200B\u2028-\u2029\uFEFF]/g, '');
     text = text.replace(/\u00A0/g, ' ');
     report.formatting = beforeFormatting - text.length;
   }
   
-  if (document.getElementById('removeMarkdown').checked) {
+  if (getElement('removeMarkdown').checked) {
     const beforeMarkdown = text.length;
     text = text.replace(/(?:^|\s)(#{1,6})\s/gm, ' ');
     text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
@@ -221,37 +232,37 @@ function cleanText() {
     report.markdown = beforeMarkdown - text.length;
   }
   
-  if (document.getElementById('removeAIMarkup').checked) {
+  if (getElement('removeAIMarkup').checked) {
     const beforeAI = text.length;
     text = text.replace(/(\*{2,}|\*{3,}|#{2,}|\+{2,}|={2,}|-{2,}|_{2,})/g, '');
     report.aiMarkup = beforeAI - text.length;
   }
   
-  const adv = document.getElementById('advanced');
+  const adv = getElement('advanced');
   if (!adv.classList.contains('hidden')) {
-    if (document.getElementById('collapseSpaces').checked) {
+    if (getElement('collapseSpaces').checked) {
       const beforeSpaces = text.length;
       text = text.replace(/[ \t]+/g, ' ');
       report.spaces = beforeSpaces - text.length;
     }
     
-    if (document.getElementById('collapseNewlines').checked) {
+    if (getElement('collapseNewlines').checked) {
       const beforeNewlines = text.length;
       text = text.replace(/\n{3,}/g, '\n\n');
       report.newlines = beforeNewlines - text.length;
     }
     
-    if (document.getElementById('trimPerLine').checked) {
+    if (getElement('trimPerLine').checked) {
       text = text.split('\n').map(l => l.trim()).join('\n');
     }
     
-    if (document.getElementById('removeHtml').checked) {
+    if (getElement('removeHtml').checked) {
       const beforeHTML = text.length;
       text = text.replace(/<|>/g, '');
       report.html = beforeHTML - text.length;
     }
     
-    if (document.getElementById('removeComments').checked) {
+    if (getElement('removeComments').checked) {
       const beforeComments = text.length;
       text = text.replace(/#\s*(italic|bold|comment)[^\n]*/gi, '');
       text = text.replace(/\/\/[^\n]*/g, '');
@@ -283,7 +294,7 @@ function cleanText() {
       }
     }
     
-    const punctuationSelect = document.getElementById('removePunctuation');
+    const punctuationSelect = getElement('removePunctuation');
     if (punctuationSelect) {
       const selectedPunctuation = Array.from(punctuationSelect.selectedOptions).map(opt => opt.value);
       if (selectedPunctuation.length > 0) {
@@ -295,9 +306,9 @@ function cleanText() {
       }
     }
     
-    const find = document.getElementById('customFind').value;
-    const replace = document.getElementById('customReplace').value;
-    const useRegex = document.getElementById('customRegex').checked;
+    const find = getElement('customFind').value;
+    const replace = getElement('customReplace').value;
+    const useRegex = getElement('customRegex').checked;
     if (find) {
       try {
         const beforeCustom = text.length;
@@ -309,7 +320,7 @@ function cleanText() {
         }
         report.custom = beforeCustom - text.length;
       } catch (e) {
-        console.error('Regex error:', e);
+        // Regex error - skip custom replacement
       }
     }
   }
@@ -317,15 +328,14 @@ function cleanText() {
   const finalLength = text.length;
   const totalRemoved = originalLength - finalLength;
   displayCleaningReport(report, originalLength, finalLength, totalRemoved);
-  document.getElementById('cleaned').value = text;
+  getElement('cleaned').value = text;
   } catch (error) {
-    console.error('Error cleaning text:', error);
-    alert('An error occurred while cleaning the text. Please check the console for details.');
+    alert('An error occurred while cleaning the text. Please try again.');
   }
 }
 
 function displayCleaningReport(report, originalLength, finalLength, totalRemoved) {
-  const reportDiv = document.getElementById('cleaningReport');
+  const reportDiv = getElement('cleaningReport');
   if (!reportDiv) return;
   reportDiv.classList.remove('hidden');
   let html = '<h3>Cleaning Report</h3><ul>';
