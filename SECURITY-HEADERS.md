@@ -32,16 +32,18 @@ upgrade-insecure-requests;
 - `img-src`: Allows images from same origin, data URIs, and HTTPS sources
 - `frame-src`: Allows embedding Termly consent UI and AdSense iframes
 - `object-src 'none'`: Blocks plugins (Flash, etc.)
-- `frame-ancestors 'self'`: Prevents clickjacking (only allows embedding on same origin)
+- `frame-ancestors`: Not supported in meta tags - must be set via HTTP header (see `_headers` file)
 
 **Future Enhancement**: Consider using nonces for inline scripts to remove `'unsafe-inline'` from script-src.
 
 ### X-Frame-Options
-**Status**: ✅ Implemented via meta tag
+**Status**: ⚠️ Requires server/CDN configuration (not supported in meta tags)
 
 Prevents clickjacking by controlling where the page can be embedded.
 
 **Value**: `SAMEORIGIN` - Page can only be embedded in frames on the same origin.
+
+**Note**: X-Frame-Options cannot be set via `<meta>` tag - it must be set via HTTP header. See `_headers` file for CDN/proxy configuration.
 
 ### Cross-Origin-Opener-Policy (COOP)
 **Status**: ✅ Implemented via meta tag
