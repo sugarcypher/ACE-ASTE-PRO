@@ -2,11 +2,30 @@
 # Note: GitHub Pages doesn't support custom headers directly
 # These would need to be configured at CDN/proxy level (Cloudflare, etc.)
 
+# Security Headers
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cross-Origin-Embedder-Policy: require-corp
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://app.termly.io https://pagead2.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://pagead2.googlesyndication.com; frame-src 'self' https://app.termly.io https://googleads.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;
+
+# HSTS (HTTP Strict Transport Security)
+# Start with low max-age for testing, then increase
+# Recommended: max-age=31536000; includeSubDomains; preload
+/*
+  Strict-Transport-Security: max-age=86400; includeSubDomains
+
 # Cache static assets for 1 year
 /styles.css
   Cache-Control: public, max-age=31536000, immutable
 
-/app.js
+/app-critical.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/app-termly.js
   Cache-Control: public, max-age=31536000, immutable
 
 /*.jpg
