@@ -45,6 +45,18 @@
 /brand.jpg?v=*
   Cache-Control: public, max-age=31536000, immutable
 
+/brand-*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand-*.jpg?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand-*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand-*.webp?v=*
+  Cache-Control: public, max-age=31536000, immutable
+
 /*.jpg
   Cache-Control: public, max-age=31536000, immutable
 
