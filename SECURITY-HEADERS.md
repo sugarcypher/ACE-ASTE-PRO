@@ -52,14 +52,25 @@ Prevents clickjacking by controlling where the page can be embedded.
 
 **Value**: `SAMEORIGIN` - Page can only be embedded in frames on the same origin.
 
-**Note**: X-Frame-Options cannot be set via `<meta>` tag - it must be set via HTTP header. See `_headers` file for CDN/proxy configuration.
+**Implementation**: Configured in `_headers` file for CDN/proxy deployment.
+
+**Note**: 
+- X-Frame-Options cannot be set via `<meta>` tag - it must be set via HTTP header
+- **GitHub Pages Limitation**: Headers in `_headers` are not served by GitHub Pages - requires CDN/proxy
+- Alternative: `frame-ancestors 'self'` in CSP also provides clickjacking protection
 
 ### Cross-Origin-Opener-Policy (COOP)
-**Status**: ✅ Implemented via meta tag
+**Status**: ✅ Implemented via meta tag + HTTP header (in `_headers`)
 
 Isolates the top-level window from other documents (pop-ups, iframes) to prevent cross-origin attacks.
 
 **Value**: `same-origin-allow-popups` - Allows same-origin popups while isolating from cross-origin windows.
+
+**Implementation**: 
+- Meta tag in `index.html` (works on GitHub Pages)
+- HTTP header in `_headers` (requires CDN/proxy)
+
+**Note**: **GitHub Pages Limitation**: HTTP header in `_headers` is not served by GitHub Pages - meta tag provides fallback protection.
 
 ### X-Content-Type-Options
 **Status**: ⚠️ Requires server/CDN configuration
@@ -93,15 +104,19 @@ Controls which browser features and APIs can be used.
 
 Forces browsers to use HTTPS connections, preventing downgrade attacks.
 
-**Current Value** (in `_headers`): `max-age=86400; includeSubDomains` (1 day - for testing)
+**Current Value** (in `_headers`): `max-age=31536000; includeSubDomains; preload` (1 year)
 
-**Recommended Production Value**: `max-age=31536000; includeSubDomains; preload` (1 year)
+**Directives**:
+- `max-age=31536000`: Browser must use HTTPS for 1 year
+- `includeSubDomains`: Applies to all subdomains
+- `preload`: Eligible for browser HSTS preload list (permanent - cannot be removed)
 
 **Implementation Notes**:
-1. Start with low max-age (1 day) for testing
-2. Gradually increase to 1 week, then 1 month, then 1 year
-3. Only add `preload` after confirming everything works (preload is permanent)
+1. ✅ `includeSubDomains` - Included for subdomain protection
+2. ✅ `preload` - Included for maximum security (permanent commitment)
+3. ⚠️ **WARNING**: `preload` is permanent - ensure site will always support HTTPS
 4. Configure at CDN/proxy level (see `_headers` file)
+5. **GitHub Pages Limitation**: Headers in `_headers` are not served by GitHub Pages - requires CDN/proxy
 
 ### Trusted Types
 **Status**: 📋 Future Enhancement
