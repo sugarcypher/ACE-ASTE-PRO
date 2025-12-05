@@ -10,12 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const cleanBtn = document.getElementById('cleanBtn');
   const pasteBtn = document.getElementById('pasteBtn');
   const clearBtn = document.getElementById('clearBtn');
+  const copyBtn = document.getElementById('copyBtn');
   const moreOptions = document.getElementById('moreOptions');
   const darkModeToggle = document.getElementById('darkModeToggle');
   
   if (cleanBtn) cleanBtn.addEventListener('click', cleanText);
   if (pasteBtn) pasteBtn.addEventListener('click', pasteFromClipboard);
   if (clearBtn) clearBtn.addEventListener('click', clearFields);
+  if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
   if (moreOptions) {
     moreOptions.addEventListener('click', () => {
       const adv = document.getElementById('advanced');
@@ -187,6 +189,48 @@ function clearFields() {
     reportDiv.innerHTML = '';
   }
   document.getElementById('paste').focus();
+}
+
+async function copyToClipboard() {
+  const cleanedField = document.getElementById('cleaned');
+  const text = cleanedField.value;
+  
+  if (!text) {
+    alert('Nothing to copy. Clean some text first!');
+    return;
+  }
+  
+  try {
+    // Try modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      const copyBtn = document.getElementById('copyBtn');
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.style.background = '';
+      }, 2000);
+      return;
+    }
+    
+    // Fallback for older browsers
+    cleanedField.select();
+    cleanedField.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    const copyBtn = document.getElementById('copyBtn');
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = 'Copied!';
+    copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+      copyBtn.style.background = '';
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy:', err);
+    alert('Failed to copy to clipboard. Please select and copy manually.');
+  }
 }
 
 function cleanText() {

@@ -94,7 +94,10 @@
     <button id="cleanBtn" class="btn">Clean my paste</button>
     <button id="clearBtn" class="btn-secondary">Clear</button>
   </div>
-  <label class="lbl">Cleaned output</label>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin: 6px 0;">
+    <label class="lbl" style="margin: 0;">Cleaned output</label>
+    <button id="copyBtn" class="btn-secondary" style="min-width: 100px;">Copy</button>
+  </div>
   <textarea id="cleaned" class="ta" rows="8" placeholder="Cleaned output…" readonly></textarea>
   
   <div id="cleaningReport" class="cleaning-report hidden"></div>
