@@ -30,12 +30,12 @@ upgrade-insecure-requests;
 - `script-src`: 
   - `'self'`: Allows scripts from same origin
   - `'sha256-...'`: SHA-256 hashes for inline scripts (loadCSS polyfill and dark mode init)
-  - `https://app.termly.io https://pagead2.googlesyndication.com`: External scripts from Termly and AdSense
-  - `'strict-dynamic'`: Allows scripts loaded by trusted scripts (e.g., AdSense inline scripts created dynamically)
+  - `https://app.termly.io`: External scripts from Termly
+  - `'strict-dynamic'`: Allows scripts loaded by trusted scripts
   - **No `'unsafe-inline'`**: Removed for better security - using hashes instead
 - `style-src`: Allows inline styles (critical CSS) and stylesheets from same origin
 - `img-src`: Allows images from same origin, data URIs, and HTTPS sources
-- `frame-src`: Allows embedding Termly consent UI and AdSense iframes
+- `frame-src`: Allows embedding Termly consent UI
 - `object-src 'none'`: Blocks plugins (Flash, etc.)
 - `frame-ancestors`: Not supported in meta tags - must be set via HTTP header (see `_headers` file)
 

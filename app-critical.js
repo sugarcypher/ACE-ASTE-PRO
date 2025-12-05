@@ -121,11 +121,6 @@ function initGlobalPrivacyControl() {
   
   if (gpcEnabled) {
     localStorage.setItem('gpcOptOut', 'true');
-    try {
-      document.cookie = 'google_adsense_opt_out=true; path=/; max-age=31536000; SameSite=Lax';
-    } catch (e) {
-      // Silent fail - GPC opt-out cookie setting failed
-    }
   } else {
     localStorage.removeItem('gpcOptOut');
   }
