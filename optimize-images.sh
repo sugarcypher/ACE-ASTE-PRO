@@ -102,3 +102,5 @@ echo "  1. Review the generated images"
 echo "  2. Update HTML to use responsive images (see updated index.html)"
 echo "  3. Commit and push the optimized images"
 
+
+

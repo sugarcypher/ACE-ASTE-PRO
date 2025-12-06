@@ -125,3 +125,5 @@ curl -I https://acepaste.xyz/brand.jpg?v=1.0
 
 Look for `Cache-Control: public, max-age=31536000, immutable` in the response headers.
 
+
+

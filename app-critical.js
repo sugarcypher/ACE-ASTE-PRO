@@ -4,7 +4,7 @@
 let elements = {};
 
 // Trusted Types policy is created inline in the head before third-party scripts load
-// This ensures the policy exists when Termly, Ezoic, and Gatekeeper scripts try to create script elements
+// This ensures the policy exists when Termly and Gatekeeper scripts try to create script elements
 // We just need to get a reference to the policy for our own use
 let trustedTypesPolicy = null;
 if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
@@ -42,17 +42,6 @@ function updateDarkModeIcon(isDark) {
 }
 
 // Lazy load third-party scripts after page load to reduce initial bundle size
-function loadEzoicScript() {
-  if (window.ezoicLoaded) return;
-  window.ezoicLoaded = true;
-  window.ezstandalone = window.ezstandalone || {};
-  ezstandalone.cmd = ezstandalone.cmd || [];
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = '//www.ezojs.com/ezoic/sa.min.js';
-  document.head.appendChild(script);
-}
-
 function loadTermlyScript() {
   if (window.termlyLoaded) return;
   window.termlyLoaded = true;
@@ -76,16 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
-  
-  // Lazy load Ezoic after page is interactive (reduces initial JS by ~52KB)
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      loadEzoicScript();
-    }, { timeout: 2000 });
-  } else {
-    // Fallback for browsers without requestIdleCallback
-    setTimeout(loadEzoicScript, 2000);
-  }
   
   // Lazy load Termly only when user interacts with consent (reduces initial JS by ~162KB)
   // Termly will be loaded when user clicks consent preferences link

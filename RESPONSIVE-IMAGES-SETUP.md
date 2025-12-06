@@ -115,3 +115,5 @@ After optimization, target sizes:
 4. Verify WebP is loading in modern browsers
 5. Verify JPEG fallback works in older browsers
 
+
+

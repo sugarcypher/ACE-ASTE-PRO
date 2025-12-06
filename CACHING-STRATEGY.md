@@ -78,3 +78,5 @@ If migrating to Netlify or Vercel:
 3. **HTML shorter cache** - Keep HTML cache short (1 hour) for content updates
 4. **Monitor cache hit rates** - Use analytics to track cache effectiveness
 
+
+

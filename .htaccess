@@ -12,3 +12,5 @@
     RewriteRule ^ads\.txt$ ads-handler.php [L]
 </IfModule>
 
+
+

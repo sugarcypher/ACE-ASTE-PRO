@@ -135,3 +135,5 @@ After Cloudflare setup:
 - Changes take effect immediately after configuration
 - GitHub Pages continues to serve the content, Cloudflare adds headers
 
+
+
