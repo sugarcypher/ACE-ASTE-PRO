@@ -96,3 +96,7 @@ body.dark-mode .cleaning-report .report-count{color:#5a9fd2}
 .cleaning-report .report-total{margin-top:12px;padding-top:12px;border-top:1px solid rgba(10,60,120,.1);font-weight:600;color:#0b0d12}
 body.dark-mode .cleaning-report .report-total{border-top-color:rgba(255,255,255,.1);color:#e0e0e0}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+/* Ezoic CCPA consent button - ensure WCAG AA contrast ratio (4.5:1) */
+#ez-ccpa-accept-all{background-color:#3d6a1a!important;color:#FFFFFF!important;border:none!important;padding:10px 20px!important;border-radius:6px!important;font-weight:500!important;cursor:pointer!important}
+#ez-ccpa-accept-all:hover{background-color:#4a7c1f!important}
+#ez-ccpa-accept-all:focus{outline:2px solid #005a8f!important;outline-offset:2px!important}
