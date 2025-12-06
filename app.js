@@ -107,7 +107,8 @@ function initGlobalPrivacyControl() {
     // This is done by setting the google_adsense_opt_out cookie or using non-personalized ads
     try {
       // Set a flag that can be used to request non-personalized ads
-      document.cookie = 'google_adsense_opt_out=true; path=/; max-age=31536000; SameSite=Lax';
+      // Cookie removed for privacy - using in-memory flag instead
+      // document.cookie = 'google_adsense_opt_out=true; path=/; max-age=31536000; SameSite=Lax';
       
       // Log GPC detection for compliance purposes
       console.log('Global Privacy Control (GPC) detected - personalized advertising disabled');
