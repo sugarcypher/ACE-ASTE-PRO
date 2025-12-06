@@ -28,9 +28,12 @@ function getElement(id) {
   return elements[id];
 }
 
+// In-memory dark mode preference (no localStorage for privacy)
+let darkModePreference = null;
+
 function toggleDarkMode() {
   const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', isDark);
+  darkModePreference = isDark; // Store in memory only
   updateDarkModeIcon(isDark);
 }
 
@@ -139,16 +142,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('touchstart', loadTermlyOnInteraction, { passive: true, once: true });
 });
 
+// In-memory GPC preference (no localStorage for privacy)
+let gpcOptOut = false;
+
 function initGlobalPrivacyControl() {
   const gpcEnabled = navigator.globalPrivacyControl === true || 
                      navigator.doNotTrack === '1' ||
                      (typeof navigator.globalPrivacyControl !== 'undefined' && navigator.globalPrivacyControl);
   
-  if (gpcEnabled) {
-    localStorage.setItem('gpcOptOut', 'true');
-  } else {
-    localStorage.removeItem('gpcOptOut');
-  }
+  gpcOptOut = gpcEnabled; // Store in memory only
 }
 
 // Fix Ezoic CCPA consent button contrast ratio for WCAG AA compliance
