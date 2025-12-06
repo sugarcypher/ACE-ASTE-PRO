@@ -151,6 +151,58 @@ function initGlobalPrivacyControl() {
   }
 }
 
+// Fix Ezoic CCPA consent button contrast ratio for WCAG AA compliance
+// Ezoic injects inline styles, so we need to override them with JavaScript
+function fixEzoicButtonContrast() {
+  const button = document.getElementById('ez-ccpa-accept-all');
+  if (button) {
+    button.style.backgroundColor = '#3d6a1a';
+    button.style.color = '#FFFFFF';
+    button.style.border = 'none';
+    button.style.padding = '10px 20px';
+    button.style.borderRadius = '6px';
+    button.style.fontWeight = '500';
+    button.style.cursor = 'pointer';
+    
+    // Add hover effect
+    button.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = '#4a7c1f';
+    });
+    button.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = '#3d6a1a';
+    });
+    
+    // Add focus outline for accessibility
+    button.addEventListener('focus', function() {
+      this.style.outline = '2px solid #005a8f';
+      this.style.outlineOffset = '2px';
+    });
+    button.addEventListener('blur', function() {
+      this.style.outline = '';
+      this.style.outlineOffset = '';
+    });
+  }
+}
+
+// Run immediately and also watch for dynamically added buttons
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    fixEzoicButtonContrast();
+    // Watch for dynamically added buttons (Ezoic may inject after page load)
+    const observer = new MutationObserver(() => {
+      fixEzoicButtonContrast();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+} else {
+  fixEzoicButtonContrast();
+  // Watch for dynamically added buttons
+  const observer = new MutationObserver(() => {
+    fixEzoicButtonContrast();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
 async function pasteFromClipboard() {
   const pasteField = getElement('paste');
   if (navigator.clipboard && navigator.clipboard.readText) {
