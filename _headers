@@ -54,7 +54,7 @@
 /*
   # Content Security Policy
   # Strict CSP with no unsafe-inline, explicit hashes for all inline scripts
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-XrgaCvigLGp3uo2xhK3Cv49iFBlNDM+/lNqT1gO9NeM=' 'sha256-ctAI/7ecEjZpMFjuJyBCBzVNAmn1ga/2OIBUgVta2ds=' 'sha256-hsI2XKScePfqq9a84r1JImigfnKFnMJwt3JXol1INWU=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-lIPM8C+z0NNrb1NgPkh1ElU3MQrACldJLPAlPT5Ir2Q=' 'sha256-ctAI/7ecEjZpMFjuJyBCBzVNAmn1ga/2OIBUgVta2ds=' 'sha256-hsI2XKScePfqq9a84r1JImigfnKFnMJwt3JXol1INWU=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests
 
   # Prevent MIME type sniffing
   X-Content-Type-Options: nosniff
