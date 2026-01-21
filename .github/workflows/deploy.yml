@@ -32,6 +32,22 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+          exclude-paths: |
+            public/
+            .github/
+            .git/
+            node_modules/
+            *.md
+            .gitignore
+            .htaccess
+            *.sh
+            *.conf
+            *.php
+            cloudflare-worker-*.js
+            nginx-*.conf
+            monitor-*.sh
+            optimize-*.sh
+            refresh-*.sh
       
       - name: Deploy to GitHub Pages
         id: deployment
