@@ -5,12 +5,12 @@
 // CONFIGURATION - Replace with your Firebase project config
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID'
+  apiKey: 'AIzaSyC0-axjchVOOvNhKOa7tcjVa_eg-oa0TH8',
+  authDomain: 'ace-paste-cleaner-pro.firebaseapp.com',
+  projectId: 'ace-paste-cleaner-pro',
+  storageBucket: 'ace-paste-cleaner-pro.firebasestorage.app',
+  messagingSenderId: '570213699368',
+  appId: '1:570213699368:web:2d060492d938917fcb8a1d'
 };
 
 // Email link sign-in settings
@@ -50,8 +50,20 @@ const FEATURE_TIERS = {
 
 const TIER_RANK = { guest: 0, free: 1, paid: 2, pro: 3 };
 
+// Permanent pro-tier email allowlist (owner / founding accounts)
+const PRO_TIER_EMAILS = [
+  'nuumoxx@icloud.com'
+];
+
 let currentUser = null;
 let currentTier = TIERS.GUEST;
+
+function resolveTierForUser(user) {
+  if (!user) return TIERS.GUEST;
+  const email = (user.email || '').toLowerCase();
+  if (PRO_TIER_EMAILS.includes(email)) return TIERS.PRO;
+  return TIERS.FREE;
+}
 
 function getUserTier() {
   return currentTier;
@@ -169,12 +181,17 @@ function initFirebaseAuth() {
     firebase.auth().onAuthStateChanged(user => {
       currentUser = user;
       if (user) {
-        currentTier = TIERS.FREE; // Default tier for logged-in users
-        // Check custom claims for paid/pro tier
+        // Start with email-based tier resolution (handles owner allowlist)
+        currentTier = resolveTierForUser(user);
+        // Then check Firebase custom claims which can override
         user.getIdTokenResult().then(tokenResult => {
-          if (tokenResult.claims.tier) {
+          if (tokenResult.claims.tier && TIER_RANK[tokenResult.claims.tier] > TIER_RANK[currentTier]) {
             currentTier = tokenResult.claims.tier;
           }
+          updateFeatureGating();
+          updateHeaderAuth(user);
+          hideAuthModal();
+        }).catch(() => {
           updateFeatureGating();
           updateHeaderAuth(user);
           hideAuthModal();
@@ -251,7 +268,34 @@ function continueAsGuest() {
 // ============================================================
 // INIT
 // ============================================================
+function setAuthMode(mode) {
+  const title = document.getElementById('authTitle');
+  const subtitle = document.getElementById('authSubtitle');
+  const sendBtn = document.getElementById('authSendLink');
+  const tabIn = document.getElementById('authTabSignIn');
+  const tabUp = document.getElementById('authTabSignUp');
+  if (mode === 'signup') {
+    if (title) title.textContent = 'Create your account';
+    if (subtitle) subtitle.textContent = 'Enter your email — we\'ll send you a link to create your account. No password needed.';
+    if (sendBtn) sendBtn.textContent = 'Send sign-up link';
+    if (tabIn) tabIn.classList.remove('active');
+    if (tabUp) tabUp.classList.add('active');
+  } else {
+    if (title) title.textContent = 'Welcome back';
+    if (subtitle) subtitle.textContent = 'Enter your email to get a one-time sign-in link. No password needed.';
+    if (sendBtn) sendBtn.textContent = 'Send sign-in link';
+    if (tabIn) tabIn.classList.add('active');
+    if (tabUp) tabUp.classList.remove('active');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Tab switching
+  const tabIn = document.getElementById('authTabSignIn');
+  const tabUp = document.getElementById('authTabSignUp');
+  if (tabIn) tabIn.addEventListener('click', () => setAuthMode('signin'));
+  if (tabUp) tabUp.addEventListener('click', () => setAuthMode('signup'));
+
   // Wire up auth modal buttons
   const sendLinkBtn = document.getElementById('authSendLink');
   if (sendLinkBtn) sendLinkBtn.addEventListener('click', sendEmailLink);
