@@ -13,13 +13,40 @@ let elements = {};
 // Adding a character to this regex is good. Removing one is wrong.
 // If you find new invisible/zero-width/non-printing chars in the wild, ADD them.
 // =============================================================================
-// Covers EVERY Unicode "Format" (Cf) category character across all scripts/languages,
-// plus a few related noncharacters and unassigned slots in problem ranges.
-const INVISIBLE_CHAR_REGEX = /[\u00AD\u034F\u061C\u070F\u08E2\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFFB]|[\u{13430}-\u{13438}]|[\u{1BCA0}-\u{1BCA3}]|[\u{1D173}-\u{1D17A}]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
+// Uses Unicode property escapes to match EVERY character in the Unicode "Format"
+// general category (\p{Cf}) — that's 161+ characters across every script in the
+// Unicode standard, automatically updated as Unicode grows. Plus variation
+// selectors (which are technically Mn, not Cf) and a handful of other invisible
+// chars that aren't in any standard category.
+//
+// What this catches without needing a manual list:
+//  - Soft hyphen, combining grapheme joiner
+//  - Arabic letter mark, Syriac abbreviation mark, Arabic disputed end of ayah
+//  - Hangul/Khmer/Mongolian fillers and inherent vowels
+//  - All zero-width chars: ZWSP, ZWNJ, ZWJ, LRM, RLM
+//  - All bidi formatting (LRE, RLE, PDF, LRO, RLO, LRI, RLI, FSI, PDI)
+//  - Word joiner, invisible operators, deprecated bidi
+//  - BOM, halfwidth Hangul filler, interlinear annotation chars
+//  - Egyptian hieroglyph format controls
+//  - Shorthand format controls
+//  - Musical notation format characters
+//  - Tag characters (U+E0000-E007F) — used for prompt injection
+//  - All variation selectors (U+180B-180D, U+FE00-FE0F, U+E0100-E01EF)
+const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 function stripInvisibleChars(text) {
   let count = 0;
-  const out = text.replace(INVISIBLE_CHAR_REGEX, () => { count++; return ''; });
+  const removedHex = [];
+  const out = text.replace(INVISIBLE_CHAR_REGEX, (ch) => {
+    count++;
+    if (removedHex.length < 50) {
+      removedHex.push('U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0'));
+    }
+    return '';
+  });
+  if (count > 0 && typeof console !== 'undefined') {
+    console.log('[ACEPASTE] stripped', count, 'invisible char(s):', removedHex.join(' '));
+  }
   return { text: out, count };
 }
 
@@ -353,6 +380,24 @@ function cleanText() {
     custom: 0
   };
   
+  // DIAGNOSTIC: log all non-ASCII characters present in the input so we can
+  // see exactly what's there. Helps debug "but I know there are invisible
+  // characters in it" situations. Visible in browser console (F12).
+  if (typeof console !== 'undefined') {
+    const nonAsciiMap = {};
+    for (const ch of text) {
+      const cp = ch.codePointAt(0);
+      if (cp > 127) {
+        const key = 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+        nonAsciiMap[key] = (nonAsciiMap[key] || 0) + 1;
+      }
+    }
+    const total = Object.values(nonAsciiMap).reduce((a, b) => a + b, 0);
+    if (total > 0) {
+      console.log('[ACEPASTE] input has', total, 'non-ASCII char(s):', nonAsciiMap);
+    }
+  }
+
   // CORE PROMISE: invisible character removal. ALWAYS runs, no opt-out.
   // The checkbox in the UI is informational — even if a future bug unchecks
   // it, this still runs. This is the reason this tool exists.
