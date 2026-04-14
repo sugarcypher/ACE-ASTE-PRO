@@ -268,10 +268,14 @@ function cleanText() {
   };
   
   if (getElement('removeInvisible').checked) {
-    const zwRe = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
-    const zwMatches = text.match(zwRe);
-    report.zeroWidth = zwMatches ? zwMatches.length : 0;
-    text = text.replace(zwRe, '');
+    // Comprehensive invisible/non-printing character regex.
+    // Covers zero-width, bidi formatting, soft hyphens, variation selectors,
+    // hangul fillers, khmer inherent vowels, mongolian variation selectors,
+    // tag characters (used for prompt injection), and more.
+    const zwRe = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
+    let zwCount = 0;
+    text = text.replace(zwRe, () => { zwCount++; return ''; });
+    report.zeroWidth = zwCount;
   }
   
   if (getElement('removeEmojis').checked) {
