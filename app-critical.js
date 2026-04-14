@@ -305,11 +305,8 @@ function clearFields() {
   pasteField.value = '';
   cleanedField.value = '';
   if (reportDiv) {
-    // Batch class and innerHTML changes together
-    requestAnimationFrame(() => {
-      reportDiv.classList.add('hidden');
-      setInnerHTML(reportDiv, '');
-    });
+    reportDiv.classList.add('hidden');
+    setInnerHTML(reportDiv, '');
   }
   pasteField.focus();
 }
@@ -368,11 +365,8 @@ function cleanText() {
       cleanedField.value = '';
       const reportDiv = getElement('cleaningReport');
       if (reportDiv) {
-        // Batch DOM writes together
-        requestAnimationFrame(() => {
-          reportDiv.classList.add('hidden');
-          setInnerHTML(reportDiv, '');
-        });
+        reportDiv.classList.add('hidden');
+        setInnerHTML(reportDiv, '');
       }
       return;
     }
@@ -709,11 +703,11 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   } else {
     html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
   }
-  // Batch DOM writes: remove hidden class and set innerHTML together
-  // Use requestAnimationFrame to ensure these happen in the same frame
-  requestAnimationFrame(() => {
-    reportDiv.classList.remove('hidden');
-    setInnerHTML(reportDiv, html);
-  });
+  // Direct DOM update (not wrapped in rAF — rAF callbacks get throttled or
+  // paused when the tab is in the background, which made the report silently
+  // fail to appear. The microoptimization of "batching DOM writes" wasn't
+  // worth a broken report).
+  setInnerHTML(reportDiv, html);
+  reportDiv.classList.remove('hidden');
 }
 
