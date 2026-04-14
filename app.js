@@ -30,66 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     darkModeToggle.addEventListener('click', toggleDarkMode);
   }
   
-  // Termly consent preferences link handler
-  const consentLinks = document.querySelectorAll('.termly-display-preferences');
-  consentLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      // Wait for Termly to be ready, then try to open preferences
-      const tryOpenPreferences = () => {
-        // Try various Termly API methods
-        if (window.termly) {
-          if (typeof window.termly.openPreferences === 'function') {
-            window.termly.openPreferences();
-            return true;
-          } else if (typeof window.termly.showPreferences === 'function') {
-            window.termly.showPreferences();
-            return true;
-          } else if (typeof window.termly.displayPreferences === 'function') {
-            window.termly.displayPreferences();
-            return true;
-          }
-        }
-        
-        // Try to find and trigger Termly's preferences button
-        const termlyPrefsBtn = document.querySelector('[data-termly-preferences]') || 
-                               document.querySelector('.termly-preferences-button') ||
-                               document.querySelector('[class*="termly"][class*="preference"]') ||
-                               document.querySelector('button[onclick*="termly"]') ||
-                               document.querySelector('a[onclick*="termly"]');
-        if (termlyPrefsBtn) {
-          termlyPrefsBtn.click();
-          return true;
-        }
-        
-        return false;
-      };
-      
-      // Try immediately
-      if (tryOpenPreferences()) {
-        return;
-      }
-      
-      // If Termly isn't ready, wait a bit and try again
-      let attempts = 0;
-      const maxAttempts = 10;
-      const checkInterval = setInterval(() => {
-        attempts++;
-        if (tryOpenPreferences() || attempts >= maxAttempts) {
-          clearInterval(checkInterval);
-          if (attempts >= maxAttempts && !tryOpenPreferences()) {
-            // Fallback: redirect to main page
-            if (window.location.pathname !== '/') {
-              window.location.href = '/';
-            } else {
-              alert('Cookie preferences are loading. Please wait a moment and try again, or use the cookie consent banner.');
-            }
-          }
-        }
-      }, 200);
-    });
-  });
 });
 
 function initGlobalPrivacyControl() {

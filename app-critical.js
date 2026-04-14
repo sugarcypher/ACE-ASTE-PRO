@@ -4,7 +4,7 @@
 let elements = {};
 
 // Trusted Types policy is created inline in the head before third-party scripts load
-// This ensures the policy exists when Termly and Gatekeeper scripts try to create script elements
+// This ensures the policy exists before any third-party scripts load
 // We just need to get a reference to the policy for our own use
 let trustedTypesPolicy = null;
 if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
@@ -44,21 +44,31 @@ function updateDarkModeIcon(isDark) {
   }
 }
 
-// Lazy load third-party scripts after page load to reduce initial bundle size
-function loadTermlyScript() {
-  if (window.termlyLoaded) return;
-  window.termlyLoaded = true;
-  const script = document.createElement('script');
-  script.defer = true;
-  script.src = 'https://app.termly.io/resource-blocker/da56ec80-6621-4889-a102-bf6598ab88ae?autoBlock=on';
-  document.head.appendChild(script);
-}
 
 // Basic event listeners - load on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Update dark mode icon on load (dark mode class already applied)
-  const isDark = document.body.classList.contains('dark-mode');
-  updateDarkModeIcon(isDark);
+  // Update dark mode icon on load (dark mode class applied by default in HTML)
+  updateDarkModeIcon(true);
+
+  // TOS acceptance check
+  if (!localStorage.getItem('tosAccepted')) {
+    const tosModal = getElement('tosModal');
+    if (tosModal) { tosModal.classList.remove('hidden'); tosModal.style.display = ''; }
+  }
+  const tosAcceptBtn = getElement('tosAccept');
+  if (tosAcceptBtn) {
+    tosAcceptBtn.addEventListener('click', () => {
+      localStorage.setItem('tosAccepted', '1');
+      const tosModal = getElement('tosModal');
+      if (tosModal) { tosModal.classList.add('hidden'); tosModal.style.display = 'none'; }
+    });
+  }
+  const tosDeclineBtn = getElement('tosDecline');
+  if (tosDeclineBtn) {
+    tosDeclineBtn.addEventListener('click', () => {
+      window.location.href = 'https://www.google.com';
+    });
+  }
   
   // Dark mode toggle
   const darkModeToggle = getElement('darkModeToggle');
@@ -68,9 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
-  
-  // Lazy load Termly only when user interacts with consent (reduces initial JS by ~162KB)
-  // Termly will be loaded when user clicks consent preferences link
   
   // Core button handlers - cache elements
   const cleanBtn = getElement('cleanBtn');
@@ -100,46 +107,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Lazy load Termly resource blocker and handler only when consent link is clicked
-  const consentLinks = document.querySelectorAll('.termly-display-preferences');
-  consentLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Load Termly resource blocker script first (if not already loaded)
-      loadTermlyScript();
-      // Load Termly handler script only when needed
-      if (!window.termlyHandlerLoaded) {
-        const script = document.createElement('script');
-        script.src = '/app-termly.js?v=1.0';
-        script.onload = () => {
-          if (window.handleTermlyPreferences) {
-            window.handleTermlyPreferences();
-          }
-        };
-        document.head.appendChild(script);
-        window.termlyHandlerLoaded = true;
-      } else if (window.handleTermlyPreferences) {
-        window.handleTermlyPreferences();
+  // Batch find/replace row management
+  const addBatchRow = getElement('addBatchRow');
+  if (addBatchRow) {
+    addBatchRow.addEventListener('click', () => {
+      const container = document.getElementById('batchFindReplace');
+      const rows = container.querySelectorAll('.batch-row');
+      if (rows.length >= 25) {
+        alert('Maximum of 25 find/replace pairs reached.');
+        return;
       }
-    }, { once: true });
-  });
-  
-  // Also load Termly on user interaction (scroll, click, etc.) for consent banner
-  let termlyInteractionLoaded = false;
-  const loadTermlyOnInteraction = () => {
-    if (!termlyInteractionLoaded) {
-      termlyInteractionLoaded = true;
-      loadTermlyScript();
-      // Remove listeners after first interaction
-      document.removeEventListener('scroll', loadTermlyOnInteraction, { passive: true });
-      document.removeEventListener('click', loadTermlyOnInteraction, { passive: true });
-      document.removeEventListener('touchstart', loadTermlyOnInteraction, { passive: true });
-    }
-  };
-  // Load Termly on first user interaction (for consent banner)
-  document.addEventListener('scroll', loadTermlyOnInteraction, { passive: true, once: true });
-  document.addEventListener('click', loadTermlyOnInteraction, { passive: true, once: true });
-  document.addEventListener('touchstart', loadTermlyOnInteraction, { passive: true, once: true });
+      const rowIndex = rows.length;
+      const row = document.createElement('div');
+      row.className = 'batch-row';
+      row.setAttribute('data-row', rowIndex);
+      setInnerHTML(row, '<input class="input-small batch-find" placeholder="Find text or /regex/"><input class="input-small batch-replace" placeholder="Replace with (empty to remove)"><button type="button" class="batch-remove" aria-label="Remove row" title="Remove row">&times;</button>');
+      container.appendChild(row);
+    });
+  }
+
+  // Delegate click for batch row remove buttons
+  const batchContainer = document.getElementById('batchFindReplace');
+  if (batchContainer) {
+    batchContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('batch-remove')) {
+        const rows = batchContainer.querySelectorAll('.batch-row');
+        if (rows.length > 1) {
+          e.target.closest('.batch-row').remove();
+        }
+      }
+    });
+  }
+
 });
 
 // In-memory GPC preference (no localStorage for privacy)
@@ -153,57 +152,6 @@ function initGlobalPrivacyControl() {
   gpcOptOut = gpcEnabled; // Store in memory only
 }
 
-// Fix Ezoic CCPA consent button contrast ratio for WCAG AA compliance
-// Ezoic injects inline styles, so we need to override them with JavaScript
-function fixEzoicButtonContrast() {
-  const button = document.getElementById('ez-ccpa-accept-all');
-  if (button) {
-    button.style.backgroundColor = '#3d6a1a';
-    button.style.color = '#FFFFFF';
-    button.style.border = 'none';
-    button.style.padding = '10px 20px';
-    button.style.borderRadius = '6px';
-    button.style.fontWeight = '500';
-    button.style.cursor = 'pointer';
-    
-    // Add hover effect
-    button.addEventListener('mouseenter', function() {
-      this.style.backgroundColor = '#4a7c1f';
-    });
-    button.addEventListener('mouseleave', function() {
-      this.style.backgroundColor = '#3d6a1a';
-    });
-    
-    // Add focus outline for accessibility
-    button.addEventListener('focus', function() {
-      this.style.outline = '2px solid #005a8f';
-      this.style.outlineOffset = '2px';
-    });
-    button.addEventListener('blur', function() {
-      this.style.outline = '';
-      this.style.outlineOffset = '';
-    });
-  }
-}
-
-// Run immediately and also watch for dynamically added buttons
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    fixEzoicButtonContrast();
-    // Watch for dynamically added buttons (Ezoic may inject after page load)
-    const observer = new MutationObserver(() => {
-      fixEzoicButtonContrast();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  });
-} else {
-  fixEzoicButtonContrast();
-  // Watch for dynamically added buttons
-  const observer = new MutationObserver(() => {
-    fixEzoicButtonContrast();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-}
 
 async function pasteFromClipboard() {
   const pasteField = getElement('paste');
@@ -313,6 +261,9 @@ function cleanText() {
     html: 0,
     comments: 0,
     punctuation: 0,
+    numerals: 0,
+    dates: 0,
+    symbolPairs: 0,
     custom: 0
   };
   
@@ -430,22 +381,77 @@ function cleanText() {
       }
     }
     
-    const find = getElement('customFind').value;
-    const replace = getElement('customReplace').value;
-    const useRegex = getElement('customRegex').checked;
-    if (find) {
-      try {
-        const beforeCustom = text.length;
-        if (useRegex) {
-          const regex = new RegExp(find, 'g');
-          text = text.replace(regex, replace || '');
-        } else {
-          text = text.split(find).join(replace || '');
+    // Remove numerals
+    if (getElement('removeNumerals') && getElement('removeNumerals').checked) {
+      const beforeNumerals = text.length;
+      text = text.replace(/[0-9]/g, '');
+      report.numerals = beforeNumerals - text.length;
+    }
+
+    // Remove dates (all common formats)
+    if (getElement('removeDates') && getElement('removeDates').checked) {
+      const beforeDates = text.length;
+      const months = '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
+      // ISO: 2025-01-31, 2025/01/31
+      text = text.replace(/\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b/g, '');
+      // US/EU: 01/31/2025, 31-01-2025, 01.31.2025
+      text = text.replace(/\b\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}\b/g, '');
+      // Month DD, YYYY or Month DD YYYY
+      const monthDayYear = new RegExp(months + '\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s*\\d{2,4}', 'gi');
+      text = text.replace(monthDayYear, '');
+      // DD Month YYYY
+      const dayMonthYear = new RegExp('\\b\\d{1,2}(?:st|nd|rd|th)?\\s+' + months + ',?\\s*\\d{2,4}', 'gi');
+      text = text.replace(dayMonthYear, '');
+      // Month DD (no year)
+      const monthDay = new RegExp(months + '\\s+\\d{1,2}(?:st|nd|rd|th)?\\b', 'gi');
+      text = text.replace(monthDay, '');
+      report.dates = beforeDates - text.length;
+    }
+
+    // Remove symbol+word pairs
+    if (getElement('removeSymbolPairs') && getElement('removeSymbolPairs').checked) {
+      const beforeSymbol = text.length;
+      // Match tokens where a symbol char is directly adjacent to alphanumeric chars
+      // e.g. $4.43, user:, #tag, @mention, 100%, C++
+      // Symbol prefix: $100, #tag, @user
+      text = text.replace(/[^\w\s][^\s]*[a-zA-Z0-9][^\s]*/g, function(match) {
+        // Only remove if there's at least one symbol and one alphanumeric
+        if (/[^\w\s]/.test(match) && /[a-zA-Z0-9]/.test(match)) return '';
+        return match;
+      });
+      // Alphanumeric prefix with symbol suffix: user:, 100%, C++
+      text = text.replace(/[a-zA-Z0-9][^\s]*[^\w\s]+/g, function(match) {
+        if (/[^\w\s]/.test(match) && /[a-zA-Z0-9]/.test(match)) return '';
+        return match;
+      });
+      report.symbolPairs = beforeSymbol - text.length;
+    }
+
+    // Batch find/replace
+    const batchContainer = document.getElementById('batchFindReplace');
+    const useRegex = getElement('batchRegex') && getElement('batchRegex').checked;
+    if (batchContainer) {
+      const rows = batchContainer.querySelectorAll('.batch-row');
+      let totalCustom = 0;
+      rows.forEach(row => {
+        const findInput = row.querySelector('.batch-find');
+        const replaceInput = row.querySelector('.batch-replace');
+        if (findInput && findInput.value) {
+          try {
+            const beforeCustom = text.length;
+            if (useRegex) {
+              const regex = new RegExp(findInput.value, 'g');
+              text = text.replace(regex, replaceInput ? replaceInput.value : '');
+            } else {
+              text = text.split(findInput.value).join(replaceInput ? replaceInput.value : '');
+            }
+            totalCustom += Math.abs(beforeCustom - text.length);
+          } catch (e) {
+            // Regex error - skip this row
+          }
         }
-        report.custom = beforeCustom - text.length;
-      } catch (e) {
-        // Regex error - skip custom replacement
-      }
+      });
+      report.custom = totalCustom;
     }
   }
   
@@ -502,6 +508,18 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   }
   if (report.punctuation > 0) {
     html += `<li class="report-item"><span class="report-label">Punctuation removed</span><span class="report-count">${report.punctuation} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.numerals > 0) {
+    html += `<li class="report-item"><span class="report-label">Numerals removed</span><span class="report-count">${report.numerals} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.dates > 0) {
+    html += `<li class="report-item"><span class="report-label">Dates removed</span><span class="report-count">${report.dates} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.symbolPairs > 0) {
+    html += `<li class="report-item"><span class="report-label">Symbol+word pairs removed</span><span class="report-count">${report.symbolPairs} chars</span></li>`;
     hasItems = true;
   }
   if (report.custom > 0) {
