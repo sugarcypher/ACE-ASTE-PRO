@@ -33,15 +33,22 @@ let elements = {};
 //  - Tag characters (U+E0000-E007F) — used for prompt injection
 //  - All variation selectors (U+180B-180D, U+FE00-FE0F, U+E0100-E01EF)
 // \p{Cf} catches all "Format" category chars — but several invisible chars
-// are misclassified by Unicode as "Letter, other" (Lo) and need explicit listing:
+// are misclassified by Unicode as other categories and need explicit listing.
+//
+// Lo (Letter, other) — invisible "letter" characters:
 //   U+115F  Hangul Choseong Filler
 //   U+1160  Hangul Jungseong Filler
 //   U+17B4  Khmer Vowel Inherent Aq
 //   U+17B5  Khmer Vowel Inherent Aa
-//   U+3164  Hangul Filler  ← rendered nothing; commonly used as an invisible "letter"
+//   U+3164  Hangul Filler  ← commonly used as invisible "letter"
 //   U+FFA0  Halfwidth Hangul Filler
-// And variation selectors are Mark, nonspacing (Mn), also need explicit listing.
-const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u115F\u1160\u17B4\u17B5\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+//
+// Mn (Mark, nonspacing) — invisible combining marks and variation selectors:
+//   U+034F        Combining Grapheme Joiner
+//   U+180B-180D   Mongolian Free Variation Selectors 1-3
+//   U+FE00-FE0F   Variation Selectors 1-16
+//   U+E0100-E01EF Variation Selectors Supplement (17-256)
+const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u034F\u115F\u1160\u17B4\u17B5\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 function stripInvisibleChars(text) {
   let count = 0;
