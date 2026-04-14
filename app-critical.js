@@ -313,8 +313,9 @@ function cleanText() {
     report.aiMarkup = beforeAI - text.length;
   }
   
-  const adv = getElement('advanced');
-  if (!adv.classList.contains('hidden')) {
+  // Advanced options always run when their checkbox is checked,
+  // regardless of whether the Advanced panel is expanded in the UI.
+  {
     if (getElement('collapseSpaces').checked) {
       const beforeSpaces = text.length;
       text = text.replace(/[ \t]+/g, ' ');
