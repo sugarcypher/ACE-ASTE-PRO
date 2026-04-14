@@ -684,9 +684,21 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
     html += '<li class="report-item"><span class="report-label">No changes detected</span></li>';
   }
   html += '</ul>';
-  if (totalRemoved !== 0 || originalLength !== finalLength) {
+
+  // Total line. Three cases:
+  //  1. Length changed (chars removed): show "X → Y chars (N removed, P%)"
+  //  2. Length unchanged but in-place modifications happened (smart punct, case
+  //     transforms, normalization): show "X chars (N normalized in place)"
+  //  3. Nothing happened: show "X chars (no changes)"
+  const inPlaceChanges = (report.smartPunct || 0);
+  if (totalRemoved !== 0) {
     const percentage = originalLength > 0 ? ((totalRemoved/originalLength)*100).toFixed(1) : '0.0';
-    html += `<div class="report-total">Total: ${originalLength} → ${finalLength} characters (${totalRemoved > 0 ? totalRemoved + ' removed' : 'no change'}, ${percentage}%)</div>`;
+    let summary = `Total: ${originalLength} → ${finalLength} characters (${totalRemoved} removed, ${percentage}%`;
+    if (inPlaceChanges > 0) summary += `; ${inPlaceChanges} normalized in place`;
+    summary += ')';
+    html += `<div class="report-total">${summary}</div>`;
+  } else if (inPlaceChanges > 0 || hasItems) {
+    html += `<div class="report-total">Total: ${originalLength} characters (${inPlaceChanges} normalized in place — length unchanged)</div>`;
   } else {
     html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
   }
