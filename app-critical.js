@@ -32,7 +32,16 @@ let elements = {};
 //  - Musical notation format characters
 //  - Tag characters (U+E0000-E007F) — used for prompt injection
 //  - All variation selectors (U+180B-180D, U+FE00-FE0F, U+E0100-E01EF)
-const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+// \p{Cf} catches all "Format" category chars — but several invisible chars
+// are misclassified by Unicode as "Letter, other" (Lo) and need explicit listing:
+//   U+115F  Hangul Choseong Filler
+//   U+1160  Hangul Jungseong Filler
+//   U+17B4  Khmer Vowel Inherent Aq
+//   U+17B5  Khmer Vowel Inherent Aa
+//   U+3164  Hangul Filler  ← rendered nothing; commonly used as an invisible "letter"
+//   U+FFA0  Halfwidth Hangul Filler
+// And variation selectors are Mark, nonspacing (Mn), also need explicit listing.
+const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u115F\u1160\u17B4\u17B5\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
 
 function stripInvisibleChars(text) {
   let count = 0;
