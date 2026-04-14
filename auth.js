@@ -157,6 +157,13 @@ function initFirebaseAuth() {
     firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth = firebase.auth();
 
+    // Handle Google redirect sign-in result (if we fell back from popup)
+    firebase.auth().getRedirectResult().catch(err => {
+      if (err && err.code !== 'auth/null-user') {
+        console.error('Redirect sign-in error:', err);
+      }
+    });
+
     // Check for email link sign-in completion
     if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
       let email = window.localStorage.getItem('emailForSignIn');
@@ -231,7 +238,25 @@ function sendEmailLink() {
     })
     .catch(err => {
       console.error('Send email link error:', err);
-      alert('Failed to send sign-in link. Please check your email and try again.');
+      let msg = 'Failed to send sign-in link.';
+      if (err.code === 'auth/quota-exceeded') {
+        msg = 'Daily email limit reached. Please try Google sign-in, or try email again tomorrow.';
+      } else if (err.code === 'auth/invalid-email') {
+        msg = 'That doesn\'t look like a valid email address.';
+      } else if (err.code === 'auth/network-request-failed') {
+        msg = 'Network error — check your connection and try again.';
+      } else if (err.message) {
+        msg = 'Sign-in link failed: ' + err.message;
+      }
+      const statusEl = document.getElementById('authStatus');
+      if (statusEl) {
+        statusEl.textContent = msg;
+        statusEl.classList.remove('hidden');
+        statusEl.style.background = 'rgba(200,60,60,.15)';
+        statusEl.style.color = '#ff6b6b';
+      } else {
+        alert(msg);
+      }
     });
 }
 
@@ -241,10 +266,19 @@ function signInWithGoogle() {
     return;
   }
   const provider = new firebase.auth.GoogleAuthProvider();
+  // Try popup first, fall back to redirect if blocked
   firebaseAuth.signInWithPopup(provider)
     .catch(err => {
-      console.error('Google sign-in error:', err);
-      alert('Google sign-in failed. Please try again.');
+      console.error('Google sign-in popup error:', err);
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // Fall back to full-page redirect — works even with popup blockers
+        firebaseAuth.signInWithRedirect(provider).catch(err2 => {
+          console.error('Google sign-in redirect error:', err2);
+          alert('Google sign-in failed: ' + (err2.message || 'unknown error'));
+        });
+        return;
+      }
+      alert('Google sign-in failed: ' + (err.message || 'unknown error'));
     });
 }
 
