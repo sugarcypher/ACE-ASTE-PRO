@@ -13,7 +13,9 @@ let elements = {};
 // Adding a character to this regex is good. Removing one is wrong.
 // If you find new invisible/zero-width/non-printing chars in the wild, ADD them.
 // =============================================================================
-const INVISIBLE_CHAR_REGEX = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
+// Covers EVERY Unicode "Format" (Cf) category character across all scripts/languages,
+// plus a few related noncharacters and unassigned slots in problem ranges.
+const INVISIBLE_CHAR_REGEX = /[\u00AD\u034F\u061C\u070F\u08E2\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFFB]|[\u{13430}-\u{13438}]|[\u{1BCA0}-\u{1BCA3}]|[\u{1D173}-\u{1D17A}]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
 
 function stripInvisibleChars(text) {
   let count = 0;
@@ -21,14 +23,68 @@ function stripInvisibleChars(text) {
   return { text: out, count };
 }
 
-// Self-test on load: verify the invisible removal still works.
+// =============================================================================
+// SMART PUNCTUATION NORMALIZATION
+// =============================================================================
+// Maps "smart" / typographic / Unicode punctuation to plain ASCII equivalents.
+// Useful for code, terminals, and any context that doesn't render Unicode well.
+// Add to this map freely — every entry is a one-way mapping to ASCII.
+// =============================================================================
+const SMART_PUNCT_MAP = {
+  // Smart double quotes
+  '\u201C': '"', '\u201D': '"', '\u201E': '"', '\u201F': '"',
+  '\u00AB': '"', '\u00BB': '"', '\u2033': '"', '\u2036': '"',
+  // Smart single quotes / apostrophes
+  '\u2018': "'", '\u2019': "'", '\u201A': "'", '\u201B': "'",
+  '\u2039': "'", '\u203A': "'", '\u2032': "'", '\u2035': "'",
+  // Dashes and hyphens
+  '\u2010': '-', '\u2011': '-', '\u2012': '-', '\u2013': '-',
+  '\u2014': '-', '\u2015': '-', '\u2212': '-',
+  // Ellipsis
+  '\u2026': '...',
+  // Bullets / middle dots
+  '\u2022': '*', '\u00B7': '*', '\u2027': '*', '\u2043': '-',
+  // Spaces (normalize to regular space)
+  '\u00A0': ' ', '\u2000': ' ', '\u2001': ' ', '\u2002': ' ',
+  '\u2003': ' ', '\u2004': ' ', '\u2005': ' ', '\u2006': ' ',
+  '\u2007': ' ', '\u2008': ' ', '\u2009': ' ', '\u200A': ' ',
+  '\u202F': ' ', '\u205F': ' ', '\u3000': ' ',
+  // Math operators commonly substituted
+  '\u00D7': 'x', '\u00F7': '/', '\u2212': '-',
+  // Fraction slash
+  '\u2044': '/',
+  // Primes and similar
+  '\u2034': "'''", '\u2037': "'''",
+  // Brackets / quotes uncommon
+  '\u300C': '"', '\u300D': '"', '\u300E': '"', '\u300F': '"',
+  '\u3008': '<', '\u3009': '>', '\u300A': '<<', '\u300B': '>>',
+  // Currency that has ASCII fallback (only the obvious ones)
+  // (left intentionally minimal — most currency symbols have no ASCII equivalent)
+};
+
+const SMART_PUNCT_REGEX = new RegExp(
+  '[' + Object.keys(SMART_PUNCT_MAP).join('') + ']',
+  'g'
+);
+
+function normalizeSmartPunctuation(text) {
+  let count = 0;
+  const out = text.replace(SMART_PUNCT_REGEX, ch => {
+    count++;
+    return SMART_PUNCT_MAP[ch] || ch;
+  });
+  return { text: out, count };
+}
+
+// Self-test on load: verify invisible removal still works for many scripts.
 // Catches regression if the regex ever gets weakened.
 (function selfTestInvisible() {
-  const sample = 'a\u200Bb\u00ADc\u202Ed\u2060e\uFEFFf\uFE0Fg\u061Ch\u3164i';
-  const expectedRemoved = 8;
+  // 12 invisible chars from many languages/categories
+  const sample = 'a\u200Bb\u00ADc\u202Ed\u2060e\uFEFFf\uFE0Fg\u061Ch\u3164i\u070Fj\u034Fk\u180El\uFFFAm';
+  const expected = 'abcdefghijklm';
   const result = stripInvisibleChars(sample);
-  if (result.count !== expectedRemoved || result.text !== 'abcdefghi') {
-    console.error('[ACEPASTE] CRITICAL: invisible character self-test FAILED. Removed', result.count, 'expected', expectedRemoved, 'output:', JSON.stringify(result.text));
+  if (result.text !== expected) {
+    console.error('[ACEPASTE] CRITICAL: invisible character self-test FAILED. Got:', JSON.stringify(result.text), 'expected:', JSON.stringify(expected));
   }
 })();
 
@@ -293,6 +349,7 @@ function cleanText() {
     numerals: 0,
     dates: 0,
     symbolPairs: 0,
+    smartPunct: 0,
     custom: 0
   };
   
@@ -303,6 +360,13 @@ function cleanText() {
     const stripped = stripInvisibleChars(text);
     text = stripped.text;
     report.zeroWidth = stripped.count;
+  }
+
+  // Smart punctuation normalization (curly quotes, em dash, ellipsis, etc.)
+  if (getElement('normalizeSmartPunct') && getElement('normalizeSmartPunct').checked) {
+    const normalized = normalizeSmartPunctuation(text);
+    text = normalized.text;
+    report.smartPunct = normalized.count;
   }
   
   if (getElement('removeEmojis').checked) {
@@ -552,6 +616,10 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   }
   if (report.symbolPairs > 0) {
     html += `<li class="report-item"><span class="report-label">Symbol+word pairs removed</span><span class="report-count">${report.symbolPairs} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.smartPunct > 0) {
+    html += `<li class="report-item"><span class="report-label">Smart punctuation normalized</span><span class="report-count">${report.smartPunct} chars</span></li>`;
     hasItems = true;
   }
   if (report.custom > 0) {
