@@ -3,6 +3,35 @@
 // Cache DOM elements to reduce repeated queries
 let elements = {};
 
+// =============================================================================
+// CORE PROMISE: INVISIBLE CHARACTER REMOVAL
+// =============================================================================
+// This is the *primary* reason this tool exists. It must NEVER be weakened,
+// gated behind a checkbox, gated behind a tier, made optional, or skipped.
+// Always run. Always remove. Add new ranges, never subtract.
+//
+// Adding a character to this regex is good. Removing one is wrong.
+// If you find new invisible/zero-width/non-printing chars in the wild, ADD them.
+// =============================================================================
+const INVISIBLE_CHAR_REGEX = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
+
+function stripInvisibleChars(text) {
+  let count = 0;
+  const out = text.replace(INVISIBLE_CHAR_REGEX, () => { count++; return ''; });
+  return { text: out, count };
+}
+
+// Self-test on load: verify the invisible removal still works.
+// Catches regression if the regex ever gets weakened.
+(function selfTestInvisible() {
+  const sample = 'a\u200Bb\u00ADc\u202Ed\u2060e\uFEFFf\uFE0Fg\u061Ch\u3164i';
+  const expectedRemoved = 8;
+  const result = stripInvisibleChars(sample);
+  if (result.count !== expectedRemoved || result.text !== 'abcdefghi') {
+    console.error('[ACEPASTE] CRITICAL: invisible character self-test FAILED. Removed', result.count, 'expected', expectedRemoved, 'output:', JSON.stringify(result.text));
+  }
+})();
+
 // Trusted Types policy is created inline in the head before third-party scripts load
 // This ensures the policy exists before any third-party scripts load
 // We just need to get a reference to the policy for our own use
@@ -267,15 +296,13 @@ function cleanText() {
     custom: 0
   };
   
-  if (getElement('removeInvisible').checked) {
-    // Comprehensive invisible/non-printing character regex.
-    // Covers zero-width, bidi formatting, soft hyphens, variation selectors,
-    // hangul fillers, khmer inherent vowels, mongolian variation selectors,
-    // tag characters (used for prompt injection), and more.
-    const zwRe = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8]|[\u{E0000}-\u{E007F}]|[\u{E0100}-\u{E01EF}]/gu;
-    let zwCount = 0;
-    text = text.replace(zwRe, () => { zwCount++; return ''; });
-    report.zeroWidth = zwCount;
+  // CORE PROMISE: invisible character removal. ALWAYS runs, no opt-out.
+  // The checkbox in the UI is informational — even if a future bug unchecks
+  // it, this still runs. This is the reason this tool exists.
+  {
+    const stripped = stripInvisibleChars(text);
+    text = stripped.text;
+    report.zeroWidth = stripped.count;
   }
   
   if (getElement('removeEmojis').checked) {
