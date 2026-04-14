@@ -50,6 +50,10 @@ const FEATURE_TIERS = {
 
 const TIER_RANK = { guest: 0, free: 1, paid: 2, pro: 3 };
 
+// MASTER KILL SWITCH — when false, all features work for all users regardless of tier.
+// Flip to true only after the Stripe payment system is live and users can actually upgrade.
+const GATING_ENABLED = false;
+
 // Permanent pro-tier email allowlist (owner / founding accounts)
 const PRO_TIER_EMAILS = [
   'nuumoxx@icloud.com'
@@ -70,6 +74,8 @@ function getUserTier() {
 }
 
 function isFeatureAvailable(featureName) {
+  // Kill switch: everything unlocked until Stripe is live
+  if (!GATING_ENABLED) return true;
   const requiredTier = FEATURE_TIERS[featureName] || TIERS.FREE;
   return TIER_RANK[currentTier] >= TIER_RANK[requiredTier];
 }
