@@ -64,6 +64,8 @@ body.dark-mode .input-small{background:rgba(40,40,40,.9);border-color:rgba(255,2
 .batch-remove:hover{background:rgba(200,60,60,.1)}
 body.dark-mode .batch-remove{color:#ff6b6b;border-color:rgba(255,107,107,.3)}
 body.dark-mode .batch-remove:hover{background:rgba(255,107,107,.1)}
+.symbol-pairs-config{margin:4px 0 8px 28px;padding:8px 12px;border-left:2px solid rgba(10,166,194,.3);border-radius:0 8px 8px 0}
+body.dark-mode .symbol-pairs-config{border-left-color:rgba(100,166,194,.3)}
 select.input-small{min-height:100px}
 select.input-small option{padding:4px}
 .footer{margin-top:auto;padding:20px;text-align:center;background:rgba(255,255,255,.5);border-top:1px solid rgba(10,60,120,.1)}

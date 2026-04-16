@@ -559,22 +559,37 @@ function cleanText() {
       report.dates = beforeDates - text.length;
     }
 
-    // Remove symbol+word pairs
+    // Remove symbol+word pairs — user-defined
     if (getElement('removeSymbolPairs') && getElement('removeSymbolPairs').checked) {
       const beforeSymbol = text.length;
-      // Match tokens where a symbol char is directly adjacent to alphanumeric chars
-      // e.g. $4.43, user:, #tag, @mention, 100%, C++
-      // Symbol prefix: $100, #tag, @user
-      text = text.replace(/[^\w\s][^\s]*[a-zA-Z0-9][^\s]*/g, function(match) {
-        // Only remove if there's at least one symbol and one alphanumeric
-        if (/[^\w\s]/.test(match) && /[a-zA-Z0-9]/.test(match)) return '';
-        return match;
-      });
-      // Alphanumeric prefix with symbol suffix: user:, 100%, C++
-      text = text.replace(/[a-zA-Z0-9][^\s]*[^\w\s]+/g, function(match) {
-        if (/[^\w\s]/.test(match) && /[a-zA-Z0-9]/.test(match)) return '';
-        return match;
-      });
+
+      // 1. Exact-match removal: remove specific strings the user listed
+      const listEl = getElement('symbolPairsList');
+      if (listEl && listEl.value.trim()) {
+        const entries = listEl.value.split('\n').map(s => s.trim()).filter(Boolean);
+        entries.forEach(entry => {
+          // Escape for regex, then replace all occurrences
+          const escaped = entry.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          text = text.replace(new RegExp(escaped, 'g'), '');
+        });
+      }
+
+      // 2. Smart mode: remove any token containing user-specified symbol chars
+      const smartMode = getElement('symbolPairsSmartMode');
+      const symbolCharsEl = getElement('symbolChars');
+      if (smartMode && smartMode.checked && symbolCharsEl && symbolCharsEl.value.trim()) {
+        const symbols = symbolCharsEl.value.trim().split(/\s+/).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        if (symbols.length > 0) {
+          const symbolClass = '[' + symbols.join('') + ']';
+          // Symbol-prefixed tokens: $100, #tag, @user
+          const prefixRe = new RegExp(symbolClass + '[^\\s]+', 'g');
+          text = text.replace(prefixRe, '');
+          // Symbol-suffixed tokens: user:, 100%
+          const suffixRe = new RegExp('[^\\s]+' + symbolClass + '(?=\\s|$)', 'g');
+          text = text.replace(suffixRe, '');
+        }
+      }
+
       report.symbolPairs = beforeSymbol - text.length;
     }
 
