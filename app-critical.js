@@ -388,6 +388,9 @@ function cleanText() {
     symbolPairs: 0,
     smartPunct: 0,
     wildcard: 0,
+    trimmed: 0,
+    caseTransform: 0,
+    caseTxType: '',
     custom: 0
   };
   
@@ -480,7 +483,9 @@ function cleanText() {
     }
     
     if (getElement('trimPerLine').checked) {
+      const beforeTrim = text.length;
       text = text.split('\n').map(l => l.trim()).join('\n');
+      report.trimmed = beforeTrim - text.length;
     }
     
     if (getElement('removeHtml').checked) {
@@ -503,8 +508,9 @@ function cleanText() {
     }
     
     const caseTxRadio = document.querySelector('input[name="caseTx"]:checked');
-    if (caseTxRadio) {
+    if (caseTxRadio && caseTxRadio.value) {
       const caseTx = caseTxRadio.value;
+      const beforeCase = text;
       if (caseTx === 'upper') text = text.toUpperCase();
       else if (caseTx === 'lower') text = text.toLowerCase();
       else if (caseTx === 'capitalize') {
@@ -518,6 +524,15 @@ function cleanText() {
           }
           return lower;
         }).join(' ');
+      }
+      if (text !== beforeCase) {
+        let changed = 0;
+        const len = Math.min(text.length, beforeCase.length);
+        for (let i = 0; i < len; i++) {
+          if (text[i] !== beforeCase[i]) changed++;
+        }
+        report.caseTransform = changed;
+        report.caseTxType = caseTx;
       }
     }
     
@@ -713,6 +728,16 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
     html += `<li class="report-item"><span class="report-label">Smart punctuation normalized</span><span class="report-count">${report.smartPunct} chars</span></li>`;
     hasItems = true;
   }
+  if (report.trimmed > 0) {
+    html += `<li class="report-item"><span class="report-label">Per-line whitespace trimmed</span><span class="report-count">${report.trimmed} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.caseTransform > 0) {
+    const labels = { upper: 'UPPERCASE', lower: 'lowercase', capitalize: 'Capitalize Each Word', title: 'Title Case' };
+    const label = labels[report.caseTxType] || 'Case transform';
+    html += `<li class="report-item"><span class="report-label">Case transform applied (${label})</span><span class="report-count">${report.caseTransform} chars</span></li>`;
+    hasItems = true;
+  }
   if (report.wildcard > 0) {
     html += `<li class="report-item"><span class="report-label">Wildcard patterns removed</span><span class="report-count">${report.wildcard} chars</span></li>`;
     hasItems = true;
@@ -731,7 +756,7 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   //  2. Length unchanged but in-place modifications happened (smart punct, case
   //     transforms, normalization): show "X chars (N normalized in place)"
   //  3. Nothing happened: show "X chars (no changes)"
-  const inPlaceChanges = (report.smartPunct || 0);
+  const inPlaceChanges = (report.smartPunct || 0) + (report.caseTransform || 0);
   if (totalRemoved !== 0) {
     const percentage = originalLength > 0 ? ((totalRemoved/originalLength)*100).toFixed(1) : '0.0';
     let summary = `Total: ${originalLength} → ${finalLength} characters (${totalRemoved} removed, ${percentage}%`;
