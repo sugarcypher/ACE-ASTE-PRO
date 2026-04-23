@@ -387,6 +387,7 @@ function cleanText() {
     dates: 0,
     symbolPairs: 0,
     smartPunct: 0,
+    wildcard: 0,
     custom: 0
   };
   
@@ -593,6 +594,26 @@ function cleanText() {
       report.symbolPairs = beforeSymbol - text.length;
     }
 
+    // Remove wildcard patterns — user-defined patterns where `*` matches one
+    // or more characters (non-greedy). Example: `(#*)` removes `(#2)`, `(#3)`.
+    if (getElement('removeWildcard') && getElement('removeWildcard').checked) {
+      const wcList = getElement('wildcardList');
+      if (wcList && wcList.value.trim()) {
+        const beforeWildcard = text.length;
+        const patterns = wcList.value.split('\n').map(s => s.trim()).filter(Boolean);
+        patterns.forEach(pattern => {
+          const parts = pattern.split('*').map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+          const regexStr = parts.join('.+?');
+          try {
+            text = text.replace(new RegExp(regexStr, 'g'), '');
+          } catch (e) {
+            // Invalid pattern - skip
+          }
+        });
+        report.wildcard = beforeWildcard - text.length;
+      }
+    }
+
     // Batch find/replace
     const batchContainer = document.getElementById('batchFindReplace');
     const useRegex = getElement('batchRegex') && getElement('batchRegex').checked;
@@ -690,6 +711,10 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   }
   if (report.smartPunct > 0) {
     html += `<li class="report-item"><span class="report-label">Smart punctuation normalized</span><span class="report-count">${report.smartPunct} chars</span></li>`;
+    hasItems = true;
+  }
+  if (report.wildcard > 0) {
+    html += `<li class="report-item"><span class="report-label">Wildcard patterns removed</span><span class="report-count">${report.wildcard} chars</span></li>`;
     hasItems = true;
   }
   if (report.custom > 0) {

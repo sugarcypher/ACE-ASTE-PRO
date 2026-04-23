@@ -181,6 +181,15 @@
       </div>
       
       <div class="option-group">
+        <div class="group-title">Remove Wildcard Patterns</div>
+        <label><input type="checkbox" id="removeWildcard" data-tier="free"> Remove patterns with <code>*</code> wildcard</label>
+        <div id="wildcardConfig" class="symbol-pairs-config">
+          <p style="font-size:12px;color:#888;margin:4px 0 8px">Enter patterns, one per line. Use <code>*</code> as the wildcard (matches one or more characters). Example: <code>(#*)</code> removes <code>(#2)</code>, <code>(#3)</code>, <code>(#42)</code>, etc.</p>
+          <textarea id="wildcardList" class="input-small" rows="3" placeholder="(#*)&#10;[!*]&#10;Chapter *:"></textarea>
+        </div>
+      </div>
+
+      <div class="option-group">
         <div class="group-title">Batch Find & Replace <span style="font-weight:400;font-size:12px;color:#888">(up to 25 pairs)</span></div>
         <div id="batchFindReplace">
           <div class="batch-row" data-row="0">
