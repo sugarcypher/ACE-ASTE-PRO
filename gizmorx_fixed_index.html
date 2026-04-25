@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GizmoRX | House calls for your sick tech</title>
+  <meta name="description" content="In-home technology support in Palm Springs: smart-home setup, device integration, troubleshooting, account cleanup, app guidance, and practical tech relief.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+:root { --stone-50: #fafaf9; --stone-100: #f5f5f4; --stone-200: #e7e5e4; --stone-300: #d6d3d1; --stone-400: #a8a29e; --stone-500: #78716c; --stone-600: #57534e; --stone-700: #44403c; --stone-800: #292524; --stone-900: #1c1917; --white: #ffffff; --radius-card: 1.75rem; --radius-large: 2rem; --radius-pill: 9999px; } html { scroll-behavior: smooth; } body { font-family: 'DM Sans', sans-serif; background: var(--stone-50); color: var(--stone-900); min-height: 100vh; -webkit-font-smoothing: antialiased; } /* ── HEADER ── */ header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid rgba(231,229,228,0.8); background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } .header-inner { max-width: 80rem; margin: 0 auto; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; } .logo-name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; } .logo-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.24em; color: var(--stone-500); margin-top: 2px; } nav { display: flex; gap: 2rem; } nav a { font-size: 0.875rem; font-weight: 500; color: var(--stone-900); text-decoration: none; transition: color 0.15s; } nav a:hover { color: var(--stone-500); } .nav-mobile { display: none; } /* ── HERO ── */ .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--stone-200); background: radial-gradient(circle at top left, rgba(16,24,40,0.10) 0%, transparent 35%), linear-gradient(135deg, #0f172a 0%, #102a43 28%, #1d4d4f 58%, #dbe7e4 100%); color: var(--white); } .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.2; pointer-events: none; } .hero-inner { position: relative; max-width: 80rem; margin: 0 auto; padding: 5rem 1.5rem; display: grid; gap: 3rem; } .hero-badge { display: inline-flex; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,0.20); background: rgba(255,255,255,0.10); padding: 0.5rem 1rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.24em; color: rgba(255,255,255,0.85); margin-bottom: 1.25rem; } .hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 400; line-height: 0.96; letter-spacing: -0.02em; max-width: 22ch; } .hero-sub { margin-top: 1.5rem; font-size: 1.125rem; line-height: 1.75; color: rgba(255,255,255,0.88); max-width: 52ch; } .hero-ctas { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; } .btn-primary { display: inline-block; border-radius: var(--radius-card); background: var(--white); color: var(--stone-900); padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 24px rgba(0,0,0,0.12); transition: transform 0.15s; } .btn-primary:hover { transform: translateY(-2px); } .btn-ghost { display: inline-block; border-radius: var(--radius-card); border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.10); color: var(--white); padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 700; text-decoration: none; transition: background 0.15s; } .btn-ghost:hover { background: rgba(255,255,255,0.18); } .hero-pills { margin-top: 2.5rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } .hero-pill { border-radius: var(--radius-card); border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.10); padding: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.90); backdrop-filter: blur(8px); } .hero-side { border-radius: var(--radius-large); border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.10); padding: 1.5rem; box-shadow: 0 24px 64px rgba(0,0,0,0.22); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); align-self: end; } .hero-side-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.24em; color: rgba(255,255,255,0.70); } .why-cards { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 1rem; } .why-card { border-radius: var(--radius-card); background: rgba(0,0,0,0.15); padding: 1.25rem; } .why-card-title { font-size: 1rem; font-weight: 600; color: var(--white); } .why-card-text { margin-top: 0.25rem; font-size: 0.875rem; line-height: 1.6; color: rgba(255,255,255,0.80); } /* ── PROCESS STRIP ── */ .process { max-width: 80rem; margin: 0 auto; padding: 4rem 1.5rem; } .process-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } .process-card { border-radius: var(--radius-card); border: 1px solid var(--stone-200); background: var(--white); padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .process-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.22em; color: var(--stone-500); } .process-text { margin-top: 1rem; font-size: 0.9375rem; line-height: 1.7; color: var(--stone-700); } /* ── SECTION SHARED ── */ .section-inner { max-width: 80rem; margin: 0 auto; padding: 4rem 1.5rem; } .section-kicker { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.24em; color: var(--stone-500); } .section-h2 { margin-top: 0.75rem; font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.08; } .section-lead { margin-top: 1.25rem; font-size: 1.0625rem; line-height: 1.75; color: var(--stone-700); max-width: 60ch; } /* ── SERVICES ── */ #services { border-top: 1px solid var(--stone-200); border-bottom: 1px solid var(--stone-200); background: var(--white); } .services-grid { margin-top: 3rem; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); } .service-card { border-radius: var(--radius-card); border: 1px solid var(--stone-200); background: var(--stone-50); padding: 1.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .service-card h3 { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; } .service-card p { margin-top: 1rem; font-size: 0.9375rem; line-height: 1.75; color: var(--stone-700); } .extended-wrap { margin-top: 2.5rem; border-radius: var(--radius-large); border: 1px solid var(--stone-200); background: var(--stone-50); padding: 1.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .extended-grid { margin-top: 1.25rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); } .extended-item { border-radius: var(--radius-card); border: 1px solid var(--stone-200); background: var(--white); padding: 1rem; font-size: 0.875rem; line-height: 1.6; color: var(--stone-700); } /* ── REVIEWS ── */ .reviews-list { margin-top: 3rem; display: flex; flex-direction: column; gap: 1.5rem; } .review-card { border-radius: var(--radius-large); border: 1px solid var(--stone-200); background: var(--white); padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .review-quote { font-size: 1rem; line-height: 1.85; color: var(--stone-800); } .review-byline { margin-top: 1.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; color: var(--stone-500); } /* ── PRICING ── */ #pricing { border-top: 1px solid var(--stone-200); border-bottom: 1px solid var(--stone-200); background: rgba(245,245,244,0.7); } .plans-grid { margin-top: 3rem; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } .plan-card { border-radius: var(--radius-card); border: 1px solid var(--stone-200); background: var(--white); color: var(--stone-900); padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .plan-card.highlight { border-color: var(--stone-900); background: var(--stone-900); color: var(--white); } .plan-name { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em; opacity: 0.70; } .plan-price { margin-top: 1.25rem; font-family: 'DM Serif Display', serif; font-size: 2.75rem; line-height: 1; letter-spacing: -0.02em; } .plan-cadence { margin-top: 0.25rem; font-size: 0.875rem; color: var(--stone-500); } .plan-card.highlight .plan-cadence { color: rgba(255,255,255,0.70); } .plan-features { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.875rem; line-height: 1.6; } .plan-feature { display: flex; align-items: flex-start; gap: 0.75rem; } .plan-dot { flex-shrink: 0; margin-top: 0.55rem; width: 5px; height: 5px; border-radius: 50%; background: var(--stone-900); } .plan-card.highlight .plan-dot { background: var(--white); } /* ── ABOUT ── */ .about-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } .about-card { border-radius: var(--radius-large); border: 1px solid var(--stone-200); background: var(--white); padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .about-card p { margin-top: 1.5rem; font-size: 1.0625rem; line-height: 1.8; color: var(--stone-700); } .ideal-card { border-radius: var(--radius-large); border: 1px solid var(--stone-200); background: var(--stone-900); padding: 2rem; color: var(--white); box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .ideal-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.24em; color: rgba(255,255,255,0.60); } .ideal-grid { margin-top: 1.5rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } .ideal-item { border-radius: var(--radius-card); border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); padding: 1rem; font-size: 0.875rem; color: rgba(255,255,255,0.85); } /* ── CONTACT ── */ #contact { border-top: 1px solid var(--stone-200); background: var(--white); } .contact-wrap { border-radius: var(--radius-large); border: 1px solid var(--stone-200); background: var(--stone-50); padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); } .contact-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); } .contact-info-card { border-radius: var(--radius-card); border: 1px solid var(--stone-200); background: var(--white); padding: 1.5rem; } .contact-info-card .row { margin-bottom: 1.25rem; } .contact-info-card .row:last-child { margin-bottom: 0; } .ci-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.22em; color: var(--stone-500); } .ci-value { margin-top: 0.2rem; font-size: 1.0625rem; font-weight: 700; color: var(--stone-900); } .contact-text { margin-top: 1.25rem; font-size: 1.0625rem; line-height: 1.75; color: var(--stone-700); max-width: 48ch; } /* ── RESPONSIVE ── */ @media (min-width: 1024px) { .header-inner { padding: 1rem 2rem; } .hero-inner { grid-template-columns: 1.15fr 0.85fr; padding: 7rem 2rem; align-items: start; } .section-inner { padding: 5rem 2rem; } .contact-wrap { padding: 2.5rem; } } @media (max-width: 767px) { nav { display: none; } .nav-mobile { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.5rem; } .nav-mobile a { font-size: 0.8rem; font-weight: 500; color: var(--stone-700); text-decoration: none; } } /* ── FOOTER ── */ footer { border-top: 1px solid var(--stone-200); background: var(--stone-900); color: rgba(255,255,255,0.55); text-align: center; padding: 2rem 1.5rem; font-size: 0.8125rem; } footer strong { color: rgba(255,255,255,0.85); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="#top" style="text-decoration:none;color:inherit" aria-label="GizmoRX home">
+        <div class="logo-name">GizmoRX</div>
+        <div class="logo-tag">House calls for your sick tech</div>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#services">Services</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-grid"></div>
+      <div class="hero-inner">
+        <div>
+          <div class="hero-badge">Trusted in-home technology support</div>
+          <h1>House calls for your sick tech.</h1>
+          <p class="hero-sub">Smart-home setup, device integration, troubleshooting, account cleanup, app guidance, and calm real-world help from a real human.</p>
+          <div class="hero-ctas">
+            <a class="btn-primary" href="#contact">Book support</a>
+            <a class="btn-ghost" href="#reviews">Read reviews</a>
+          </div>
+          <div class="hero-pills">
+            <div class="hero-pill">Device setup &amp; rescue</div>
+            <div class="hero-pill">Smart-home integration</div>
+            <div class="hero-pill">Subscription &amp; account cleanup</div>
+          </div>
+        </div>
+        <aside class="hero-side" aria-label="Why GizmoRX">
+          <div class="hero-side-label">Why GizmoRX</div>
+          <div class="why-cards">
+            <div class="why-card"><div class="why-card-title">Real experience</div><div class="why-card-text">In-home support built around actual devices, actual homes, actual friction points.</div></div>
+            <div class="why-card"><div class="why-card-title">Clear pricing</div><div class="why-card-text">Simple consultation, hourly, and care-plan options without call-center maze logic.</div></div>
+            <div class="why-card"><div class="why-card-title">Human translation</div><div class="why-card-text">Not outsourced script-reading; practical help that explains what changed and why.</div></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="process" aria-label="Process">
+      <div class="process-grid">
+        <div class="process-card"><div class="process-label">1. Intake</div><p class="process-text">Share the problem, the devices involved, the end goal, and whether this is rescue, setup, optimization, or all three.</p></div>
+        <div class="process-card"><div class="process-label">2. Remedy</div><p class="process-text">Get practical in-home support for broken, misbehaving, outdated, disconnected, or overwhelming tech systems.</p></div>
+        <div class="process-card"><div class="process-label">3. Relief</div><p class="process-text">Leave with working devices, cleaner systems, clearer accounts, and a better grasp of how everything fits together.</p></div>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="section-inner">
+        <div class="section-kicker">Services</div>
+        <h2 class="section-h2">The sharpest edge of the offer, first.</h2>
+        <p class="section-lead">GizmoRX is strongest where homes, devices, apps, accounts, and modern digital clutter collide. The core offer stays centered on practical, in-person tech relief.</p>
+        <div class="services-grid">
+          <article class="service-card"><h3>Smart Device Consultation</h3><p>Smart Device Consulting consists of new device shopping assistance, set-up, data transfer, integration, training, upgrading, linking, troubleshooting, programming, and maintenance.</p></article>
+          <article class="service-card"><h3>Account and App / Software Consulting</h3><p>Similar to device selection, Account and App/software Consulting aids in app selection, guidance, training, integration, operation, upgrades, and maintenance. We are multi-platform pan-device solution specialists. We save clients around $200 a month by updating monthly service subscription accounts.</p></article>
+          <article class="service-card"><h3>Contemporary Lighting Design</h3><p>We use smart lights, LED smart bulbs, cutting-edge lighting styles and technology, projectors, etc. to craft ambiance in your spaces.</p></article>
+        </div>
+        <div class="extended-wrap">
+          <div class="section-kicker">Extended capabilities</div>
+          <div class="extended-grid">
+            <div class="extended-item">Communication Technology Consultation &amp; Services</div>
+            <div class="extended-item">Creative Consultation &amp; Services</div>
+            <div class="extended-item">Cybersecurity Consultation &amp; Services</div>
+            <div class="extended-item">Entertainment Technology Consultation &amp; Services</div>
+            <div class="extended-item">IT Consulting &amp; Services</div>
+            <div class="extended-item">Shopping Assistance</div>
+            <div class="extended-item">Video &amp; Photo Editing</div>
+            <div class="extended-item">Videography, Photography, Drone Photography, Lidar 3D Scanning</div>
+            <div class="extended-item">Website Development — webpage &amp; website creation, customized to your needs. Includes e-commerce, blogs, galleries, stores, landing pages, backlinks, digital marketing, ad &amp; content creation, social media integration. AI transformation specialty.</div>
+            <div class="extended-item">Graphic / Digital Design — logo design, digital art, posters, flyers, game layouts, schematics, resumes, templates, product designs, etc.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviews">
+      <div class="section-inner">
+        <div class="section-kicker">Reviews</div>
+        <h2 class="section-h2">Actual device chaos; actual outcomes.</h2>
+        <div class="reviews-list">
+          <article class="review-card"><p class="review-quote">“A new printer + an Apple iOS update left me without a working printer, feeling out of options, and with a ton of frustration. Then, like a miracle, GizmoRX showed up and did in thirty minutes what HP tech support could not do in two and a half hours. They did what my Doctor daughter couldn't do in two hours. They accomplished what I gave up on after one hour… in thirty minutes. If you value your time, mental health, and efficient &amp; smart solutions; I highly recommend GizmoRX!”</p><div class="review-byline">— Lindy S (age 66), Sioux Falls, SD (Smart Tile) 04/01/2024</div></article>
+          <article class="review-card"><p class="review-quote">“GizmoRX saved me over two hundred dollars a month by evaluating my accounts &amp; recommending changes in service providers. As someone on a fixed income, I was astounded what they could do! They upgraded my home sound system with new Sonos speakers they set up. Set up my stereo, smart speakers, new wifi, new TVs, and Apple TVs. They removed all the old, out-of-date components. I was trained in the operational tactics, requirements, and capabilities of my new devices. And didn't make a mess! So handsome and charming too!”</p><div class="review-byline">— Mario (age 78), Palm Springs, CA 01/08/2024</div></article>
+          <article class="review-card"><p class="review-quote">“I was at my wits' end trying to get all my smart home devices working properly. My stereo system was only playing through half the speakers, the robot vacuum was still in the box, and the smart faucet had very low water pressure. On top of that, my HomePod, Alexa, and Google speakers all needed updates and connections, the smart thermostat wouldn't sync to my phone, and the new smart TV was a complicated mess. GizmoRX worked through every single issue systematically, organized the power cables, cleared away the clutter, helped identify subscription charges I did not know I had, helped me cancel them, and even helped request refunds. My entire smart home ecosystem is finally working as intended. GizmoRX services were worth every penny; in fact, he should charge more!”</p><div class="review-byline">— Mary Lou (age 70), Mitchell, SD 05/08/2024</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="section-inner">
+        <div class="section-kicker">Pricing</div>
+        <h2 class="section-h2">Clear enough to trust.</h2>
+        <div class="plans-grid">
+          <article class="plan-card"><div class="plan-name">Intake &amp; Assessment Consultation</div><div class="plan-price">$100</div><div class="plan-cadence">one-time payment</div><div class="plan-features"><div class="plan-feature"><span class="plan-dot"></span><span>Share your vision</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Present new / old devices</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Decide goals</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Define budget</span></div></div></article>
+          <article class="plan-card"><div class="plan-name">Standard Care Plan</div><div class="plan-price">$50</div><div class="plan-cadence">monthly</div><div class="plan-features"><div class="plan-feature"><span class="plan-dot"></span><span>Four support calls**</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Response within 72 hours</span></div><div class="plan-feature"><span class="plan-dot"></span><span>*Plug Club membership</span></div><div class="plan-feature"><span class="plan-dot"></span><span>5% discount on hourly rate</span></div></div></article>
+          <article class="plan-card highlight"><div class="plan-name">Premium Plan</div><div class="plan-price">$80</div><div class="plan-cadence">monthly</div><div class="plan-features"><div class="plan-feature"><span class="plan-dot"></span><span>Seven support calls**</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Response within 48 hours</span></div><div class="plan-feature"><span class="plan-dot"></span><span>*Plug Club membership</span></div><div class="plan-feature"><span class="plan-dot"></span><span>7% discount / hour</span></div></div></article>
+          <article class="plan-card"><div class="plan-name">Hourly</div><div class="plan-price">$50</div><div class="plan-cadence">per hour</div><div class="plan-features"><div class="plan-feature"><span class="plan-dot"></span><span>Flexible single-session support</span></div></div></article>
+          <article class="plan-card"><div class="plan-name">VIP Plan</div><div class="plan-price">$100</div><div class="plan-cadence">yearly</div><div class="plan-features"><div class="plan-feature"><span class="plan-dot"></span><span>Up to 15 support calls**</span></div><div class="plan-feature"><span class="plan-dot"></span><span>Response within 24 hours</span></div><div class="plan-feature"><span class="plan-dot"></span><span>One annual device check-up</span></div></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="section-inner about-grid">
+        <div class="about-card">
+          <div class="section-kicker">About GizmoRX</div>
+          <h2 class="section-h2">Built for the modern home; grounded in practical relief.</h2>
+          <p>At GizmoRX, we provide cutting-edge in-home IT solutions for individuals and teams in Palm Springs, CA. With a focus on innovation and customer satisfaction, our work is tailored to meet your specific needs, so you can navigate contemporary technology with more ease.</p>
+        </div>
+        <div class="ideal-card">
+          <div class="ideal-label">Ideal for</div>
+          <div class="ideal-grid">
+            <div class="ideal-item">Smart-home troubleshooting</div>
+            <div class="ideal-item">Device setup and migration</div>
+            <div class="ideal-item">TV / streaming / speaker integration</div>
+            <div class="ideal-item">App and account cleanup</div>
+            <div class="ideal-item">Monthly subscription optimization</div>
+            <div class="ideal-item">Practical digital training</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-inner">
+        <div class="contact-wrap">
+          <div class="contact-grid">
+            <div>
+              <div class="section-kicker">Contact</div>
+              <h2 class="section-h2">Get the remedy started.</h2>
+              <p class="contact-text">Share the issue, the devices involved, and whether you want an in-home visit, setup help, or a system-wide cleanup.</p>
+            </div>
+            <div class="contact-info-card">
+              <div class="row"><div class="ci-label">Call</div><div class="ci-value"><a href="tel:+14247773476">+1-424-777-3476</a></div></div>
+              <div class="row"><div class="ci-label">Email</div><div class="ci-value"><a href="mailto:gizmorxps@outlook.com">gizmorxps@outlook.com</a></div></div>
+              <div class="row"><div class="ci-label">Location</div><div class="ci-value">Palm Springs, CA</div></div>
+              <div class="row"><div class="ci-label">Hours</div><div class="ci-value">7 days a week</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><strong>GizmoRX</strong> &nbsp;·&nbsp; House calls for your sick tech &nbsp;·&nbsp; Palm Springs, CA &nbsp;·&nbsp; +1-424-777-3476</footer>
+</body>
+</html>
