@@ -99,6 +99,24 @@ body.dark-mode .cleaning-report h3{color:#e0e0e0}
 body.dark-mode .cleaning-report li{color:#b8b8b8}
 .cleaning-report .report-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
 .cleaning-report .report-item.report-sub{padding:2px 0 2px 18px;font-size:13px;opacity:.85}
+.report-actions{display:flex;align-items:center;gap:12px;margin:4px 0 16px;flex-wrap:wrap}
+.report-actions.hidden{display:none}
+.report-actions-note{color:#888;font-size:12px}
+body.dark-mode .report-actions-note{color:#aaa}
+.modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal.hidden{display:none}
+.modal-backdrop{position:absolute;inset:0;background:rgba(11,13,18,.55);backdrop-filter:blur(2px)}
+.modal-panel{position:relative;max-width:560px;width:100%;background:#fff;color:#0b0d12;border-radius:12px;border:1px solid rgba(10,166,194,.3);padding:20px;box-shadow:0 16px 48px rgba(0,0,0,.25);max-height:85vh;overflow-y:auto}
+body.dark-mode .modal-panel{background:#1a1a1a;color:#e0e0e0;border-color:rgba(100,166,194,.4)}
+.modal-panel h3{margin:0 0 12px;font-size:18px;font-weight:600}
+.modal-panel p{margin:0 0 12px;font-size:14px;line-height:1.5}
+.report-preview{background:rgba(10,166,194,.08);border:1px solid rgba(10,166,194,.2);border-radius:8px;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45;max-height:240px;overflow:auto;white-space:pre;margin:0 0 12px}
+body.dark-mode .report-preview{background:rgba(100,166,194,.08);border-color:rgba(100,166,194,.25)}
+.research-share-label{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.5;padding:10px 12px;background:rgba(10,166,194,.05);border-radius:8px;margin-bottom:12px}
+.research-share-label.hidden{display:none}
+.research-share-label input{margin-top:3px;flex-shrink:0}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.modal-actions .btn,.modal-actions .btn-secondary{flex:0 0 auto;min-width:110px;font-size:14px;padding:10px 16px}
 .cleaning-report .report-label{flex:1}
 .cleaning-report .report-count{color:#0a7ac2;font-weight:600;margin-left:12px}
 body.dark-mode .cleaning-report .report-count{color:#5a9fd2}

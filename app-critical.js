@@ -3,6 +3,16 @@
 // Cache DOM elements to reduce repeated queries
 let elements = {};
 
+// Optional research-share endpoint. When empty, the share opt-in is hidden
+// from the UI entirely so users never see an option that doesn't actually
+// transmit anywhere. Set to a fully-qualified https URL to enable.
+const RESEARCH_ENDPOINT = '';
+
+// Most-recent report payload — populated at the end of cleanText() so the
+// "Download report" button has something to serialize. Counts only; never
+// contains original or cleaned text.
+let lastReportPayload = null;
+
 // =============================================================================
 // CORE PROMISE: INVISIBLE CHARACTER REMOVAL
 // =============================================================================
@@ -231,6 +241,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (pasteBtn) pasteBtn.addEventListener('click', pasteFromClipboard);
   if (clearBtn) clearBtn.addEventListener('click', clearFields);
   if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
+
+  const downloadReportBtn = getElement('downloadReportBtn');
+  const reportCancelBtn = getElement('reportCancelBtn');
+  const reportConfirmBtn = getElement('reportDownloadConfirmBtn');
+  const reportBackdrop = getElement('reportModalBackdrop');
+  const researchShareNotice = getElement('researchShareNotice');
+  if (downloadReportBtn) downloadReportBtn.addEventListener('click', openReportModal);
+  if (reportCancelBtn) reportCancelBtn.addEventListener('click', closeReportModal);
+  if (reportConfirmBtn) reportConfirmBtn.addEventListener('click', confirmReportDownload);
+  if (reportBackdrop) reportBackdrop.addEventListener('click', closeReportModal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const modal = getElement('reportModal');
+      if (modal && !modal.classList.contains('hidden')) closeReportModal();
+    }
+  });
+  if (researchShareNotice && RESEARCH_ENDPOINT) {
+    researchShareNotice.classList.remove('hidden');
+  }
   if (moreOptions) {
     moreOptions.addEventListener('click', () => {
       const adv = getElement('advanced');
@@ -321,6 +350,9 @@ function clearFields() {
     reportDiv.classList.add('hidden');
     setInnerHTML(reportDiv, '');
   }
+  const reportActions = getElement('reportActions');
+  if (reportActions) reportActions.classList.add('hidden');
+  lastReportPayload = null;
   pasteField.focus();
 }
 
@@ -381,6 +413,9 @@ function cleanText() {
         reportDiv.classList.add('hidden');
         setInnerHTML(reportDiv, '');
       }
+      const reportActions = getElement('reportActions');
+      if (reportActions) reportActions.classList.add('hidden');
+      lastReportPayload = null;
       return;
     }
   
@@ -675,6 +710,9 @@ function cleanText() {
   const totalRemoved = originalLength - finalLength;
   displayCleaningReport(report, originalLength, finalLength, totalRemoved);
   getElement('cleaned').value = text;
+  lastReportPayload = buildReportPayload(report, originalLength, finalLength);
+  const reportActions = getElement('reportActions');
+  if (reportActions) reportActions.classList.remove('hidden');
   } catch (error) {
     alert('An error occurred while cleaning the text. Please try again.');
   }
@@ -804,5 +842,115 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   // worth a broken report).
   setInnerHTML(reportDiv, html);
   reportDiv.classList.remove('hidden');
+}
+
+// Build the JSON payload for downloads / optional research share.
+// CONTAINS: counts, lengths, ISO timestamp, schema version, invisible breakdown.
+// NEVER CONTAINS: original text, cleaned text, user-entered patterns, batch
+// find/replace strings, symbol-pair list, wildcard list, the user's clipboard.
+// If you add fields to this function, hold the line — counts and category
+// metadata only.
+function buildReportPayload(report, originalLength, finalLength) {
+  const breakdown = report.invisibleBreakdown || {};
+  return {
+    schema: 'acepaste-cleaning-report/v1',
+    timestamp: new Date().toISOString(),
+    stats: {
+      originalLength,
+      finalLength,
+      totalRemoved: originalLength - finalLength
+    },
+    invisibles: {
+      total: report.zeroWidth || 0,
+      zeroWidth: breakdown.zeroWidth || 0,
+      bidi: breakdown.bidi || 0,
+      variation: breakdown.variation || 0,
+      tag: breakdown.tag || 0,
+      other: breakdown.other || 0
+    },
+    removals: {
+      markdown: report.markdown || 0,
+      aiMarkup: report.aiMarkup || 0,
+      emojis: report.emojis || 0,
+      formatting: report.formatting || 0,
+      spaces: report.spaces || 0,
+      newlines: report.newlines || 0,
+      html: report.html || 0,
+      comments: report.comments || 0,
+      punctuation: report.punctuation || 0,
+      numerals: report.numerals || 0,
+      dates: report.dates || 0,
+      symbolPairs: report.symbolPairs || 0,
+      smartPunct: report.smartPunct || 0,
+      wildcard: report.wildcard || 0,
+      trimmed: report.trimmed || 0,
+      caseTransform: report.caseTransform || 0,
+      caseTxType: report.caseTxType || '',
+      custom: report.custom || 0
+    }
+  };
+}
+
+function openReportModal() {
+  if (!lastReportPayload) return;
+  const modal = getElement('reportModal');
+  const preview = getElement('reportPreview');
+  const checkbox = getElement('shareWithResearch');
+  const shareLabel = getElement('researchShareLabel');
+  if (!modal) return;
+  if (preview) preview.textContent = JSON.stringify(lastReportPayload, null, 2);
+  if (checkbox) checkbox.checked = false;
+  if (shareLabel) {
+    if (RESEARCH_ENDPOINT) shareLabel.classList.remove('hidden');
+    else shareLabel.classList.add('hidden');
+  }
+  modal.classList.remove('hidden');
+}
+
+function closeReportModal() {
+  const modal = getElement('reportModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function confirmReportDownload() {
+  if (!lastReportPayload) {
+    closeReportModal();
+    return;
+  }
+  const json = JSON.stringify(lastReportPayload, null, 2);
+  const stamp = lastReportPayload.timestamp.replace(/[:.]/g, '-');
+  const filename = `acepaste-report-${stamp}.json`;
+  try {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Failed to download report.');
+    return;
+  }
+
+  const checkbox = getElement('shareWithResearch');
+  if (RESEARCH_ENDPOINT && checkbox && checkbox.checked) {
+    try {
+      fetch(RESEARCH_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: json,
+        keepalive: true
+      }).catch(err => {
+        if (typeof console !== 'undefined') console.warn('[ACEPASTE] research share failed:', err);
+      });
+    } catch (e) {
+      if (typeof console !== 'undefined') console.warn('[ACEPASTE] research share threw:', e);
+    }
+  }
+
+  closeReportModal();
 }
 

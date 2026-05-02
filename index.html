@@ -102,6 +102,9 @@
   <div class="privacy-notice" style="margin-top:8px">
     <strong>⚠️ The invisible character threat is real.</strong> Modern AI-generated text routinely contains characters from the U+E0000 "tag" range — used to encode prompt instructions invisible to humans but executed by other AI systems. Ace Paste Cleaner Pro removes them on every paste. Always. No opt-out.
   </div>
+  <div id="researchShareNotice" class="privacy-notice hidden" style="margin-top:8px">
+    <strong>📊 Optional research share.</strong> When you click "Download report", you'll see a checkbox to also share that report with us — helps us track what kinds of invisible content are being injected (how often, how much, what kind). <strong>Counts only</strong>, never your text or patterns. Default off — you choose every time.
+  </div>
   <label class="lbl">Paste text</label>
   <textarea id="paste" class="ta" rows="8" placeholder="Paste here…"></textarea>
   
@@ -228,7 +231,29 @@
   <textarea id="cleaned" class="ta" rows="8" placeholder="Cleaned output…" readonly></textarea>
   
   <div id="cleaningReport" class="cleaning-report hidden"></div>
-  
+
+  <div id="reportActions" class="report-actions hidden">
+    <button id="downloadReportBtn" class="btn-secondary">Download report</button>
+    <small class="report-actions-note">Counts only — your text never leaves this browser.</small>
+  </div>
+
+  <div id="reportModal" class="modal hidden" role="dialog" aria-labelledby="reportModalTitle" aria-modal="true">
+    <div class="modal-backdrop" id="reportModalBackdrop"></div>
+    <div class="modal-panel">
+      <h3 id="reportModalTitle">Download cleaning report</h3>
+      <p>This file contains <strong>only the counts shown in your cleaning report</strong> — no original text, no cleaned text, no patterns or settings you entered. Preview:</p>
+      <pre id="reportPreview" class="report-preview"></pre>
+      <label id="researchShareLabel" class="research-share-label hidden">
+        <input type="checkbox" id="shareWithResearch">
+        <span>Also share this anonymous report with Ace Paste research. Helps us track what kinds of invisible content are being injected — how often, how much, what kind. Same data shown above. Default off — you choose every time.</span>
+      </label>
+      <div class="modal-actions">
+        <button id="reportCancelBtn" class="btn-secondary">Cancel</button>
+        <button id="reportDownloadConfirmBtn" class="btn">Download</button>
+      </div>
+    </div>
+  </div>
+
   <section class="uses-section">
     <h2 class="uses-title">Uses</h2>
     <div class="uses-grid">
