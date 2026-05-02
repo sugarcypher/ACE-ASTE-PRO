@@ -98,6 +98,7 @@ body.dark-mode .cleaning-report h3{color:#e0e0e0}
 .cleaning-report li{margin:6px 0;color:#2c3e50;font-size:14px}
 body.dark-mode .cleaning-report li{color:#b8b8b8}
 .cleaning-report .report-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.cleaning-report .report-item.report-sub{padding:2px 0 2px 18px;font-size:13px;opacity:.85}
 .cleaning-report .report-label{flex:1}
 .cleaning-report .report-count{color:#0a7ac2;font-weight:600;margin-left:12px}
 body.dark-mode .cleaning-report .report-count{color:#5a9fd2}

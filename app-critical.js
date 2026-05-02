@@ -52,18 +52,31 @@ const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u034F\u115F\u1160\u17B4\u17B5\u3164\uFFA0
 
 function stripInvisibleChars(text) {
   let count = 0;
+  const breakdown = { zeroWidth: 0, bidi: 0, variation: 0, tag: 0, other: 0 };
   const removedHex = [];
   const out = text.replace(INVISIBLE_CHAR_REGEX, (ch) => {
     count++;
+    const cp = ch.codePointAt(0);
+    if (cp === 0x200B || cp === 0x200C || cp === 0x200D || cp === 0x200E || cp === 0x200F || cp === 0x2060 || cp === 0xFEFF) {
+      breakdown.zeroWidth++;
+    } else if ((cp >= 0x202A && cp <= 0x202E) || (cp >= 0x2066 && cp <= 0x2069)) {
+      breakdown.bidi++;
+    } else if ((cp >= 0x180B && cp <= 0x180D) || (cp >= 0xFE00 && cp <= 0xFE0F) || (cp >= 0xE0100 && cp <= 0xE01EF)) {
+      breakdown.variation++;
+    } else if (cp >= 0xE0000 && cp <= 0xE007F) {
+      breakdown.tag++;
+    } else {
+      breakdown.other++;
+    }
     if (removedHex.length < 50) {
-      removedHex.push('U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0'));
+      removedHex.push('U+' + cp.toString(16).toUpperCase().padStart(4, '0'));
     }
     return '';
   });
   if (count > 0 && typeof console !== 'undefined') {
     console.log('[ACEPASTE] stripped', count, 'invisible char(s):', removedHex.join(' '));
   }
-  return { text: out, count };
+  return { text: out, count, breakdown };
 }
 
 // =============================================================================
@@ -419,6 +432,7 @@ function cleanText() {
     const stripped = stripInvisibleChars(text);
     text = stripped.text;
     report.zeroWidth = stripped.count;
+    report.invisibleBreakdown = stripped.breakdown;
   }
 
   // Smart punctuation normalization (curly quotes, em dash, ellipsis, etc.)
@@ -675,6 +689,22 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   if (report.zeroWidth > 0) {
     html += `<li class="report-item"><span class="report-label">Invisible characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
     hasItems = true;
+    const b = report.invisibleBreakdown || {};
+    if (b.zeroWidth > 0) {
+      html += `<li class="report-item report-sub"><span class="report-label">↳ Zero-width chars (ZWSP, ZWJ, BOM, LRM/RLM)</span><span class="report-count">${b.zeroWidth}</span></li>`;
+    }
+    if (b.bidi > 0) {
+      html += `<li class="report-item report-sub"><span class="report-label">↳ Bidi overrides (LRE/RLE/PDF/LRO/RLO/LRI/RLI/FSI/PDI)</span><span class="report-count">${b.bidi}</span></li>`;
+    }
+    if (b.variation > 0) {
+      html += `<li class="report-item report-sub"><span class="report-label">↳ Variation selectors</span><span class="report-count">${b.variation}</span></li>`;
+    }
+    if (b.tag > 0) {
+      html += `<li class="report-item report-sub"><span class="report-label">↳ Tag characters (prompt-injection range)</span><span class="report-count">${b.tag}</span></li>`;
+    }
+    if (b.other > 0) {
+      html += `<li class="report-item report-sub"><span class="report-label">↳ Other format/invisible</span><span class="report-count">${b.other}</span></li>`;
+    }
   }
   if (report.emojis > 0) {
     html += `<li class="report-item"><span class="report-label">Emojis removed</span><span class="report-count">${report.emojis} chars</span></li>`;
