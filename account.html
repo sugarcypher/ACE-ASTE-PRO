@@ -233,9 +233,7 @@
           <a href="/pricing.html" class="btn-outline">View plans →</a>
         </div>
         <div id="manageSection" style="margin-top:0.75rem">
-          <a href="https://billing.stripe.com/p/login/REPLACE_STRIPE_PORTAL" class="btn-outline" rel="noopener" id="manageBtn">
-            Manage billing →
-          </a>
+          <button class="btn-outline" id="manageBtn" type="button">Manage billing →</button>
           <button class="btn-danger" id="signoutBtn" type="button">Sign out</button>
         </div>
       </div>
@@ -350,6 +348,40 @@
   document.getElementById('switchToLogin').addEventListener('click', function() {
     document.getElementById('signupCard').style.display = 'none';
     document.getElementById('loginCard').style.display  = 'block';
+  });
+
+  // Manage billing — creates a Stripe portal session then redirects
+  document.getElementById('manageBtn').addEventListener('click', async function() {
+    this.disabled = true; this.textContent = 'Loading…';
+    try {
+      var s = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
+      var jwt = s && s.jwt ? s.jwt : null;
+      if (!jwt) { alert('Sign in first.'); this.disabled = false; this.textContent = 'Manage billing →'; return; }
+
+      var res = await fetch(
+        (window.ACEPASTE_SUPABASE_URL || 'https://eqoltjofjlznlirbalrb.supabase.co') +
+        '/functions/v1/create-portal-session',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + jwt,
+            'apikey': window.ACEPASTE_SUPABASE_ANON || '',
+          },
+          body: JSON.stringify({ return_url: window.location.href }),
+        }
+      );
+      var data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not open billing portal. Contact support.');
+        this.disabled = false; this.textContent = 'Manage billing →';
+      }
+    } catch(e) {
+      alert('Could not open billing portal. Contact support.');
+      this.disabled = false; this.textContent = 'Manage billing →';
+    }
   });
 
   // Sign out
