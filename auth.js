@@ -1,362 +1,222 @@
-// Ace Paste Cleaner Pro - Firebase Auth & Tier Management
-// Requires Firebase SDK loaded via CDN in index.html
+/**
+ * auth.js — Ace Paste Cleaner Pro shared auth + subscription layer
+ *
+ * Loaded by index.html and account.html. Also imported by the extension
+ * indirectly via a REST API. Uses Supabase Auth (email/password) and a
+ * `subscriptions` table to track active plans.
+ *
+ * Replace the two constants below with your actual Supabase project values.
+ */
 
-// ============================================================
-// CONFIGURATION - Replace with your Firebase project config
-// ============================================================
-const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyC0-axjchVOOvNhKOa7tcjVa_eg-oa0TH8',
-  authDomain: 'ace-paste-cleaner-pro.firebaseapp.com',
-  projectId: 'ace-paste-cleaner-pro',
-  storageBucket: 'ace-paste-cleaner-pro.firebasestorage.app',
-  messagingSenderId: '570213699368',
-  appId: '1:570213699368:web:2d060492d938917fcb8a1d'
-};
+// ── Config ────────────────────────────────────────────────────────────────
+const ACEPASTE_SUPABASE_URL  = 'https://eqoltjofjlznlirbalrb.supabase.co';
+const ACEPASTE_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxb2x0am9mamx6bmxpcmJhbHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMTI2NzAsImV4cCI6MjA5MzU4ODY3MH0.5L6MAZpnPDdlBqFDtHHH3-gKFXUOnsbWgrJfnusw-Zk';
 
-// Email link sign-in settings
-const ACTION_CODE_SETTINGS = {
-  url: window.location.origin,
-  handleCodeInApp: true
-};
+// Plans the backend can return
+const PLAN_FREE     = 'free';
+const PLAN_TRIAL    = 'trial';    // 24-hour access
+const PLAN_MONTHLY  = 'monthly';
+const PLAN_YEARLY   = 'yearly';
+const PLAN_LIFETIME = 'lifetime';
 
-// ============================================================
-// TIER SYSTEM
-// ============================================================
-const TIERS = {
-  GUEST: 'guest',
-  FREE: 'free',
-  PAID: 'paid',
-  PRO: 'pro'
-};
-
-// Feature-to-tier mapping (all free for now — change values to gate features later)
-const FEATURE_TIERS = {
-  removeInvisible: TIERS.FREE,
-  removeMarkdown: TIERS.FREE,
-  removeAIMarkup: TIERS.FREE,
-  removeEmojis: TIERS.FREE,
-  removeFormatting: TIERS.FREE,
-  collapseSpaces: TIERS.FREE,
-  collapseNewlines: TIERS.FREE,
-  trimPerLine: TIERS.FREE,
-  removeHtml: TIERS.FREE,
-  removeNumerals: TIERS.FREE,
-  removeDates: TIERS.FREE,
-  removeSymbolPairs: TIERS.FREE,
-  removeComments: TIERS.FREE,
-  batchFindReplace: TIERS.FREE,
-  removePunctuation: TIERS.FREE
-};
-
-const TIER_RANK = { guest: 0, free: 1, paid: 2, pro: 3 };
-
-// MASTER KILL SWITCH — when false, all features work for all users regardless of tier.
-// Flip to true only after the Stripe payment system is live and users can actually upgrade.
-const GATING_ENABLED = false;
-
-// Permanent pro-tier email allowlist (owner / founding accounts)
-const PRO_TIER_EMAILS = [
-  'nuumoxx@icloud.com'
-];
-
-let currentUser = null;
-let currentTier = TIERS.GUEST;
-
-function resolveTierForUser(user) {
-  if (!user) return TIERS.GUEST;
-  const email = (user.email || '').toLowerCase();
-  if (PRO_TIER_EMAILS.includes(email)) return TIERS.PRO;
-  return TIERS.FREE;
+// ── Internal helpers ───────────────────────────────────────────────────────
+function _headers(jwt) {
+  const h = {
+    'Content-Type': 'application/json',
+    'apikey': ACEPASTE_SUPABASE_ANON,
+  };
+  if (jwt) h['Authorization'] = 'Bearer ' + jwt;
+  return h;
 }
 
-function getUserTier() {
-  return currentTier;
+async function _post(path, body, jwt) {
+  const r = await fetch(ACEPASTE_SUPABASE_URL + path, {
+    method: 'POST',
+    headers: _headers(jwt),
+    body: JSON.stringify(body),
+  });
+  return r.json();
 }
 
-function isFeatureAvailable(featureName) {
-  // Kill switch: everything unlocked until Stripe is live
-  if (!GATING_ENABLED) return true;
-  const requiredTier = FEATURE_TIERS[featureName] || TIERS.FREE;
-  return TIER_RANK[currentTier] >= TIER_RANK[requiredTier];
+async function _get(path, jwt) {
+  const r = await fetch(ACEPASTE_SUPABASE_URL + path, {
+    method: 'GET',
+    headers: _headers(jwt),
+  });
+  return r.json();
 }
 
-function updateFeatureGating() {
-  // Apply tier-locked class to features above the user's tier
-  Object.keys(FEATURE_TIERS).forEach(featureId => {
-    const el = document.getElementById(featureId);
-    if (!el) return;
-    const label = el.closest('label');
-    if (!label) return;
-    if (isFeatureAvailable(featureId)) {
-      label.classList.remove('tier-locked');
-      el.disabled = false;
-    } else {
-      label.classList.add('tier-locked');
-      el.disabled = true;
-      el.checked = false;
+// ── Session cache (sessionStorage only — no localStorage per privacy policy) ──
+const SESSION_KEY = 'acepaste_sub';
+
+function _saveSession(data) {
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function _loadSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
+}
+
+function _clearSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────
+
+/**
+ * Sign in with email + password. Returns { ok, user, plan, error }.
+ */
+async function acePasteSignIn(email, password) {
+  try {
+    const data = await _post('/auth/v1/token?grant_type=password', { email, password });
+    if (!data.access_token) {
+      return { ok: false, error: data.error_description || data.msg || 'Invalid credentials' };
+    }
+    const jwt   = data.access_token;
+    const user  = data.user;
+    const plan  = await _fetchPlan(jwt, user.id);
+    const session = { jwt, email: user.email, userId: user.id, plan, expiresAt: data.expires_at };
+    _saveSession(session);
+    return { ok: true, user, plan };
+  } catch(e) {
+    return { ok: false, error: 'Network error. Please try again.' };
+  }
+}
+
+/**
+ * Sign up with email + password. Returns { ok, user, plan, error }.
+ */
+async function acePasteSignUp(email, password) {
+  try {
+    const data = await _post('/auth/v1/signup', { email, password });
+    if (data.error || !data.id) {
+      return { ok: false, error: data.msg || data.error || 'Sign-up failed' };
+    }
+    // Auto sign-in after successful signup
+    return acePasteSignIn(email, password);
+  } catch(e) {
+    return { ok: false, error: 'Network error. Please try again.' };
+  }
+}
+
+/**
+ * Sign out — clears session.
+ */
+async function acePasteSignOut() {
+  const session = _loadSession();
+  if (session && session.jwt) {
+    try { await _post('/auth/v1/logout', {}, session.jwt); } catch(e) {}
+  }
+  _clearSession();
+  dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: PLAN_FREE } }));
+}
+
+/**
+ * Returns the current session's plan without a network call.
+ * Falls back to PLAN_FREE.
+ */
+function acePasteCurrentPlan() {
+  const s = _loadSession();
+  if (!s) return PLAN_FREE;
+  // Treat expired sessions as free
+  if (s.expiresAt && Date.now() / 1000 > s.expiresAt) {
+    _clearSession();
+    return PLAN_FREE;
+  }
+  return s.plan || PLAN_FREE;
+}
+
+/**
+ * Returns true if the user has any active paid plan.
+ */
+function acePasteIsPaid() {
+  return acePasteCurrentPlan() !== PLAN_FREE;
+}
+
+/**
+ * Refresh subscription status from the server. Call on page load.
+ * Dispatches 'acepaste:auth' custom event with { plan }.
+ */
+async function acePasteRefreshPlan() {
+  const s = _loadSession();
+  if (!s || !s.jwt) {
+    dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: PLAN_FREE } }));
+    return PLAN_FREE;
+  }
+  try {
+    const plan = await _fetchPlan(s.jwt, s.userId);
+    _saveSession({ ...s, plan });
+    dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan, email: s.email } }));
+    return plan;
+  } catch(e) {
+    dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: s.plan || PLAN_FREE } }));
+    return s.plan || PLAN_FREE;
+  }
+}
+
+/**
+ * Returns session email, or null.
+ */
+function acePasteEmail() {
+  const s = _loadSession();
+  return s ? s.email : null;
+}
+
+// ── Internal ───────────────────────────────────────────────────────────────
+
+/**
+ * Fetches the user's active plan from the `subscriptions` table.
+ * The Supabase Row-Level Security policy ensures users can only read their own row.
+ */
+async function _fetchPlan(jwt, userId) {
+  try {
+    // Call the edge function instead of querying the table directly
+    // This keeps the plan logic server-side and avoids RLS complexity
+    const r = await fetch(
+      ACEPASTE_SUPABASE_URL + '/functions/v1/subscription-check',
+      { headers: _headers(jwt) }
+    );
+    const data = await r.json();
+    return data.plan || PLAN_FREE;
+  } catch(e) {
+    return PLAN_FREE;
+  }
+}
+
+// ── Extension auth bridge ──────────────────────────────────────────────────
+// When loaded on the /auth/extension page, the page can post the JWT
+// to the extension via chrome.runtime.sendMessage (externally_connectable).
+
+function acePasteExtensionBridge() {
+  const params = new URLSearchParams(location.search);
+  const source = params.get('source');
+  const extId  = params.get('ext_id');
+  if (source !== 'extension' || !extId) return;
+
+  // After auth, send token to extension and close the tab
+  window.addEventListener('acepaste:auth', function(e) {
+    const s = _loadSession();
+    if (!s || !s.jwt) return;
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      try {
+        chrome.runtime.sendMessage(extId, {
+          type: 'ACEPASTE_AUTH_TOKEN',
+          jwt: s.jwt,
+          plan: e.detail.plan,
+          email: s.email,
+          expiresAt: s.expiresAt,
+        }, function() {
+          // Close this tab after a brief confirmation delay
+          setTimeout(function() { window.close(); }, 800);
+        });
+      } catch(err) {
+        console.warn('[AcePaste] Could not reach extension:', err);
+      }
     }
   });
-  // Batch find/replace container
-  const batchContainer = document.getElementById('batchFindReplace');
-  if (batchContainer) {
-    if (!isFeatureAvailable('batchFindReplace')) {
-      batchContainer.classList.add('tier-locked');
-    } else {
-      batchContainer.classList.remove('tier-locked');
-    }
-  }
 }
 
-// ============================================================
-// AUTH UI
-// ============================================================
-function showAuthModal() {
-  const modal = document.getElementById('authModal');
-  if (modal) { modal.classList.remove('hidden'); modal.style.display = ''; }
+// Auto-invoke bridge if query params are present
+if (typeof window !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', acePasteExtensionBridge);
 }
-
-function hideAuthModal() {
-  const modal = document.getElementById('authModal');
-  if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
-}
-
-function updateHeaderAuth(user) {
-  const authArea = document.getElementById('headerAuth');
-  if (!authArea) return;
-
-  if (user) {
-    const displayName = user.displayName || user.email || 'User';
-    authArea.innerHTML = '';
-    const span = document.createElement('span');
-    span.className = 'auth-user';
-    span.textContent = displayName;
-    const btn = document.createElement('button');
-    btn.className = 'btn-ghost auth-signout';
-    btn.textContent = 'Sign out';
-    btn.addEventListener('click', signOut);
-    authArea.appendChild(span);
-    authArea.appendChild(btn);
-  } else {
-    authArea.innerHTML = '';
-    const btn = document.createElement('button');
-    btn.className = 'btn-ghost auth-signin';
-    btn.textContent = 'Sign in';
-    btn.addEventListener('click', showAuthModal);
-    authArea.appendChild(btn);
-  }
-}
-
-// ============================================================
-// FIREBASE AUTH LOGIC
-// ============================================================
-let firebaseApp = null;
-let firebaseAuth = null;
-
-function initFirebaseAuth() {
-  // Check if Firebase SDK is loaded
-  if (typeof firebase === 'undefined') {
-    console.warn('Firebase SDK not loaded - auth disabled');
-    return;
-  }
-
-  try {
-    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-    firebaseAuth = firebase.auth();
-
-    // Handle Google redirect sign-in result (if we fell back from popup)
-    firebase.auth().getRedirectResult().catch(err => {
-      if (err && err.code !== 'auth/null-user') {
-        console.error('Redirect sign-in error:', err);
-      }
-    });
-
-    // Check for email link sign-in completion
-    if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
-      let email = window.localStorage.getItem('emailForSignIn');
-      if (!email) {
-        email = window.prompt('Please provide your email for confirmation');
-      }
-      if (email) {
-        firebase.auth().signInWithEmailLink(email, window.location.href)
-          .then(result => {
-            window.localStorage.removeItem('emailForSignIn');
-            // Clean URL
-            window.history.replaceState(null, '', window.location.pathname);
-          })
-          .catch(err => {
-            console.error('Email link sign-in error:', err);
-            alert('Sign-in failed. Please try again.');
-          });
-      }
-    }
-
-    // Auth state observer
-    firebase.auth().onAuthStateChanged(user => {
-      currentUser = user;
-      if (user) {
-        // Start with email-based tier resolution (handles owner allowlist)
-        currentTier = resolveTierForUser(user);
-        // Then check Firebase custom claims which can override
-        user.getIdTokenResult().then(tokenResult => {
-          if (tokenResult.claims.tier && TIER_RANK[tokenResult.claims.tier] > TIER_RANK[currentTier]) {
-            currentTier = tokenResult.claims.tier;
-          }
-          updateFeatureGating();
-          updateHeaderAuth(user);
-          hideAuthModal();
-        }).catch(() => {
-          updateFeatureGating();
-          updateHeaderAuth(user);
-          hideAuthModal();
-        });
-      } else {
-        currentTier = TIERS.GUEST;
-        updateFeatureGating();
-        updateHeaderAuth(null);
-      }
-    });
-  } catch (err) {
-    console.warn('Firebase init error:', err);
-  }
-}
-
-function sendEmailLink() {
-  const emailInput = document.getElementById('authEmail');
-  if (!emailInput || !emailInput.value) {
-    alert('Please enter your email address.');
-    return;
-  }
-  const email = emailInput.value.trim();
-
-  if (!firebaseAuth) {
-    alert('Authentication is not configured yet. Please try again later.');
-    return;
-  }
-
-  firebaseAuth.sendSignInLinkToEmail(email, ACTION_CODE_SETTINGS)
-    .then(() => {
-      window.localStorage.setItem('emailForSignIn', email);
-      const statusEl = document.getElementById('authStatus');
-      if (statusEl) {
-        statusEl.textContent = 'Check your email for a sign-in link!';
-        statusEl.classList.remove('hidden');
-      }
-    })
-    .catch(err => {
-      console.error('Send email link error:', err);
-      let msg = 'Failed to send sign-in link.';
-      if (err.code === 'auth/quota-exceeded') {
-        msg = 'Daily email limit reached. Please try Google sign-in, or try email again tomorrow.';
-      } else if (err.code === 'auth/invalid-email') {
-        msg = 'That doesn\'t look like a valid email address.';
-      } else if (err.code === 'auth/network-request-failed') {
-        msg = 'Network error — check your connection and try again.';
-      } else if (err.message) {
-        msg = 'Sign-in link failed: ' + err.message;
-      }
-      const statusEl = document.getElementById('authStatus');
-      if (statusEl) {
-        statusEl.textContent = msg;
-        statusEl.classList.remove('hidden');
-        statusEl.style.background = 'rgba(200,60,60,.15)';
-        statusEl.style.color = '#ff6b6b';
-      } else {
-        alert(msg);
-      }
-    });
-}
-
-function signInWithGoogle() {
-  if (!firebaseAuth) {
-    alert('Authentication is not configured yet. Please try again later.');
-    return;
-  }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  // Try popup first, fall back to redirect if blocked
-  firebaseAuth.signInWithPopup(provider)
-    .catch(err => {
-      console.error('Google sign-in popup error:', err);
-      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        // Fall back to full-page redirect — works even with popup blockers
-        firebaseAuth.signInWithRedirect(provider).catch(err2 => {
-          console.error('Google sign-in redirect error:', err2);
-          alert('Google sign-in failed: ' + (err2.message || 'unknown error'));
-        });
-        return;
-      }
-      alert('Google sign-in failed: ' + (err.message || 'unknown error'));
-    });
-}
-
-function signOut() {
-  if (firebaseAuth) {
-    firebaseAuth.signOut();
-  }
-  currentUser = null;
-  currentTier = TIERS.GUEST;
-  updateFeatureGating();
-  updateHeaderAuth(null);
-}
-
-function continueAsGuest() {
-  hideAuthModal();
-  currentTier = TIERS.GUEST;
-  updateFeatureGating();
-  updateHeaderAuth(null);
-}
-
-// ============================================================
-// INIT
-// ============================================================
-function setAuthMode(mode) {
-  const title = document.getElementById('authTitle');
-  const subtitle = document.getElementById('authSubtitle');
-  const sendBtn = document.getElementById('authSendLink');
-  const tabIn = document.getElementById('authTabSignIn');
-  const tabUp = document.getElementById('authTabSignUp');
-  if (mode === 'signup') {
-    if (title) title.textContent = 'Create your account';
-    if (subtitle) subtitle.textContent = 'Enter your email — we\'ll send you a link to create your account. No password needed.';
-    if (sendBtn) sendBtn.textContent = 'Send sign-up link';
-    if (tabIn) tabIn.classList.remove('active');
-    if (tabUp) tabUp.classList.add('active');
-  } else {
-    if (title) title.textContent = 'Welcome back';
-    if (subtitle) subtitle.textContent = 'Enter your email to get a one-time sign-in link. No password needed.';
-    if (sendBtn) sendBtn.textContent = 'Send sign-in link';
-    if (tabIn) tabIn.classList.add('active');
-    if (tabUp) tabUp.classList.remove('active');
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Tab switching
-  const tabIn = document.getElementById('authTabSignIn');
-  const tabUp = document.getElementById('authTabSignUp');
-  if (tabIn) tabIn.addEventListener('click', () => setAuthMode('signin'));
-  if (tabUp) tabUp.addEventListener('click', () => setAuthMode('signup'));
-
-  // Wire up auth modal buttons
-  const sendLinkBtn = document.getElementById('authSendLink');
-  if (sendLinkBtn) sendLinkBtn.addEventListener('click', sendEmailLink);
-
-  const googleBtn = document.getElementById('authGoogle');
-  if (googleBtn) googleBtn.addEventListener('click', signInWithGoogle);
-
-  const guestBtn = document.getElementById('authGuest');
-  if (guestBtn) guestBtn.addEventListener('click', continueAsGuest);
-
-  // Allow Enter key on email input
-  const emailInput = document.getElementById('authEmail');
-  if (emailInput) {
-    emailInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendEmailLink();
-      }
-    });
-  }
-
-  // Initialize Firebase Auth
-  initFirebaseAuth();
-});

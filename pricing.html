@@ -1,0 +1,600 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Pricing — Ace Paste Cleaner Pro</title>
+<meta name="description" content="Simple, transparent pricing for Ace Paste Cleaner Pro. One subscription works on both acepaste.xyz and the browser extension.">
+<meta property="og:title" content="Pricing — Ace Paste Cleaner Pro">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://acepaste.xyz/pricing">
+<link rel="stylesheet" href="/styles.css?v=1.0">
+<style>
+/* ── Pricing page styles ─────────────────────────────────────────────────── */
+.pricing-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 1rem;
+}
+.pricing-hero h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text, #111);
+}
+.pricing-hero p {
+  font-size: 1.05rem;
+  color: var(--muted, #555);
+  max-width: 520px;
+  margin: 0 auto 1rem;
+  line-height: 1.55;
+}
+.shared-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #e8f4fd;
+  color: #1a6ea8;
+  border: 1px solid #b3d9f5;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
+}
+.dark-mode .shared-badge {
+  background: #1a2f42;
+  color: #7fc4f5;
+  border-color: #2e5373;
+}
+
+/* ── Tier grid ───────────────────────────────────────────────────────────── */
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.tier-card {
+  border: 1.5px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  background: var(--card-bg, #fff);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: box-shadow 0.18s, border-color 0.18s;
+}
+.tier-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.tier-card.featured {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+.dark-mode .tier-card {
+  background: #1e2530;
+  border-color: #2e3a4a;
+}
+.dark-mode .tier-card.featured {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74,144,226,0.18);
+}
+
+.tier-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #666);
+  margin-bottom: 0.5rem;
+}
+.tier-card.featured .tier-label { color: #2563eb; }
+.dark-mode .tier-card.featured .tier-label { color: #7eb8f7; }
+
+.tier-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text, #111);
+}
+.dark-mode .tier-name { color: #e8edf3; }
+
+.tier-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  margin: 0.6rem 0 0.2rem;
+}
+.tier-price .amount {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--text, #111);
+  line-height: 1;
+}
+.dark-mode .tier-price .amount { color: #e8edf3; }
+.tier-price .period {
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  align-self: flex-end;
+  padding-bottom: 0.15rem;
+}
+.tier-vs {
+  font-size: 0.78rem;
+  color: var(--muted, #888);
+  margin-bottom: 0.3rem;
+  min-height: 1.1em;
+}
+
+.savings-badge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.02em;
+}
+.dark-mode .savings-badge {
+  background: #14432a;
+  color: #4ade80;
+}
+.savings-badge.invisible { visibility: hidden; }
+
+.tier-desc {
+  font-size: 0.86rem;
+  color: var(--muted, #666);
+  line-height: 1.45;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+.dark-mode .tier-desc { color: #8a9ab0; }
+
+.tier-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: auto;
+}
+.tier-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.tier-btn.primary {
+  background: #2563eb;
+  color: #fff;
+}
+.tier-btn.secondary {
+  background: transparent;
+  border: 1.5px solid #2563eb;
+  color: #2563eb;
+}
+.dark-mode .tier-btn.secondary {
+  border-color: #4a90e2;
+  color: #7eb8f7;
+}
+
+/* Popular ribbon */
+.ribbon {
+  position: absolute;
+  top: -1px;
+  right: 16px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.22rem 0.65rem 0.28rem;
+  border-radius: 0 0 8px 8px;
+  text-transform: uppercase;
+}
+
+/* ── Feature comparison table ────────────────────────────────────────────── */
+.compare-section {
+  max-width: 780px;
+  margin: 2.5rem auto 3rem;
+  padding: 0 1rem;
+}
+.compare-section h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  color: var(--text, #111);
+}
+.dark-mode .compare-section h3 { color: #e8edf3; }
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.compare-table th {
+  text-align: center;
+  padding: 0.6rem 0.75rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted, #666);
+  border-bottom: 2px solid var(--border, #e5e5e5);
+}
+.compare-table th:first-child { text-align: left; }
+.compare-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: middle;
+  color: var(--text, #222);
+}
+.dark-mode .compare-table td { color: #cdd5e0; border-color: #2a3344; }
+.dark-mode .compare-table th { border-color: #2a3344; }
+.compare-table td:not(:first-child) { text-align: center; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .cat-row td {
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted, #888);
+  padding-top: 1rem;
+  padding-bottom: 0.3rem;
+  background: none;
+}
+.check { color: #16a34a; font-size: 1.1rem; }
+.cross { color: #aaa; font-size: 1rem; }
+.limit { color: #d97706; font-size: 0.82rem; font-weight: 600; }
+
+/* ── Free tier notice ─────────────────────────────────────────────────────── */
+.free-notice {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--muted, #666);
+  margin-bottom: 2rem;
+}
+.free-notice a { color: #2563eb; text-decoration: none; font-weight: 600; }
+.free-notice a:hover { text-decoration: underline; }
+
+/* ── FAQ strip ────────────────────────────────────────────────────────────── */
+.faq-strip {
+  max-width: 680px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1rem;
+}
+.faq-strip h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--text, #111);
+}
+.dark-mode .faq-strip h3 { color: #e8edf3; }
+.faq-item { margin-bottom: 1rem; }
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text, #222);
+  padding: 0.5rem 0;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border, #eee);
+}
+.faq-item summary::after { content: "＋"; font-size: 1rem; color: #2563eb; }
+details[open] summary::after { content: "－"; }
+.faq-item p {
+  font-size: 0.87rem;
+  color: var(--muted, #555);
+  line-height: 1.55;
+  padding: 0.6rem 0 0.2rem;
+  margin: 0;
+}
+.dark-mode .faq-item summary { color: #cdd5e0; border-color: #2a3344; }
+.dark-mode .faq-item p { color: #8a9ab0; }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tier-grid { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+  .tier-price .amount { font-size: 1.6rem; }
+  .compare-table { font-size: 0.8rem; }
+  .compare-table th, .compare-table td { padding: 0.45rem 0.4rem; }
+}
+@media (max-width: 420px) {
+  .tier-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <picture>
+    <source srcset="/brand-56.webp?v=1.0 1x, /brand-112.webp?v=1.0 2x" type="image/webp">
+    <img src="/brand-56.jpg?v=1.0" srcset="/brand-56.jpg?v=1.0 1x, /brand-112.jpg?v=1.0 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
+  </picture>
+  <h1>Ace Paste Cleaner Pro</h1>
+  <span class="domain">acepaste.xyz</span>
+  <button id="darkModeToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+</header>
+
+<main class="wrap">
+  <section class="pricing-hero">
+    <div class="shared-badge">🔗 One subscription — web &amp; extension</div>
+    <h2>Simple, honest pricing</h2>
+    <p>Pay once on acepaste.xyz or the browser extension — your subscription covers both. No hidden fees. Cancel anytime.</p>
+  </section>
+
+  <!-- ── Tier cards ─────────────────────────────────────────────────────── -->
+  <div class="tier-grid">
+
+    <!-- Free -->
+    <div class="tier-card">
+      <div class="tier-label">Free</div>
+      <div class="tier-name">Free Forever</div>
+      <div class="tier-price">
+        <span class="amount">$0</span>
+      </div>
+      <div class="tier-vs">&nbsp;</div>
+      <div class="savings-badge invisible">—</div>
+      <div class="tier-desc">Invisible character removal and markdown stripping. Up to 2,000 characters. Manual clean only — no auto-paste or scanning.</div>
+      <a href="/" class="tier-btn secondary">Use for free →</a>
+    </div>
+
+    <!-- 1-Day Trial -->
+    <div class="tier-card">
+      <div class="tier-label">Daily</div>
+      <div class="tier-name">1-Day Access</div>
+      <div class="tier-price">
+        <span class="amount">$1.23</span>
+        <span class="period">/day</span>
+      </div>
+      <div class="tier-vs">Full access for 24 hours</div>
+      <div class="savings-badge invisible">—</div>
+      <div class="tier-desc">Every premium feature unlocked for 24 hours. Quarantine, scanner, custom rules, unlimited text — no commitment required.</div>
+      <a href="https://buy.stripe.com/aFa4gzaV3c0v8IlaHWcEw00" class="tier-btn secondary" id="trialBtn" rel="noopener">Try for $1.23 →</a>
+    </div>
+
+    <!-- Monthly -->
+    <div class="tier-card">
+      <div class="tier-label">Monthly</div>
+      <div class="tier-name">Monthly</div>
+      <div class="tier-price">
+        <span class="amount">$12.34</span>
+        <span class="period">/mo</span>
+      </div>
+      <div class="tier-vs">vs $36.90 at daily rate</div>
+      <div class="savings-badge">Save 67%</div>
+      <div class="tier-desc">Full access, billed month-to-month. No lock-in. Works on both the web app and the browser extension under one login.</div>
+      <a href="https://buy.stripe.com/cNi00j1kt1lRbUx4jycEw01" class="tier-btn secondary" id="monthlyBtn" rel="noopener">Start monthly →</a>
+    </div>
+
+    <!-- Yearly — featured -->
+    <div class="tier-card featured">
+      <div class="ribbon">Most popular</div>
+      <div class="tier-label">Yearly</div>
+      <div class="tier-name">Annual</div>
+      <div class="tier-price">
+        <span class="amount">$123.45</span>
+        <span class="period">/yr</span>
+      </div>
+      <div class="tier-vs">vs $148.08 at monthly rate</div>
+      <div class="savings-badge">2 months free</div>
+      <div class="tier-desc">Everything in Monthly, billed once a year. You get two full months at no charge versus renewing monthly.</div>
+      <a href="https://buy.stripe.com/bJe5kDgfn8Oje2F8zOcEw02" class="tier-btn primary" id="yearlyBtn" rel="noopener">Get annual →</a>
+    </div>
+
+    <!-- Lifetime -->
+    <div class="tier-card">
+      <div class="tier-label">Lifetime</div>
+      <div class="tier-name">Lifetime</div>
+      <div class="tier-price">
+        <span class="amount">$234.56</span>
+      </div>
+      <div class="tier-vs">vs $123.45/yr — breaks even month 23</div>
+      <div class="savings-badge">Pays off in 23 months</div>
+      <div class="tier-desc">Pay once, own it forever. After month 23 you're ahead — every month after that is free. Every future update included.</div>
+      <a href="https://buy.stripe.com/28E00j9QZe8D1fT03icEw03" class="tier-btn secondary" id="lifetimeBtn" rel="noopener">Get lifetime →</a>
+    </div>
+
+  </div>
+
+  <p class="free-notice">Already have an account? <a href="/account.html">Sign in →</a></p>
+
+  <!-- ── Feature comparison ─────────────────────────────────────────────── -->
+  <section class="compare-section">
+    <h3>What's included</h3>
+    <table class="compare-table" role="table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Free</th>
+          <th>Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="cat-row"><td colspan="3">Core Cleaning</td></tr>
+        <tr>
+          <td>Remove invisible / hidden characters</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Strip markdown formatting</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Remove AI debris (##, ***, +++)</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Strip HTML tags &amp; comments</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Remove emojis</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Case transforms (upper / lower / title / sentence)</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Punctuation normalization</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Custom find &amp; replace (with regex)</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Character limit</td>
+          <td><span class="limit">2,000 chars</span></td>
+          <td><span class="check">Unlimited</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="3">Extension — Auto-Protect</td></tr>
+        <tr>
+          <td>Auto-clean text on paste into any page</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Auto-clean text on copy from any page</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Full pipeline quarantine (apply all rules on copy/paste)</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="3">Extension — Page Scanner</td></tr>
+        <tr>
+          <td>Scan pages for hostile invisible characters</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Highlight contaminated text on-page</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>On-page warning banner</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="3">Account</td></tr>
+        <tr>
+          <td>Works on acepaste.xyz</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Works in browser extension</td>
+          <td><span class="limit">Limited</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Single login covers both web &amp; extension</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Priority support</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── FAQ ────────────────────────────────────────────────────────────── -->
+  <section class="faq-strip">
+    <h3>Common questions</h3>
+
+    <details class="faq-item">
+      <summary>Does one subscription really cover both the web app and the extension?</summary>
+      <p>Yes. Sign in with the same email on acepaste.xyz and in the extension. Both check the same backend, so a single active subscription unlocks everything on both surfaces simultaneously.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>What happens after I buy a 1-day trial?</summary>
+      <p>Your account is upgraded to full access for 24 hours from the moment of purchase. After that, features revert to the free tier unless you subscribe. The $1.23 is not deducted from any subscription price — it's a standalone access fee.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Can I cancel my subscription?</summary>
+      <p>Yes, at any time from your account page. Monthly billing stops immediately on cancellation; yearly billing stops at the end of your current period. Lifetime purchases never expire.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Does my data leave my browser?</summary>
+      <p>Text you paste and clean is <strong>never</strong> sent to any server — all cleaning runs locally in your browser. The only data we transmit is your account credentials (email + hashed password) for authentication and a subscription-status check on login. Cleaning is, and will remain, entirely local.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>How are the "Save X%" figures calculated?</summary>
+      <p>Each tier uses the metric that best represents its value. Monthly saves 67% versus 30 individual daily purchases ($36.90 total). Annual gives you 2 months free versus renewing monthly for a year ($148.08 total). Lifetime uses breakeven framing — at $123.45/yr, it pays itself off in 23 months and every month after that costs nothing.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>What payment methods are accepted?</summary>
+      <p>All major credit and debit cards via Stripe. Stripe also supports Apple Pay and Google Pay where available. We do not store any card details ourselves.</p>
+    </details>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-links">
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/security.html">Security</a>
+    <a href="/account.html">Account</a>
+  </nav>
+  <p class="footer-copy">© 2025 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a></p>
+</footer>
+
+<script>
+// Minimal dark mode toggle (no localStorage per privacy policy)
+(function() {
+  var btn = document.getElementById('darkModeToggle');
+  if (btn) btn.addEventListener('click', function() {
+    var isDark = document.body.classList.toggle('dark-mode');
+    btn.textContent = isDark ? '☀️' : '🌙';
+  });
+
+  // Append session token to Stripe links so returning users are recognised
+  try {
+    var sub = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
+    if (sub && sub.email) {
+      var links = document.querySelectorAll('[id$="Btn"]');
+      links.forEach(function(a) {
+        var url = new URL(a.href, location.href);
+        url.searchParams.set('prefilled_email', sub.email);
+        a.href = url.toString();
+      });
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

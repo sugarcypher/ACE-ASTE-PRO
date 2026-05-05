@@ -139,6 +139,74 @@ if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
   trustedTypesPolicy = window.trustedTypes.defaultPolicy;
 }
 
+// ── Freemium gate ─────────────────────────────────────────────────────────
+// Plan is set by auth.js via sessionStorage. Falls back to 'free' silently.
+const FREE_CHAR_LIMIT = 2000;
+
+// Features locked on the free tier (checkbox IDs + input IDs)
+const PREMIUM_FEATURE_IDS = [
+  'removeAIMarkup','removeEmojis','removeFormatting',
+  'removeHtml','removeComments',
+  'customFind','customReplace','customRegex',
+  'removePunctuation'
+];
+const PREMIUM_CASE_RADIOS = true; // all caseTx radios are premium
+
+function _getAcePlan() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
+    if (!s) return 'free';
+    if (s.expiresAt && Date.now() / 1000 > s.expiresAt) return 'free';
+    return s.plan || 'free';
+  } catch(e) { return 'free'; }
+}
+
+function acePasteIsPaidWeb() {
+  return _getAcePlan() !== 'free';
+}
+
+/** Lock or unlock premium features in the UI based on current plan. */
+function applyFreemiumUI() {
+  const paid = acePasteIsPaidWeb();
+
+  // Lock/unlock checkboxes + inputs
+  for (const id of PREMIUM_FEATURE_IDS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (paid) {
+      el.disabled = false;
+      const lbl = el.closest('label') || el.parentElement;
+      if (lbl) lbl.classList.remove('ace-premium-locked');
+    } else {
+      el.disabled = true;
+      el.checked  = false;
+      const lbl = el.closest('label') || el.parentElement;
+      if (lbl) lbl.classList.add('ace-premium-locked');
+    }
+  }
+
+  // Lock/unlock case-transform radios
+  if (PREMIUM_CASE_RADIOS) {
+    document.querySelectorAll('input[name="caseTx"]').forEach(r => {
+      if (r.value === 'none') return;
+      if (paid) {
+        r.disabled = false;
+        const lbl = r.closest('label') || r.parentElement;
+        if (lbl) lbl.classList.remove('ace-premium-locked');
+      } else {
+        r.disabled = true;
+        if (r.checked) { r.checked = false; document.getElementById('caseTxNone') && (document.getElementById('caseTxNone').checked = true); }
+        const lbl = r.closest('label') || r.parentElement;
+        if (lbl) lbl.classList.add('ace-premium-locked');
+      }
+    });
+  }
+
+  // Show/hide upgrade nudge
+  const nudge = document.getElementById('upgradeNudge');
+  if (nudge) nudge.style.display = paid ? 'none' : '';
+}
+
 // Helper function to safely set innerHTML using Trusted Types
 function setInnerHTML(element, html) {
   if (trustedTypesPolicy) {
@@ -173,10 +241,49 @@ function updateDarkModeIcon(isDark) {
 }
 
 
+// Lazy load third-party scripts after page load to reduce initial bundle size
+function loadTermlyScript() {
+  if (window.termlyLoaded) return;
+  window.termlyLoaded = true;
+  const script = document.createElement('script');
+  script.defer = true;
+  script.src = 'https://app.termly.io/resource-blocker/da56ec80-6621-4889-a102-bf6598ab88ae?autoBlock=on';
+  // SRI cannot be pinned: Termly updates this resource server-side.
+  // Integrity is enforced via the Trusted Types createScriptURL allowlist instead.
+  script.crossOrigin = 'anonymous';
+  document.head.appendChild(script);
+}
+
 // Basic event listeners - load on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   // Update dark mode icon on load (dark mode class applied by default in HTML)
   updateDarkModeIcon(true);
+
+  // Lazy load Termly resource blocker and handler only when consent link is clicked
+  const consentLinks = document.querySelectorAll('.termly-display-preferences');
+  consentLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Load Termly resource blocker script first (if not already loaded)
+      loadTermlyScript();
+      // Load Termly handler script only when needed
+      if (!window.termlyHandlerLoaded) {
+        const script = document.createElement('script');
+        script.src = '/app-termly.js?v=1.0';
+        script.integrity = 'sha384-osftMLwri1ylK62yKFnxFqz9fg9T5jq1E3aAo/o1umwrUPRl5CtO6nc4Vkm3UUwk';
+        script.crossOrigin = 'anonymous';
+        script.onload = () => {
+          if (window.handleTermlyPreferences) {
+            window.handleTermlyPreferences();
+          }
+        };
+        document.head.appendChild(script);
+        window.termlyHandlerLoaded = true;
+      } else if (window.handleTermlyPreferences) {
+        window.handleTermlyPreferences();
+      }
+    });
+  });
 
   // TOS acceptance check
   if (!localStorage.getItem('tosAccepted')) {
