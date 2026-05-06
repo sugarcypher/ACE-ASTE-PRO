@@ -88,13 +88,13 @@ Deno.serve(async (req) => {
 
         const userId = await getUserIdByEmail(supabase, email);
         if (!userId) {
-          // User paid but has no account yet. Store a pending grant keyed by email.
-          // When they sign up, on_user_created will pick it up via the whitelist.
+          // User paid but has no account yet. Store a pending grant keyed by email
+          // with the correct plan. When they sign up, on_user_created picks it up.
           await supabase.from('lifetime_grant_emails').upsert(
-            { email, note: `auto-grant from Stripe checkout ${session.id} (plan: ${plan})` },
+            { email, plan, note: `auto-grant from Stripe checkout ${session.id}` },
             { onConflict: 'email' }
           );
-          console.warn(`[webhook] No account for ${email} — added to grant whitelist for plan ${plan}`);
+          console.warn(`[webhook] No account for ${email} — added to grant whitelist for plan=${plan}`);
           break;
         }
 
