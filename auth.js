@@ -298,12 +298,29 @@ async function _fetchPlan(jwt, userId) {
 // ── Extension auth bridge ──────────────────────────────────────────────────
 // When loaded on the /auth/extension page, the page can post the JWT
 // to the extension via chrome.runtime.sendMessage (externally_connectable).
+//
+// SECURITY: ext_id is validated against a hardcoded allowlist to prevent a
+// phishing attack where a crafted URL delivers the JWT to an attacker's
+// extension. Update TRUSTED_EXT_IDS when you publish/update the extension.
+
+var TRUSTED_EXT_IDS = [
+  // TODO: replace with your Chrome Web Store extension ID once published.
+  // Format: 'abcdefghijklmnopqrstuvwxyzabcdef' (32 lowercase hex chars)
+  // e.g. 'jfnnndaijdgfmjgfondaibcglpbnhfph'
+  // Leave empty until extension is published — bridge is disabled by default.
+];
 
 function acePasteExtensionBridge() {
   const params = new URLSearchParams(location.search);
   const source = params.get('source');
   const extId  = params.get('ext_id');
   if (source !== 'extension' || !extId) return;
+
+  // Reject unknown extension IDs — prevents JWT exfiltration via crafted URL
+  if (TRUSTED_EXT_IDS.length === 0 || !TRUSTED_EXT_IDS.includes(extId)) {
+    console.warn('[AcePaste] Blocked bridge attempt from untrusted ext_id:', extId);
+    return;
+  }
 
   // After auth, send token to extension and close the tab
   window.addEventListener('acepaste:auth', function(e) {

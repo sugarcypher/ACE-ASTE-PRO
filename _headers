@@ -79,7 +79,23 @@
 
   # Cross-Origin Policies
   Cross-Origin-Opener-Policy: same-origin-allow-popups
-  Cross-Origin-Embedder-Policy: require-corp
+  # NOTE: COEP require-corp is intentionally omitted from the global rule.
+  # It would break cross-origin consent scripts (Termly/Gatekeeper) that do
+  # not set CORP headers. Apply per-route if needed in a COEP-safe context.
+
+# ── account.html override ────────────────────────────────────────────────────
+# account.html contains an inline <script> block. Until it is extracted to
+# account.js and hashed, we use unsafe-inline for scripts on this route only.
+# All other directives remain strict; connect-src is scoped to Supabase only
+# (no third-party consent scripts on this page).
+/account.html
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 0
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=31556952; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
 
 # ============================================================================
 # CACHE CONTROL HEADERS

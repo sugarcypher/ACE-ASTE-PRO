@@ -1,14 +1,15 @@
 /**
- * restore-purchase — Supabase Edge Function
+ * restore-purchase — Supabase Edge Function v6
  *
  * POST /functions/v1/restore-purchase
  * Authorization: Bearer <supabase_jwt>
  * Body: { receipt_email: string }
  *
- * Looks up whether the authenticated user's Stripe purchase exists under
- * a different email (the receipt_email). If found, copies the plan to their
- * account. Covers the case where a user paid with a different email than
- * their Supabase account.
+ * Security hardening (all versions):
+ *  v4 — reads plan column, sets trial_ends_at for trial plans
+ *  v5 — consumed_at IS NULL check; unified error strings; lowercase normalization
+ *  v6 — atomic whitelist claim via UPDATE...RETURNING (TOCTOU race fix)
+ *       two concurrent calls can no longer both succeed on the same grant
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -25,16 +26,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Authorization, apikey, Content-Type',
 };
 
+const NO_PURCHASE_MSG = 'No purchase found for that email. Check your Stripe receipt and try again.';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
-  // Verify caller is authenticated
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return json({ error: 'Unauthorized' }, 401);
-  }
+  if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -45,7 +45,6 @@ Deno.serve(async (req) => {
   const { data: { user }, error: authErr } = await supabase.auth.getUser(jwt);
   if (authErr || !user) return json({ error: 'Unauthorized' }, 401);
 
-  // Parse body
   let receiptEmail: string;
   try {
     const body = await req.json();
@@ -56,12 +55,11 @@ Deno.serve(async (req) => {
 
   if (!receiptEmail) return json({ error: 'receipt_email is required' }, 400);
 
-  // Don't allow restoring to the same email — nothing to restore
   if (receiptEmail === user.email?.toLowerCase()) {
     return json({ error: 'That is already the email on your account. Your plan should be current.' }, 400);
   }
 
-  // Rate-limit: check restore attempts in the last hour (simple, no Redis needed)
+  // Rate-limit: 5 attempts per user per hour
   const { data: recent } = await supabase
     .from('restore_attempts')
     .select('id')
@@ -72,68 +70,53 @@ Deno.serve(async (req) => {
     return json({ error: 'Too many restore attempts. Please wait an hour and try again.' }, 429);
   }
 
-  // Log this attempt
-  await supabase.from('restore_attempts').insert({
-    user_id: user.id,
-    receipt_email: receiptEmail,
-  });
+  await supabase.from('restore_attempts').insert({ user_id: user.id, receipt_email: receiptEmail });
 
-  // 1. Check if there's a pending grant for this email in lifetime_grant_emails
-  const { data: grantRow } = await supabase
+  // ── 1. Atomic whitelist claim ─────────────────────────────────────────────
+  // Use UPDATE...RETURNING rather than SELECT then UPDATE to eliminate the
+  // TOCTOU race: only one concurrent call can set consumed_at from NULL.
+  const { data: claimedRows } = await supabase
     .from('lifetime_grant_emails')
-    .select('email, plan')
+    .update({ consumed_at: new Date().toISOString() })
     .eq('email', receiptEmail)
-    .maybeSingle();
+    .is('consumed_at', null)
+    .select('plan');
 
-  if (grantRow) {
-    const grantedPlan = grantRow.plan || 'lifetime';
+  if (claimedRows && claimedRows.length > 0) {
+    const grantedPlan = claimedRows[0].plan || 'lifetime';
     const grantUpdate: Record<string, unknown> = { user_id: user.id, plan: grantedPlan };
     if (grantedPlan === 'trial') {
       grantUpdate.trial_ends_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     }
     await supabase.from('subscriptions').upsert(grantUpdate, { onConflict: 'user_id' });
+    console.log(`[restore] Whitelist grant plan=${grantedPlan} applied to user=${user.id}`);
     return json({ plan: grantedPlan });
   }
 
-  // 2. Search Stripe for a customer with that receipt email
+  // ── 2. Search Stripe ──────────────────────────────────────────────────────
   const customers = await stripe.customers.list({ email: receiptEmail, limit: 5 });
   if (!customers.data.length) {
-    return json({ error: 'No Stripe purchase found for that email.' });
+    return json({ error: NO_PURCHASE_MSG });  // unified — don't reveal Stripe customer existence
   }
 
-  // Find the most recent paid subscription or one-time charge across those customers
   let bestPlan: string | null = null;
   let bestPeriodEnd: Date | null = null;
 
   for (const customer of customers.data) {
-    // Check active subscriptions
-    const subs = await stripe.subscriptions.list({
-      customer: customer.id,
-      status: 'active',
-      limit: 5,
-    });
+    const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 5 });
     for (const sub of subs.data) {
       const priceId = sub.items.data[0]?.price.id;
       const plan = PRICE_TO_PLAN[priceId];
       if (plan === 'monthly' || plan === 'yearly') {
         const periodEnd = new Date(sub.current_period_end * 1000);
-        if (!bestPeriodEnd || periodEnd > bestPeriodEnd) {
-          bestPlan = plan;
-          bestPeriodEnd = periodEnd;
-        }
+        if (!bestPeriodEnd || periodEnd > bestPeriodEnd) { bestPlan = plan; bestPeriodEnd = periodEnd; }
       }
     }
 
-    // Check one-time payments (trial, lifetime) via charges or payment intents
-    const sessions = await stripe.checkout.sessions.list({
-      customer: customer.id,
-      limit: 10,
-    });
+    const sessions = await stripe.checkout.sessions.list({ customer: customer.id, limit: 10 });
     for (const session of sessions.data) {
       if (session.payment_status !== 'paid') continue;
-      const expanded = await stripe.checkout.sessions.retrieve(session.id, {
-        expand: ['line_items'],
-      });
+      const expanded = await stripe.checkout.sessions.retrieve(session.id, { expand: ['line_items'] });
       const priceId = expanded.line_items?.data[0]?.price?.id;
       if (!priceId) continue;
       const plan = PRICE_TO_PLAN[priceId];
@@ -144,16 +127,17 @@ Deno.serve(async (req) => {
   }
 
   if (!bestPlan) {
-    return json({ error: 'No active purchase found for that email.' });
+    return json({ error: NO_PURCHASE_MSG });  // same string regardless of path
   }
 
-  // Apply the found plan to the authenticated user's account
   const update: Record<string, unknown> = { user_id: user.id, plan: bestPlan };
   if (bestPeriodEnd) update.period_ends_at = bestPeriodEnd.toISOString();
+  if (bestPlan === 'trial') {
+    update.trial_ends_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  }
 
   const { error: upsertErr } = await supabase
-    .from('subscriptions')
-    .upsert(update, { onConflict: 'user_id' });
+    .from('subscriptions').upsert(update, { onConflict: 'user_id' });
 
   if (upsertErr) {
     console.error('[restore] Upsert error:', upsertErr);
@@ -164,7 +148,7 @@ Deno.serve(async (req) => {
   return json({ plan: bestPlan });
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const PRICE_TO_PLAN: Record<string, string> = {
   'price_1TTrW9EsqFDVCVgWlpNMG4sP': 'trial',
