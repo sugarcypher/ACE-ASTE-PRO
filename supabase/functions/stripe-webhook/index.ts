@@ -65,6 +65,12 @@ Deno.serve(async (req) => {
           expand: ['line_items'],
         });
 
+        // Only process completed, paid sessions
+        if (session.payment_status !== 'paid') {
+          console.log('[webhook] checkout.session.completed: skipping unpaid session', session.id, session.payment_status);
+          break;
+        }
+
         const priceId = session.line_items?.data[0]?.price?.id;
         if (!priceId) {
           console.error('[webhook] checkout.session.completed: no price_id found for session', session.id);
@@ -125,7 +131,15 @@ Deno.serve(async (req) => {
         if (!email) { console.error('[webhook] No email for customer', customerId); break; }
 
         const userId = await getUserIdByEmail(supabase, email);
-        if (!userId) { console.error('[webhook] No account for email:', email); break; }
+        if (!userId) {
+          // No account yet — whitelist so on_user_created picks it up on signup.
+          await supabase.from('lifetime_grant_emails').upsert(
+            { email, plan, note: `auto-grant from subscription ${sub.id}` },
+            { onConflict: 'email' }
+          );
+          console.warn(`[webhook] No account for ${email} — whitelisted for plan=${plan}`);
+          break;
+        }
 
         const { error } = await supabase.from('subscriptions').upsert({
           user_id:                userId,

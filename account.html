@@ -357,6 +357,17 @@
     }
   }
 
+  function showConfirming(email) {
+    document.getElementById('signedOut').style.display = 'none';
+    document.getElementById('signedIn').style.display  = 'block';
+    var chip = document.getElementById('planChip');
+    chip.textContent = 'Confirming…';
+    chip.className   = 'plan-chip';
+    document.getElementById('accountInfo').textContent = email + ' · Confirming your purchase…';
+    document.getElementById('upgradeSection').style.display = 'none';
+    document.getElementById('restoreSection').style.display = 'none';
+  }
+
   function showError(elId, msg) {
     var el = document.getElementById(elId);
     el.textContent = msg;
@@ -373,13 +384,17 @@
     var email = acePasteEmail();
     if (!email) return;
     if (isPurchased) {
-      // Returning from Stripe — retry plan refresh up to 4x with backoff
-      // to handle the case where the webhook hasn't landed yet (~1-3s delay).
+      // Returning from Stripe — show "Confirming…" state while waiting for
+      // the webhook to land (typically 1–3 s), then retry up to 3 times.
+      showConfirming(email);
       (function retryRefresh(attempts) {
         acePasteRefreshPlan().then(function(plan) {
-          showSignedIn(plan, email);
-          if (plan === 'free' && attempts > 0) {
+          if (plan !== 'free') {
+            showSignedIn(plan, email);          // webhook landed — show real plan
+          } else if (attempts > 0) {
             setTimeout(function() { retryRefresh(attempts - 1); }, 2000);
+          } else {
+            showSignedIn(plan, email);          // exhausted — show free (edge case)
           }
         });
       })(3);
@@ -398,7 +413,25 @@
     var result = await acePasteSignIn(email, pass);
     this.disabled = false; this.textContent = 'Sign in';
     if (!result.ok) return showError('authError', result.error);
-    showSignedIn(result.plan, email);
+
+    // Path B: user wasn't signed in when they returned from Stripe.
+    // Webhook may not have landed yet — retry if plan is still free.
+    if (isPurchased && result.plan === 'free') {
+      showConfirming(email);
+      (function retryAfterSignIn(attempts) {
+        acePasteRefreshPlan().then(function(plan) {
+          if (plan !== 'free') {
+            showSignedIn(plan, email);
+          } else if (attempts > 0) {
+            setTimeout(function() { retryAfterSignIn(attempts - 1); }, 2000);
+          } else {
+            showSignedIn(plan, email);
+          }
+        });
+      })(3);
+    } else {
+      showSignedIn(result.plan, email);
+    }
     // Extension bridge fires automatically via auth.js DOMContentLoaded listener
   });
 

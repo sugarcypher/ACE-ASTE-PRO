@@ -81,16 +81,18 @@ Deno.serve(async (req) => {
   // 1. Check if there's a pending grant for this email in lifetime_grant_emails
   const { data: grantRow } = await supabase
     .from('lifetime_grant_emails')
-    .select('email')
+    .select('email, plan')
     .eq('email', receiptEmail)
     .maybeSingle();
 
   if (grantRow) {
-    await supabase.from('subscriptions').upsert(
-      { user_id: user.id, plan: 'lifetime' },
-      { onConflict: 'user_id' }
-    );
-    return json({ plan: 'lifetime' });
+    const grantedPlan = grantRow.plan || 'lifetime';
+    const grantUpdate: Record<string, unknown> = { user_id: user.id, plan: grantedPlan };
+    if (grantedPlan === 'trial') {
+      grantUpdate.trial_ends_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    }
+    await supabase.from('subscriptions').upsert(grantUpdate, { onConflict: 'user_id' });
+    return json({ plan: grantedPlan });
   }
 
   // 2. Search Stripe for a customer with that receipt email
