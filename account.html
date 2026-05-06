@@ -178,17 +178,56 @@
       <div class="account-card" id="loginCard">
         <h2>Sign in</h2>
         <div class="auth-error" id="authError"></div>
+        <div id="loginForm">
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-row">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="Password" required>
+          </div>
+          <button class="btn-full" id="loginBtn" type="button">Sign in</button>
+          <p class="form-switch">No account? <a id="switchToSignup">Create one →</a></p>
+          <p class="form-switch" style="margin-top:0.25rem"><a id="switchToRecovery" href="#">Forgot password?</a></p>
+          <p class="form-switch" style="margin-top:0.25rem"><a href="/pricing.html">View pricing →</a></p>
+        </div>
+      </div>
+
+      <!-- Forgot password card -->
+      <div class="account-card" id="recoveryCard" style="display:none">
+        <h2>Reset password</h2>
+        <div class="auth-error" id="recoveryError"></div>
+        <div id="recoveryForm">
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1rem">Enter your email and we'll send a reset link.</p>
+          <div class="form-row">
+            <label for="recoveryEmail">Email</label>
+            <input type="email" id="recoveryEmail" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <button class="btn-full" id="sendRecoveryBtn" type="button">Send reset link</button>
+          <p class="form-switch" style="margin-top:0.75rem"><a id="switchBackToLogin" href="#">← Back to sign in</a></p>
+        </div>
+        <div id="recoverySuccessMsg" style="display:none;text-align:center;padding:0.5rem 0">
+          <p style="font-size:2rem;margin:0 0 0.5rem">📧</p>
+          <p style="font-weight:700;font-size:1rem;margin:0 0 0.4rem;color:var(--text,#111)">Check your inbox</p>
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1rem">A reset link was sent. Click it to set a new password.</p>
+          <a id="backToLoginFromRecovery" href="#" style="color:#2563eb;font-size:0.88rem;font-weight:600;text-decoration:none">← Back to sign in</a>
+        </div>
+      </div>
+
+      <!-- Set new password card (shown when arriving via recovery link) -->
+      <div class="account-card" id="setPasswordCard" style="display:none">
+        <h2>Set new password</h2>
+        <div class="auth-error" id="setPasswordError"></div>
         <div class="form-row">
-          <label for="email">Email</label>
-          <input type="email" id="email" autocomplete="email" placeholder="you@example.com" required>
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" autocomplete="new-password" placeholder="8+ characters" required>
         </div>
         <div class="form-row">
-          <label for="password">Password</label>
-          <input type="password" id="password" autocomplete="current-password" placeholder="Password" required>
+          <label for="confirmNewPassword">Confirm password</label>
+          <input type="password" id="confirmNewPassword" autocomplete="new-password" placeholder="Repeat password" required>
         </div>
-        <button class="btn-full" id="loginBtn" type="button">Sign in</button>
-        <p class="form-switch">No account? <a id="switchToSignup">Create one →</a></p>
-        <p class="form-switch" style="margin-top:0.4rem"><a href="/pricing.html">View pricing →</a></p>
+        <button class="btn-full" id="setPasswordBtn" type="button">Set password</button>
       </div>
 
       <div class="account-card" id="signupCard" style="display:none">
@@ -239,6 +278,9 @@
           </p>
         </div>
 
+        <div style="margin-bottom:0.75rem">
+          <a href="/" class="btn-full" style="text-align:center;text-decoration:none;display:block">Use Ace Paste →</a>
+        </div>
         <div id="upgradeSection">
           <a href="/pricing.html" class="btn-outline">View plans →</a>
         </div>
@@ -366,15 +408,58 @@
     document.getElementById('loginCard').style.display  = 'block';
   });
 
-  // Toggle login/signup
-  document.getElementById('switchToSignup').addEventListener('click', function() {
-    document.getElementById('loginCard').style.display  = 'none';
-    document.getElementById('signupCard').style.display = 'block';
+  // Toggle login/signup/recovery
+  function showCard(id) {
+    ['loginCard','signupCard','recoveryCard','setPasswordCard'].forEach(function(c) {
+      document.getElementById(c).style.display = c === id ? 'block' : 'none';
+    });
+  }
+  document.getElementById('switchToSignup').addEventListener('click', function() { showCard('signupCard'); });
+  document.getElementById('switchToLogin').addEventListener('click', function() { showCard('loginCard'); });
+  document.getElementById('switchToRecovery').addEventListener('click', function(e) { e.preventDefault(); showCard('recoveryCard'); });
+  document.getElementById('switchBackToLogin').addEventListener('click', function(e) { e.preventDefault(); showCard('loginCard'); });
+  document.getElementById('backToLoginFromRecovery').addEventListener('click', function(e) { e.preventDefault(); showCard('loginCard'); });
+
+  // Send recovery email
+  document.getElementById('sendRecoveryBtn').addEventListener('click', async function() {
+    clearError('recoveryError');
+    var email = document.getElementById('recoveryEmail').value.trim();
+    if (!email) return showError('recoveryError', 'Enter your email address.');
+    this.disabled = true; this.textContent = 'Sending…';
+    var result = await acePasteSendRecovery(email);
+    this.disabled = false; this.textContent = 'Send reset link';
+    if (!result.ok) return showError('recoveryError', result.error);
+    document.getElementById('recoveryForm').style.display = 'none';
+    document.getElementById('recoverySuccessMsg').style.display = 'block';
   });
-  document.getElementById('switchToLogin').addEventListener('click', function() {
-    document.getElementById('signupCard').style.display = 'none';
-    document.getElementById('loginCard').style.display  = 'block';
-  });
+
+  // Set new password (when arriving via recovery link in URL hash)
+  (function() {
+    var token = acePasteParseHashToken();
+    if (!token || token.type !== 'recovery') return;
+    // Hide all other cards, show set-password card
+    showCard('setPasswordCard');
+    // Clear the hash so the token isn't visible / reusable from history
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    document.getElementById('setPasswordBtn').addEventListener('click', async function() {
+      clearError('setPasswordError');
+      var pass1 = document.getElementById('newPassword').value;
+      var pass2 = document.getElementById('confirmNewPassword').value;
+      if (pass1.length < 8) return showError('setPasswordError', 'Password must be at least 8 characters.');
+      if (pass1 !== pass2) return showError('setPasswordError', 'Passwords do not match.');
+      this.disabled = true; this.textContent = 'Saving…';
+      var result = await acePasteSetNewPassword(token.accessToken, pass1);
+      this.disabled = false; this.textContent = 'Set password';
+      if (!result.ok) return showError('setPasswordError', result.error);
+      // Success — sign in with new password
+      showCard('loginCard');
+      showError('authError', '✓ Password updated — sign in with your new password.');
+      document.getElementById('authError').style.color = '#16a34a';
+      document.getElementById('authError').style.background = '#f0fdf4';
+      document.getElementById('authError').style.borderColor = '#bbf7d0';
+    });
+  })();
 
   // Manage billing — creates a Stripe portal session then redirects
   document.getElementById('manageBtn').addEventListener('click', async function() {

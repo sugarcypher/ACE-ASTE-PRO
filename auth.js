@@ -117,6 +117,61 @@ async function acePasteSignUp(email, password) {
 }
 
 /**
+ * Send a password recovery email.
+ * Returns { ok, error }.
+ */
+async function acePasteSendRecovery(email) {
+  try {
+    const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/recover', {
+      method: 'POST',
+      headers: _headers(),
+      body: JSON.stringify({ email }),
+    });
+    // Supabase returns 200 with empty body on success (even for unknown emails,
+    // to prevent user enumeration).
+    return r.ok ? { ok: true } : { ok: false, error: 'Could not send recovery email. Try again.' };
+  } catch(e) {
+    return { ok: false, error: 'Network error. Please try again.' };
+  }
+}
+
+/**
+ * Set a new password using a recovery access token from the URL hash.
+ * Call this when the page loads with #access_token=...&type=recovery in the URL.
+ * Returns { ok, error }.
+ */
+async function acePasteSetNewPassword(accessToken, newPassword) {
+  try {
+    const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { ..._headers(accessToken), 'Authorization': 'Bearer ' + accessToken },
+      body: JSON.stringify({ password: newPassword }),
+    });
+    const data = await r.json();
+    if (data.error) return { ok: false, error: data.error_description || data.error };
+    return { ok: true };
+  } catch(e) {
+    return { ok: false, error: 'Network error. Please try again.' };
+  }
+}
+
+/**
+ * Parse a Supabase recovery/confirmation token from the URL hash.
+ * Returns { accessToken, type } or null.
+ */
+function acePasteParseHashToken() {
+  try {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return null;
+    const params = new URLSearchParams(hash);
+    const token = params.get('access_token');
+    const type  = params.get('type');
+    if (token && (type === 'recovery' || type === 'signup')) return { accessToken: token, type };
+    return null;
+  } catch(e) { return null; }
+}
+
+/**
  * Sign out — clears session.
  */
 async function acePasteSignOut() {
