@@ -316,7 +316,36 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
-  
+
+  // ── Auth + freemium gate ──────────────────────────────────────────────────
+  // Apply UI immediately from cached session (sync, no flash).
+  if (typeof applyFreemiumUI === 'function') applyFreemiumUI();
+
+  // Update header account link to reflect sign-in state.
+  function updateAccountLink(plan, email) {
+    const link = document.getElementById('hdrAccountLink');
+    if (!link) return;
+    if (email) {
+      link.textContent = plan && plan !== 'free' ? '✓ Account' : 'Account';
+      link.title = email;
+    }
+  }
+  if (typeof acePasteEmail === 'function') {
+    updateAccountLink(
+      typeof acePasteCurrentPlan === 'function' ? acePasteCurrentPlan() : 'free',
+      acePasteEmail()
+    );
+  }
+
+  // Listen for async plan resolution (after network call).
+  window.addEventListener('acepaste:auth', function(e) {
+    if (typeof applyFreemiumUI === 'function') applyFreemiumUI();
+    updateAccountLink(e.detail && e.detail.plan, e.detail && e.detail.email);
+  });
+
+  // Kick off server-side plan refresh (dispatches acepaste:auth when done).
+  if (typeof acePasteRefreshPlan === 'function') acePasteRefreshPlan();
+
   // Core button handlers - cache elements
   const cleanBtn = getElement('cleanBtn');
   const pasteBtn = getElement('pasteBtn');
