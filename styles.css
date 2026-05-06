@@ -111,6 +111,7 @@ body.dark-mode .ace-premium-locked{opacity:.25}
 .hdr-nav a:hover{background:rgba(10,60,120,.1);color:#003d66}
 body.dark-mode .hdr-nav a{color:#7bb3e0}
 body.dark-mode .hdr-nav a:hover{background:rgba(255,255,255,.1);color:#a8d4f5}
+.trust-badges{text-align:center;margin:0 auto 20px;max-width:520px}.trust-badges img{max-width:100%;height:auto;display:inline-block}
 .ext-promo{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.65);border:1px solid rgba(10,60,120,.12);border-radius:12px;padding:11px 18px;margin:0 auto 18px;max-width:600px;font-size:14px;color:#1a1f26;flex-wrap:wrap;text-align:center}
 body.dark-mode .ext-promo{background:rgba(40,40,40,.65);border-color:rgba(255,255,255,.12);color:#d0d0d0}
 .ext-promo-btn{background:linear-gradient(135deg,#e8f0fe,#d0e0fd);border:1px solid rgba(66,133,244,.35);border-radius:8px;color:#1a56c4;font-size:13px;font-weight:600;padding:6px 14px;text-decoration:none;transition:opacity 0.15s ease;white-space:nowrap;flex-shrink:0}
