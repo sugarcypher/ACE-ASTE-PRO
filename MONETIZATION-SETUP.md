@@ -1,132 +1,124 @@
 # Ace Paste Cleaner Pro — Monetization Setup Guide
 
-One-time setup to wire up shared subscriptions across acepaste.xyz and the browser extension.
+**Owner:** ThinkWell Labs  
+**Last updated:** 2026-05-06  
+**Project ref:** `eqoltjofjlznlirbalrb`
+
+One-time reference for wiring up shared subscriptions across acepaste.xyz and the browser extension. Most of this is already done — the checklist at the bottom shows exactly what remains.
 
 ---
 
-## Architecture overview
+## Architecture
 
 ```
 User (web or extension)
       │
       ▼
-acepaste.xyz/account.html  ←──  auth.js  ──→  Supabase Auth
+acepaste.xyz/account.html  ←── auth.js ──→  Supabase Auth (email/password)
       │                                              │
-      │  (JWT)                            subscriptions table
+      │  JWT (1h expiry, silent refresh)    subscriptions table
       │                                              │
-      ├─── Web app: sessionStorage + UI gates        │
+      ├── Web app: sessionStorage + UI gates         │
       │                                              │
-      └─── Extension: externally_connectable    ◄────┘
+      └── Extension: externally_connectable    ◄─────┘
               background.js → chrome.storage.local
+              (silent JWT refresh via refresh_token)
               popup.js reads chrome.storage.local
-```
 
-Stripe events → `/functions/v1/stripe-webhook` → updates `subscriptions` table
-
----
-
-## Step 1 — Create a Supabase project
-
-1. Go to [supabase.com](https://supabase.com) → New Project
-2. Note your **Project URL** and **Anon (public) key** (Settings → API)
-3. In the SQL editor, paste and run the contents of `supabase/schema.sql`
-4. Confirm the `subscriptions` table appears in Table Editor
-
----
-
-## Step 2 — Configure auth.js
-
-In `auth.js`, replace the two constants at the top:
-
-```js
-const ACEPASTE_SUPABASE_URL  = 'https://YOUR_PROJECT_REF.supabase.co';
-const ACEPASTE_SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
-```
-
-Supabase Auth is email/password by default. To enable it:
-Dashboard → Authentication → Providers → Email → Enable (turn off email confirmation for a smoother initial UX, or leave it on for production).
-
----
-
-## Step 3 — Create Stripe products
-
-Go to [dashboard.stripe.com](https://dashboard.stripe.com) → Products → Add product.
-
-Create **four products** with these exact prices (or match what you set):
-
-| Product name           | Price      | Billing         | Type        |
-|------------------------|------------|-----------------|-------------|
-| Ace Paste — 1-Day Trial | $1.23     | One-time        | One-time    |
-| Ace Paste — Monthly    | $12.34/mo  | Recurring monthly | Subscription |
-| Ace Paste — Annual     | $123.45/yr | Recurring yearly | Subscription |
-| Ace Paste — Lifetime   | $234.56    | One-time        | One-time    |
-
-For each product, copy the **Price ID** (starts with `price_`).
-
-### Create Payment Links
-
-For each product, click "Create payment link" and copy the URL. Paste into `pricing.html`:
-
-```html
-<!-- Replace the REPLACE_* placeholders in pricing.html -->
-<a href="https://buy.stripe.com/REPLACE_TRIAL_LINK" ...>
-<a href="https://buy.stripe.com/REPLACE_MONTHLY_LINK" ...>
-<a href="https://buy.stripe.com/REPLACE_YEARLY_LINK" ...>
-<a href="https://buy.stripe.com/REPLACE_LIFETIME_LINK" ...>
-```
-
-**Important:** In each Payment Link, enable "Collect customer email" and set the **success URL** to:
-```
-https://acepaste.xyz/account.html?payment=success
+Stripe events → stripe-webhook edge function → updates subscriptions table
+Browser CSP violations → csp-report edge function → csp_violations table
 ```
 
 ---
 
-## Step 4 — Deploy edge functions
+## Edge functions (all deployed)
 
-Install the Supabase CLI: `npm install -g supabase`
+| Function | Endpoint | Purpose |
+|----------|----------|---------|
+| `stripe-webhook` | `/functions/v1/stripe-webhook` | Processes Stripe events; updates plan in `subscriptions` |
+| `restore-purchase` | `/functions/v1/restore-purchase` | Lets users re-link a Stripe purchase to their account |
+| `subscription-check` | `/functions/v1/subscription-check` | Returns current plan for a JWT-authenticated user |
+| `create-portal-session` | `/functions/v1/create-portal-session` | Creates a Stripe billing portal session |
+| `csp-report` | `/functions/v1/csp-report` | Receives browser CSP violation reports (no auth) |
 
-```bash
-cd ACE-ASTE-PRO
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-
-# Deploy both functions
-supabase functions deploy subscription-check
-supabase functions deploy stripe-webhook
-```
-
-### Set edge function secrets
-
-```bash
-supabase secrets set \
-  STRIPE_SECRET_KEY=sk_live_... \
-  STRIPE_WEBHOOK_SECRET=whsec_... \
-  SUPABASE_SERVICE_ROLE_KEY=... \
-  SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-```
-
-The `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are also available automatically inside edge functions, but setting them explicitly ensures consistency.
+All functions use pinned esm.sh imports (`@supabase/supabase-js@2.39.3`, `stripe@14.21.0`).
 
 ---
 
-## Step 5 — Register Stripe webhook
+## Database tables
 
-1. Stripe Dashboard → Developers → Webhooks → Add endpoint
-2. Endpoint URL: `https://YOUR_PROJECT_REF.supabase.co/functions/v1/stripe-webhook`
-3. Events to listen for:
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.payment_failed`
-4. Copy the **Signing secret** (`whsec_...`) and set it as `STRIPE_WEBHOOK_SECRET` (see above)
+| Table | Purpose | Retention |
+|-------|---------|-----------|
+| `subscriptions` | One row per user; tracks plan + Stripe IDs | Permanent |
+| `restore_attempts` | Logs restore-purchase attempts (email + timestamp) | 30 days (auto-purged) |
+| `processed_webhook_events` | Idempotency guard — prevents Stripe duplicate events | 7 days (auto-purged) |
+| `csp_violations` | CSP violation reports from browsers | 30 days (auto-purged) |
+
+All tables have RLS enabled. `processed_webhook_events` and `csp_violations` are service_role-only.
+
+Purge jobs run daily at 03:00 UTC via pg_cron (already scheduled).
 
 ---
 
-## Step 6 — Map Price IDs in the webhook function
+## Plans
 
-In `supabase/functions/stripe-webhook/index.ts`, replace the placeholder price IDs:
+| Plan | Price | Billing | Stripe type |
+|------|-------|---------|-------------|
+| Free | $0 | — | — |
+| 1-Day Trial | $1.23 | One-time | Payment |
+| Monthly | $12.34/mo | Recurring | Subscription |
+| Annual | $123.45/yr | Recurring | Subscription |
+| Lifetime | $234.56 | One-time | Payment |
+
+### Savings vs next tier down
+
+| Plan | Compared to | Savings |
+|------|-------------|---------|
+| Monthly | 30 × $1.23 = $36.90 | **67%** |
+| Annual | 12 × $12.34 = $148.08 | **17%** |
+| Lifetime | 3 × $123.45 = $370.35 | **37%** (breakeven ~1.9 yrs vs annual) |
+
+---
+
+## Security controls in place
+
+| Control | Where | Status |
+|---------|-------|--------|
+| Cloudflare Turnstile (invisible CAPTCHA) | account.html sign-in, sign-up, recovery | ✅ Live |
+| JWT silent refresh (5 min before expiry) | auth.js + background.js | ✅ Live |
+| Server-side JWT invalidation on sign-out | background.js → `/auth/v1/logout` | ✅ Live |
+| Webhook idempotency (dedup table) | stripe-webhook + DB | ✅ Live |
+| CSP violation reporting | all pages → csp-report function | ✅ Live |
+| Strict CSP (hash-allowlisted scripts) | index.html + _headers | ✅ Live |
+| esm.sh dependency pinning | all edge functions | ✅ Live |
+| RLS on all tables | Supabase DB | ✅ Live |
+| Incident response policy | INCIDENT-RESPONSE.md | ✅ Written |
+| Automated purge jobs (pg_cron) | DB | ✅ Scheduled |
+| Extension origin validation (sender.origin) | background.js | ✅ Live |
+| ReDoS protection + output size cap | cleaner.js | ✅ Live |
+
+---
+
+## What's still needed (Stripe side)
+
+All of the above is already deployed. The remaining steps are manual Stripe configuration.
+
+### 1 — Create products
+
+Stripe Dashboard → Products → Add product. Create four:
+
+| Name | Price | Billing |
+|------|-------|---------|
+| Ace Paste — 1-Day Trial | $1.23 | One-time |
+| Ace Paste — Monthly | $12.34/mo | Recurring monthly |
+| Ace Paste — Annual | $123.45/yr | Recurring yearly |
+| Ace Paste — Lifetime | $234.56 | One-time |
+
+Copy the four **Price IDs** (`price_abc123...`).
+
+### 2 — Wire Price IDs into the webhook function
+
+In `supabase/functions/stripe-webhook/index.ts`, replace the four `price_REPLACE_*` constants:
 
 ```ts
 const PRICE_TO_PLAN: Record<string, string> = {
@@ -137,155 +129,85 @@ const PRICE_TO_PLAN: Record<string, string> = {
 };
 ```
 
-Redeploy after changing:
+Do the same in `supabase/functions/restore-purchase/index.ts`.
+
+Redeploy both functions after editing:
 ```bash
 supabase functions deploy stripe-webhook
+supabase functions deploy restore-purchase
 ```
 
----
+### 3 — Set edge function secrets
 
-## Step 7 — Update extension manifest
+Supabase Dashboard → Edge Functions → Manage secrets:
 
-In `AcePasteBrowserExtension/manifest.json`, `externally_connectable` already allows `https://acepaste.xyz/*`. No further changes needed — the extension never calls Supabase directly. Auth flows through the acepaste.xyz page.
-
----
-
-## Step 8 — Add auth.js to index.html
-
-In `index.html`, add this line in the `<head>` before `app-critical.js`:
-
-```html
-<script defer src="/auth.js"></script>
-```
-
-Then add the upgrade nudge and account status elements to the page. In the `.wrap` section, add:
-
-```html
-<div id="aceUpgradeNudge" style="display:none">
-  🔒 Some features require a paid plan.
-  <a href="/pricing.html">Upgrade →</a>
-</div>
-<span id="aceAccountStatus" style="display:none"></span>
-```
-
-And add an Account link to the header nav. You'll also need to add the `.ace-premium-locked` style to `styles.css`:
-
-```css
-.ace-premium-locked {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none;
-  position: relative;
-}
-.ace-premium-locked::after {
-  content: " 🔒";
-  font-size: 0.8em;
-}
-```
-
----
-
-## Step 9 — Stripe Customer Portal (for billing management)
-
-1. Stripe Dashboard → Billing → Customer portal → Activate
-2. Enable: "Customers can update subscriptions", "Customers can cancel subscriptions"
-3. Copy the portal link and replace in `account.html`:
-   ```html
-   <a href="https://billing.stripe.com/p/login/REPLACE_STRIPE_PORTAL" ...>
-   ```
-
----
-
-## Step 10 — Test the full flow
-
-### Test payment (use Stripe test mode first)
-1. Enable test mode in Stripe Dashboard
-2. Replace Stripe keys with test keys (`sk_test_...`, `pk_test_...`)
-3. Visit `acepaste.xyz/pricing.html` → click a plan → use test card `4242 4242 4242 4242`
-4. Check that the webhook fires and `subscriptions` table updates
-5. Visit `acepaste.xyz/account.html` → sign in → verify plan shows correctly
-6. Open extension → click "Sign in for Pro" → signs in on web → extension reflects Pro status
-
-### Verify freemium limits
-- **Free web:** paste >2,000 chars → should truncate + show notice
-- **Free web:** AI markup / emoji checkboxes should be locked (🔒) and disabled
-- **Free extension:** quarantine checkboxes disabled, scanner buttons disabled
-- **Paid:** all features available, no char limit
-
----
-
-## Pricing summary
-
-Each tier's savings are calculated against the tier below it (progressive comparison).
-
-| Plan     | Price    | Compared to              | Savings |
-|----------|----------|--------------------------|---------|
-| 1-day    | $1.23/day | — (baseline)            | —       |
-| Monthly  | $12.34   | 30 × $1.23 = $36.90     | **67%** |
-| Annual   | $123.45  | 12 × $12.34 = $148.08   | **17%** |
-| Lifetime | $234.56  | 3 × $123.45 = $370.35   | **37%** (breakeven vs annual ~1.9 yrs) |
-
----
-
-## Checklist
-
-### ✅ Done automatically
-- [x] Supabase project created (`eqoltjofjlznlirbalrb` — ThinkWell Labs org, us-east-1)
-- [x] Schema migrated (subscriptions, restore_attempts, lifetime_grant_emails, triggers, RLS, RPCs)
-- [x] Lifetime grants seeded (nuumoxx@icloud.com, 13531nxt@gmail.com, b@twl.today)
-- [x] `auth.js` constants set (URL + anon key — live values, not placeholders)
-- [x] CSP `connect-src` updated in `index.html` and `_headers`
-- [x] `subscription-check` edge function deployed (ACTIVE)
-- [x] `stripe-webhook` edge function deployed (ACTIVE, JWT verification OFF — correct for webhooks)
-- [x] `restore-purchase` edge function deployed (ACTIVE)
-- [x] auth.js + freemium gates added to index.html, app-critical.js
-- [x] Extension manifest, popup, background wired for auth bridge
-- [x] Premium-lock CSS in styles.css
-
-### ⚠️ Still needed — Stripe side (manual, ~15 min)
-
-**1. Create products in Stripe Dashboard → Products → Add product**
-
-| Product name           | Price      | Billing           |
-|------------------------|------------|-------------------|
-| Ace Paste — 1-Day Trial | $1.23     | One-time          |
-| Ace Paste — Monthly    | $12.34/mo  | Recurring monthly |
-| Ace Paste — Annual     | $123.45/yr | Recurring yearly  |
-| Ace Paste — Lifetime   | $234.56    | One-time          |
-
-**2. Copy the four Price IDs** (format: `price_abc123...`) and redeploy the webhook:
-- Open `supabase/functions/stripe-webhook/index.ts` and `supabase/functions/restore-purchase/index.ts`
-- Replace the four `price_REPLACE_*` values with real IDs
-- Redeploy via: Supabase Dashboard → Edge Functions → stripe-webhook → Deploy new version
-
-**3. Set edge function secrets** — Supabase Dashboard → Edge Functions → Manage secrets:
 ```
 STRIPE_SECRET_KEY     = sk_live_...
-STRIPE_WEBHOOK_SECRET = whsec_...  (get this from step 4)
+STRIPE_WEBHOOK_SECRET = whsec_...   (from step 4)
 ```
 
-**4. Register Stripe webhook** — Stripe Dashboard → Developers → Webhooks → Add endpoint:
-- URL: `https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/stripe-webhook`
-- Events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
-- Copy the signing secret → add as `STRIPE_WEBHOOK_SECRET` in step 3
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically.
 
-**5. Create Payment Links** for each product → enable "Collect customer email" → success URL:
-```
-https://acepaste.xyz/account.html?payment=success
-```
-Paste the four links into `pricing.html` (replace `REPLACE_TRIAL_LINK`, `REPLACE_MONTHLY_LINK`, etc.)
+### 4 — Register Stripe webhook
 
-**6. Stripe Customer Portal** — Stripe Dashboard → Billing → Customer portal → Activate:
-- Paste the portal URL into `account.html` (replace `REPLACE_STRIPE_PORTAL`)
+Stripe Dashboard → Developers → Webhooks → Add endpoint:
 
-**7. Test in Stripe test mode** with card `4242 4242 4242 4242`, then switch to live keys.
+- **URL:** `https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/stripe-webhook`
+- **Events:**
+  - `checkout.session.completed`
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+  - `invoice.payment_failed`
+
+Copy the **Signing secret** (`whsec_...`) → add as `STRIPE_WEBHOOK_SECRET` in step 3.
+
+### 5 — Create Payment Links
+
+For each product → Create payment link:
+- Enable **Collect customer email**
+- Set **Success URL** to: `https://acepaste.xyz/account.html?payment=success`
+
+Paste the four links into `pricing.html` (replace `REPLACE_TRIAL_LINK`, `REPLACE_MONTHLY_LINK`, `REPLACE_YEARLY_LINK`, `REPLACE_LIFETIME_LINK`).
+
+### 6 — Activate Stripe Customer Portal
+
+Stripe Dashboard → Billing → Customer portal → Activate:
+- Enable: customers can update and cancel subscriptions
+
+Copy the portal URL and paste into `account.html` (replace `REPLACE_STRIPE_PORTAL`).
+
+### 7 — Test end-to-end
+
+Use Stripe test mode with card `4242 4242 4242 4242`:
+
+1. `acepaste.xyz/pricing.html` → pick a plan → complete checkout
+2. Check `subscriptions` table updated (Supabase Dashboard → Table Editor)
+3. `acepaste.xyz/account.html` → sign in → plan should reflect purchase
+4. Open extension → sign in → premium features should unlock
+5. Verify freemium limits still apply on free accounts (>2,000 chars, locked options)
+
+Switch to live Stripe keys when confirmed working in test mode.
 
 ---
 
-## Supabase project reference
+## Supabase rate limits (manual — dashboard only)
 
-| Key | Value |
-|-----|-------|
+Supabase Dashboard → Authentication → Rate Limits:
+- Defaults are reasonable; tighten email sign-up rate if you see bot traffic post-launch.
+
+Supabase Dashboard → Authentication → Attack Protection:
+- Turnstile already configured (Site Key + Secret Key set, provider: Turnstile). ✅
+
+---
+
+## Key references
+
+| Item | Value |
+|------|-------|
 | Project ref | `eqoltjofjlznlirbalrb` |
 | Project URL | `https://eqoltjofjlznlirbalrb.supabase.co` |
 | Webhook endpoint | `https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/stripe-webhook` |
+| Turnstile site key | `0x4AAAAAADKDgrgt_iRwIndF` |
+| Incident response policy | `INCIDENT-RESPONSE.md` |
+| DB schema reference | `supabase/schema.sql` |
