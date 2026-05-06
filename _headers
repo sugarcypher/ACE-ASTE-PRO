@@ -54,8 +54,7 @@
 /*
   # Content Security Policy
   # Strict CSP with no unsafe-inline, explicit hashes for all inline scripts
-  # SETUP: replace YOUR_PROJECT_REF with your actual Supabase project ref (e.g. abcdefghijklmnop)
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-ctK80pXSAwHb9TdKWV/OoTKdB/I5N16sDnC669JkHqw=' 'sha256-ctAI/7ecEjZpMFjuJyBCBzVNAmn1ga/2OIBUgVta2ds=' 'sha256-hsI2XKScePfqq9a84r1JImigfnKFnMJwt3JXol1INWU=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-ctK80pXSAwHb9TdKWV/OoTKdB/I5N16sDnC669JkHqw=' 'sha256-ctAI/7ecEjZpMFjuJyBCBzVNAmn1ga/2OIBUgVta2ds=' 'sha256-hsI2XKScePfqq9a84r1JImigfnKFnMJwt3JXol1INWU=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report
 
   # Prevent MIME type sniffing
   X-Content-Type-Options: nosniff
@@ -89,7 +88,7 @@
 # All other directives remain strict; connect-src is scoped to Supabase only
 # (no third-party consent scripts on this page).
 /account.html
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   X-XSS-Protection: 0

@@ -79,3 +79,55 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.on_user_created();
+
+-- ============================================================
+-- 4. Webhook idempotency (added 2026-05-06)
+-- Prevents Stripe at-least-once delivery from double-processing events.
+-- stripe-webhook edge function inserts event_id before handling; duplicate
+-- inserts raise unique-violation (code 23505) and are silently skipped.
+-- ============================================================
+create table if not exists public.processed_webhook_events (
+  event_id     text        primary key,
+  processed_at timestamptz not null default now()
+);
+alter table public.processed_webhook_events enable row level security;
+create policy "service_role only" on public.processed_webhook_events
+  using (auth.role() = 'service_role');
+
+-- Purge events older than 7 days (Stripe's dedup window is 3 days; 7 is safe margin).
+create or replace function public.purge_old_webhook_events()
+returns void language sql security definer as $$
+  delete from public.processed_webhook_events
+  where processed_at < now() - interval '7 days';
+$$;
+revoke all on function public.purge_old_webhook_events() from public;
+grant execute on function public.purge_old_webhook_events() to service_role;
+
+-- ============================================================
+-- 5. CSP violation log (added 2026-05-06)
+-- Populated by the csp-report edge function when browsers POST violations.
+-- No PII; auto-purged after 30 days.
+-- ============================================================
+create table if not exists public.csp_violations (
+  id                  bigint      generated always as identity primary key,
+  document_uri        text,
+  violated_directive  text,
+  effective_directive text,
+  blocked_uri         text,
+  source_file         text,
+  line_number         int,
+  column_number       int,
+  disposition         text,
+  reported_at         timestamptz not null default now()
+);
+alter table public.csp_violations enable row level security;
+create policy "service_role only" on public.csp_violations
+  using (auth.role() = 'service_role');
+
+create or replace function public.purge_old_csp_violations()
+returns void language sql security definer as $$
+  delete from public.csp_violations
+  where reported_at < now() - interval '30 days';
+$$;
+revoke all on function public.purge_old_csp_violations() from public;
+grant execute on function public.purge_old_csp_violations() to service_role;

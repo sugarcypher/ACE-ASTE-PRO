@@ -1,5 +1,5 @@
 /**
- * stripe-webhook — Supabase Edge Function
+ * stripe-webhook — Supabase Edge Function v8
  *
  * POST /functions/v1/stripe-webhook
  * Stripe-Signature: <sig>
@@ -9,6 +9,11 @@
  *   STRIPE_SECRET_KEY       — sk_live_...
  *   SUPABASE_URL            — auto-injected by Supabase runtime
  *   SUPABASE_SERVICE_ROLE_KEY — auto-injected by Supabase runtime
+ *
+ * Security hardening:
+ *  v8 — idempotency guard via processed_webhook_events table.
+ *       Stripe guarantees at-least-once delivery; this prevents double-processing
+ *       on retries and closes the replay-attack window.
  */
 
 // Supply-chain hardening: pin to minor versions so esm.sh cannot silently
@@ -52,6 +57,26 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
+
+  // ── Idempotency guard ──────────────────────────────────────────────────────
+  // INSERT the event_id before processing. If the event was already handled,
+  // Postgres raises a unique-violation (23505) and we return 200 immediately.
+  // This prevents double-grants on Stripe retries and closes the replay window.
+  const { error: dupErr } = await supabase
+    .from('processed_webhook_events')
+    .insert({ event_id: event.id });
+
+  if (dupErr) {
+    if (dupErr.code === '23505') {
+      // Already processed — acknowledge to Stripe, do nothing.
+      console.log('[webhook] Duplicate event ignored:', event.id);
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    // Unexpected DB error — log but continue (don't block legitimate events).
+    console.error('[webhook] Could not record event_id:', dupErr.message);
+  }
 
   try {
     switch (event.type) {

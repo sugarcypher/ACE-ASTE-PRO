@@ -55,11 +55,25 @@ const TITLE_SKIP = new Set([
   'a','an','the','and','or','but','in','on','at','to','for','of','with','by'
 ]);
 
+// ── Input / output caps for custom find-replace ──────────────────────────────
+// Prevents: oversized regex compilation, catastrophic replacement expansion
+// (e.g. replacing every char with $&$& on a large input), and degenerate
+// literal-split blowup.
+const MAX_FIND_LENGTH    = 500;   // chars — beyond this regex is impractical anyway
+const MAX_REPLACE_LENGTH = 500;   // chars — per-match expansion budget
+const MAX_OUTPUT_MULT    = 8;     // output may not exceed 8× original length
+const MAX_OUTPUT_ABS     = 4 * 1024 * 1024; // 4 MB hard ceiling regardless
+
 // Reject regex patterns with nested quantifiers that can cause catastrophic backtracking.
+// Covers: (X+)+, (X*)+, (X|Y)+, (X+){n,}, plus explicit ref-based patterns ($&, $1…$9).
 function isSafeRegex(pattern) {
   try { new RegExp(pattern); } catch (e) { return false; }
+  // Nested quantifiers — quantified group followed by quantifier
   if (/(\([^)]*[+*][^)]*\))[+*{]/.test(pattern)) return false;
+  // Alternation inside quantified group
   if (/(\([^)]*\|[^)]*\))[+*{]/.test(pattern)) return false;
+  // Repeated alternation groups: (a|b)+ is already caught above; also catch (a|b){2,}
+  if (/\([^)]*\|[^)]*\)\{[0-9,]+\}/.test(pattern)) return false;
   return true;
 }
 
@@ -206,19 +220,31 @@ function cleanText(text, opts) {
 
   if (opts.customFind) {
     const before = text.length;
-    const replace = opts.customReplace || '';
+    // Cap inputs to prevent oversized patterns and per-match replacement blowup.
+    const find    = String(opts.customFind).slice(0, MAX_FIND_LENGTH);
+    const replace = String(opts.customReplace || '').slice(0, MAX_REPLACE_LENGTH);
+    const maxOut  = Math.min(before * MAX_OUTPUT_MULT, MAX_OUTPUT_ABS);
+
+    const _applyOrRevert = (result) => {
+      if (result.length > maxOut) {
+        errors.push('Custom replacement rejected: output would be too large.');
+        return text; // revert to pre-replacement value
+      }
+      return result;
+    };
+
     if (opts.customRegex) {
-      if (!isSafeRegex(opts.customFind)) {
+      if (!isSafeRegex(find)) {
         errors.push('Regex rejected: pattern may cause excessive backtracking.');
       } else {
         try {
-          text = text.replace(new RegExp(opts.customFind, 'g'), replace);
+          text = _applyOrRevert(text.replace(new RegExp(find, 'g'), replace));
         } catch (e) {
           errors.push('Invalid regex: ' + e.message);
         }
       }
     } else {
-      text = text.split(opts.customFind).join(replace);
+      text = _applyOrRevert(text.split(find).join(replace));
     }
     report.custom = before - text.length;
   }
