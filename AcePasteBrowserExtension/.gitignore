@@ -1,0 +1,20 @@
+# Build artifacts
+*.zip
+*.crx
+*.pem
+
+# Editor / OS junk
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Node tooling (none used currently, but reserve)
+node_modules/
+.pnp.*
+.npm
+.yarn/
+
+# Temporary
+*.log
+*.tmp

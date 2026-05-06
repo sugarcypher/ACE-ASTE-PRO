@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ace Paste — Engine Test Harness</title>
+<style>
+  body { font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         max-width: 900px; margin: 24px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #666; margin: 0 0 16px; font-size: 13px; }
+  .summary { padding: 12px 16px; border-radius: 8px; margin: 16px 0;
+             font-weight: 600; font-size: 15px; }
+  .summary.pass { background: #e8f5ed; color: #1f6b3a; border: 1px solid #1f6b3a; }
+  .summary.fail { background: #fbe9e7; color: #b8261c; border: 1px solid #b8261c; }
+  .group { margin: 16px 0; }
+  .group h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;
+              color: #666; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1px solid #ddd; }
+  .case { display: grid; grid-template-columns: 24px 1fr; gap: 8px; padding: 6px 8px;
+          border-radius: 4px; align-items: start; font-size: 13px; }
+  .case + .case { margin-top: 2px; }
+  .case.pass { background: #f3faf6; }
+  .case.fail { background: #fdf3f3; border-left: 3px solid #b8261c; padding-left: 5px; }
+  .icon { font-weight: 600; }
+  .case.pass .icon { color: #1f6b3a; }
+  .case.fail .icon { color: #b8261c; }
+  .name { font-weight: 500; }
+  .detail { color: #666; font-size: 12px; margin-top: 2px;
+            font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+  .detail b { color: #b8261c; }
+  .live { background: #fff8e1; border: 1px solid #f0c419; padding: 12px;
+          border-radius: 8px; margin: 16px 0; }
+  .live h2 { margin-top: 0; font-size: 14px; }
+  .live textarea { width: 100%; height: 80px; font-family: ui-monospace, Menlo, monospace;
+                   font-size: 12px; }
+  .live button { padding: 6px 12px; font-size: 13px; cursor: pointer;
+                 border: 1px solid #2a7be4; background: #2a7be4; color: white;
+                 border-radius: 4px; margin: 8px 4px 0 0; }
+  .live pre { background: #f5f5f5; padding: 8px; border-radius: 4px; font-size: 11px;
+              max-height: 200px; overflow: auto; }
+</style>
+</head>
+<body>
+  <h1>Ace Paste — Engine Test Harness <span id="buildStamp" style="font-size:11px;color:#999;font-weight:400;"></span></h1>
+  <p class="sub">Self-contained smoke test for <code>cleaner.js</code>. No extension required —
+     just open this file in any browser. Verifies dangerous-invisible coverage, engine parity
+     with the web app, and the report contract.</p>
+
+  <div id="summary" class="summary">Running tests…</div>
+  <div id="results"></div>
+
+  <div class="live">
+    <h2>Live cleaner playground</h2>
+    <p style="margin-top:0;font-size:12px;color:#666;">
+      Paste anything (try copying from a known-contaminated source — Slack messages, marketing emails, AI chatbots).
+      Click <b>Clean</b> to run it through the engine and inspect what was found.
+    </p>
+    <textarea id="liveInput" placeholder="Paste here…"></textarea>
+    <div>
+      <button id="btnCleanInvisible" type="button">Clean (invisibles only)</button>
+      <button id="btnCleanFull" type="button">Clean (full pipeline)</button>
+      <button id="btnSeed" type="button">Seed with hostile sample</button>
+    </div>
+    <pre id="liveOutput">Result will appear here…</pre>
+  </div>
+
+  <script src="../cleaner.js"></script>
+  <script>
+  // IIFE — keeps test-runner bindings local so they don't collide with the
+  // top-level `cleanText` / `INVISIBLE_RE` declarations from cleaner.js
+  // (classic-script siblings share the global scope; const re-declaration
+  // would otherwise SyntaxError and kill the whole test runner silently).
+  (function() {
+    'use strict';
+    if (!self.AcePasteCleaner) {
+      const sum = document.getElementById('summary');
+      sum.classList.add('fail');
+      sum.textContent = '✗ cleaner.js failed to load — open DevTools console for details';
+      return;
+    }
+    const { cleanText, INVISIBLE_RE_GLOBAL, INVISIBLE_SUPPL_RE_GLOBAL } = self.AcePasteCleaner;
+    const tests = [];
+    function group(name) { tests.push({ group: name, cases: [] }); return tests[tests.length - 1]; }
+    function add(g, name, fn) { g.cases.push({ name, fn }); }
+
+    // ── Dangerous invisible coverage ──────────────────────────────────────
+    const G1 = group('Dangerous invisible characters (default ON)');
+    add(G1, 'Strips classic ZWSP / ZWNJ / ZWJ', () => {
+      const r = cleanText('a​b‌c‍d', { removeInvisible: true });
+      eq(r.text, 'abcd'); eq(r.report.invisible, 3);
+    });
+    add(G1, 'Strips BOM (U+FEFF)', () => {
+      eq(cleanText('﻿hi', { removeInvisible: true }).text, 'hi');
+    });
+    add(G1, 'Strips LRM / RLM (U+200E, U+200F)', () => {
+      eq(cleanText('a‎b‏c', { removeInvisible: true }).text, 'abc');
+    });
+    add(G1, 'Strips Trojan Source bidi overrides (U+202E, U+202D)', () => {
+      eq(cleanText('safe‮evil‬more', { removeInvisible: true }).text, 'safeevilmore');
+    });
+    add(G1, 'Strips bidi isolates (U+2066–U+2069)', () => {
+      eq(cleanText('a⁦hidden⁩b', { removeInvisible: true }).text, 'ahiddenb');
+    });
+    add(G1, 'Strips word joiner U+2060', () => {
+      eq(cleanText('a⁠b', { removeInvisible: true }).text, 'ab');
+    });
+    add(G1, 'Strips soft hyphen U+00AD', () => {
+      eq(cleanText('hy­phen', { removeInvisible: true }).text, 'hyphen');
+    });
+    add(G1, 'Strips variation selectors U+FE00–U+FE0F', () => {
+      eq(cleanText('A️mark', { removeInvisible: true }).text, 'Amark');
+    });
+    add(G1, 'Strips supplementary tag chars U+E0000–U+E007F (LLM prompt-injection vector)', () => {
+      const tag = (s) => Array.from(s).map(c => String.fromCodePoint(0xE0000 + c.charCodeAt(0))).join('');
+      const r = cleanText('hi' + tag('evil'), { removeInvisible: true });
+      eq(r.text, 'hi'); eq(r.report.invisible, 4);
+    });
+    add(G1, 'Strips supplementary variation selectors U+E0100–U+E01EF (Sneaky Bits)', () => {
+      const r = cleanText('A' + String.fromCodePoint(0xE0100) + String.fromCodePoint(0xE01EF) + 'B',
+                          { removeInvisible: true });
+      eq(r.text, 'AB'); eq(r.report.invisible, 2);
+    });
+    add(G1, 'Strips Mongolian vowel separator + Hangul fillers + Braille blank', () => {
+      eq(cleanText('a᠎bᅟcㅤd⠀e', { removeInvisible: true }).text, 'abcde');
+    });
+    add(G1, 'Counts chars (not bytes) in report', () => {
+      eq(cleanText('‮​‌‍hi﻿', { removeInvisible: true }).report.invisible, 5);
+    });
+
+    // ── Whitespace / formatting ───────────────────────────────────────────
+    const G2 = group('Whitespace & formatting');
+    add(G2, 'NBSP → space, em-space removed', () => {
+      const r = cleanText('a b c', { removeFormatting: true });
+      eq(r.text, 'a bc');
+    });
+    add(G2, 'Ideographic space removed', () => {
+      eq(cleanText('a　b', { removeFormatting: true }).text, 'ab');
+    });
+    add(G2, 'Collapse spaces + newlines + trim per line', () => {
+      const r = cleanText('a   b\n\n\n\nc   \n  d', {
+        collapseSpaces: true, collapseNewlines: true, trimPerLine: true
+      });
+      eq(r.text, 'a b\n\nc\nd');
+      eq(r.report.trimmedLines, 2);
+    });
+
+    // ── Engine parity ─────────────────────────────────────────────────────
+    const G3 = group('Engine parity (web app)');
+    add(G3, 'Markdown bold / code / heading', () => {
+      const r = cleanText('# Title\n**bold** `code` ```block```', { removeMarkdown: true });
+      assert(r.text.includes('Title'), 'Title missing');
+      assert(!r.text.includes('**'), '** remained');
+      assert(!r.text.includes('```'), '``` remained');
+    });
+    add(G3, 'AI debris ##/***/+++/===', () => {
+      const r = cleanText('a ## b *** c +++ d === e', { removeAIMarkup: true });
+      assert(!/[#*+=]{2,}/.test(r.text), 'AI debris remained: ' + r.text);
+    });
+    add(G3, 'Emoji removal', () => {
+      const r = cleanText('hi 👋 fire 🔥', { removeEmojis: true });
+      assert(!/[\u{1F300}-\u{1F9FF}]/u.test(r.text), 'emoji remained: ' + r.text);
+    });
+    add(G3, 'HTML strip', () => {
+      eq(cleanText('<p>hi <b>x</b></p>', { removeHtml: true }).text, 'hi x');
+    });
+    add(G3, 'Comments removed (// + /* */ + <!-- -->)', () => {
+      const r = cleanText('keep\n// hide\n/* hide */\n<!-- hide -->\nkeep', { removeComments: true });
+      assert(!r.text.includes('hide'), 'comment remained: ' + r.text);
+    });
+    add(G3, 'Case transforms', () => {
+      eq(cleanText('hi world', { caseTx: 'upper' }).text, 'HI WORLD');
+      eq(cleanText('the quick fox', { caseTx: 'title' }).text, 'The Quick Fox');
+    });
+    add(G3, 'Punctuation strip', () => {
+      eq(cleanText('Hi, world! Yes?', { punctuation: [',', '!', '?'] }).text, 'Hi world Yes');
+    });
+    add(G3, 'Custom literal find/replace', () => {
+      eq(cleanText('foo bar foo', { customFind: 'foo', customReplace: 'X' }).text, 'X bar X');
+    });
+    add(G3, 'Custom regex', () => {
+      eq(cleanText('a1 b2', { customFind: '\\d', customReplace: '#', customRegex: true }).text, 'a# b#');
+    });
+    add(G3, 'Safe-regex rejects (a+)+ catastrophic backtracking', () => {
+      const r = cleanText('aaaa', { customFind: '(a+)+', customRegex: true });
+      assert(r.errors.length > 0, 'expected ReDoS rejection');
+    });
+
+    // ── Report contract ───────────────────────────────────────────────────
+    const G4 = group('Report contract');
+    add(G4, 'Report exposes all expected categories', () => {
+      const expected = ['invisible','markdown','aiMarkup','emojis','formatting','spaces',
+                        'newlines','html','comments','punctuation','custom','trimmedLines'];
+      const r = cleanText('hello', {});
+      for (const k of expected) assert(k in r.report, 'missing report.' + k);
+    });
+    add(G4, 'originalLength / finalLength accuracy', () => {
+      const r = cleanText('hello world', { caseTx: 'upper' });
+      eq(r.originalLength, 11); eq(r.finalLength, 11);
+    });
+
+    // ── Scanner-side regex export ─────────────────────────────────────────
+    const G5 = group('Scanner regex export (used by scanner.js)');
+    add(G5, 'INVISIBLE_RE_GLOBAL detects bidi override', () => {
+      assert('safe‮evil'.match(INVISIBLE_RE_GLOBAL), 'no match');
+    });
+    add(G5, 'INVISIBLE_SUPPL_RE_GLOBAL detects tag char', () => {
+      assert(('hi' + String.fromCodePoint(0xE0061)).match(INVISIBLE_SUPPL_RE_GLOBAL), 'no match');
+    });
+
+    // ── Full pipeline integration ─────────────────────────────────────────
+    const G6 = group('Full pipeline integration (popup defaults)');
+    add(G6, 'Default popup pipeline cleans BOM + bidi + ZWSP + markdown + AI debris', () => {
+      const inp = '﻿# Heading\n\n\n**bold**‮ ## debris\n<p>html</p>\nhello ​ world  \n\n';
+      const r = cleanText(inp, {
+        removeInvisible: true, removeMarkdown: true, removeAIMarkup: true,
+        collapseSpaces: true, collapseNewlines: true, trimPerLine: true,
+        removeComments: true, removeHtml: true
+      });
+      assert(!r.text.includes('﻿'), 'BOM remained');
+      assert(!r.text.includes('‮'), 'bidi remained');
+      assert(!r.text.includes('​'), 'ZWSP remained');
+      assert(!r.text.includes('**'), '** remained');
+      assert(!r.text.includes('<p>'), 'html remained');
+      assert(!r.text.includes('  '), 'double space remained');
+      assert(!/\n{3,}/.test(r.text), 'triple newline remained');
+      assert(r.report.invisible >= 3, 'invisible count low: ' + r.report.invisible);
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+    function eq(a, b, msg) {
+      if (a !== b) throw new Error((msg || '') + ' expected ' + JSON.stringify(b) + ', got ' + JSON.stringify(a));
+    }
+    function assert(cond, msg) { if (!cond) throw new Error(msg || 'assertion failed'); }
+
+    // ── Run ───────────────────────────────────────────────────────────────
+    const root = document.getElementById('results');
+    let totalPass = 0, totalFail = 0;
+    for (const g of tests) {
+      const div = document.createElement('div');
+      div.className = 'group';
+      const h2 = document.createElement('h2');
+      h2.textContent = g.group;
+      div.appendChild(h2);
+      for (const c of g.cases) {
+        const row = document.createElement('div');
+        row.className = 'case';
+        const icon = document.createElement('span');
+        const name = document.createElement('span');
+        icon.className = 'icon';
+        let pass = true, err = null;
+        try { c.fn(); } catch (e) { pass = false; err = e.message; }
+        icon.textContent = pass ? '✓' : '✗';
+        row.classList.add(pass ? 'pass' : 'fail');
+        if (pass) totalPass++; else totalFail++;
+        const namewrap = document.createElement('span');
+        namewrap.className = 'name';
+        namewrap.textContent = c.name;
+        name.appendChild(namewrap);
+        if (!pass) {
+          const d = document.createElement('div');
+          d.className = 'detail';
+          d.innerHTML = '<b>FAIL:</b> ' + err.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'})[c]);
+          name.appendChild(d);
+        }
+        row.appendChild(icon);
+        row.appendChild(name);
+        div.appendChild(row);
+      }
+      root.appendChild(div);
+    }
+
+    const sum = document.getElementById('summary');
+    sum.classList.add(totalFail === 0 ? 'pass' : 'fail');
+    sum.textContent = totalFail === 0
+      ? `✓ All ${totalPass} tests pass`
+      : `✗ ${totalFail} of ${totalPass + totalFail} tests failed`;
+
+    // ── Live playground ───────────────────────────────────────────────────
+    function runLive(mode) {
+      const inp = document.getElementById('liveInput').value;
+      const opts = mode === 'full'
+        ? {
+            removeInvisible: true, removeMarkdown: true, removeAIMarkup: true,
+            removeEmojis: true, removeFormatting: true,
+            collapseSpaces: true, collapseNewlines: true, trimPerLine: true,
+            removeHtml: true, removeComments: true
+          }
+        : { removeInvisible: true };
+      const r = cleanText(inp, opts);
+      const out = {
+        cleaned: r.text,
+        report: r.report,
+        originalLength: r.originalLength,
+        finalLength: r.finalLength,
+        delta: r.originalLength - r.finalLength,
+        errors: r.errors
+      };
+      document.getElementById('liveOutput').textContent = JSON.stringify(out, null, 2);
+    }
+    function seedHostile() {
+      const tag = (s) => Array.from(s).map(c => String.fromCodePoint(0xE0000 + c.charCodeAt(0))).join('');
+      const sample = '﻿Hello ‮Reversed‬ world​' +
+                     ' (this contains tag stego: hi' + tag('payload') + ')\n' +
+                     'And **markdown** + ## debris + 🔥';
+      document.getElementById('liveInput').value = sample;
+    }
+    // Wire buttons via addEventListener — robust against scope/inline-handler issues.
+    document.getElementById('btnCleanInvisible').addEventListener('click', () => runLive('invisible-only'));
+    document.getElementById('btnCleanFull').addEventListener('click', () => runLive('full'));
+    document.getElementById('btnSeed').addEventListener('click', seedHostile);
+    // Also expose globally for backwards-compat.
+    window.runLive = runLive;
+    window.seedHostile = seedHostile;
+    // Build stamp — confirms the user is seeing the latest version.
+    // The literal __BUILD_STAMP__ placeholder is replaced at bundle time by build-test-me.py.
+    const stamp = document.getElementById('buildStamp');
+    if (stamp) stamp.textContent = '__BUILD_STAMP__ — ' + totalPass + '/' + (totalPass + totalFail) + ' tests';
+  })();
+  </script>
+</body>
+</html>
