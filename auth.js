@@ -95,9 +95,11 @@ async function _maybeRefreshJWT(session) {
 /**
  * Sign in with email + password. Returns { ok, user, plan, error }.
  */
-async function acePasteSignIn(email, password) {
+async function acePasteSignIn(email, password, captchaToken) {
   try {
-    const data = await _post('/auth/v1/token?grant_type=password', { email, password });
+    const body = { email, password };
+    if (captchaToken) body.gotrue_meta_security = { captcha_token: captchaToken };
+    const data = await _post('/auth/v1/token?grant_type=password', body);
     if (!data.access_token) {
       // Supabase returns error_code: 'email_not_confirmed' when user hasn't verified
       const code = data.error_code || data.error || '';
@@ -130,9 +132,11 @@ async function acePasteSignIn(email, password) {
  * confirmPending=true means the account was created but the user must verify
  * their email before they can sign in — do NOT auto-sign-in.
  */
-async function acePasteSignUp(email, password) {
+async function acePasteSignUp(email, password, captchaToken) {
   try {
-    const data = await _post('/auth/v1/signup', { email, password });
+    const body = { email, password };
+    if (captchaToken) body.gotrue_meta_security = { captcha_token: captchaToken };
+    const data = await _post('/auth/v1/signup', body);
     // Duplicate email: Supabase returns a fake-success user object (id present, identities=[])
     // to prevent user enumeration — treat empty identities as "already registered".
     if (data.id && Array.isArray(data.identities) && data.identities.length === 0) {
@@ -156,12 +160,14 @@ async function acePasteSignUp(email, password) {
  * Send a password recovery email.
  * Returns { ok, error }.
  */
-async function acePasteSendRecovery(email) {
+async function acePasteSendRecovery(email, captchaToken) {
   try {
+    const body = { email };
+    if (captchaToken) body.gotrue_meta_security = { captcha_token: captchaToken };
     const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/recover', {
       method: 'POST',
       headers: _headers(),
-      body: JSON.stringify({ email }),
+      body: JSON.stringify(body),
     });
     // Supabase returns 200 with empty body on success (even for unknown emails,
     // to prevent user enumeration).

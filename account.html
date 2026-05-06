@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
 <title>Account — Ace Paste Cleaner Pro</title>
 <meta name="description" content="Sign in to your Ace Paste Cleaner Pro account to manage your subscription.">
 <link rel="stylesheet" href="/styles.css?v=1.0">
@@ -159,8 +159,13 @@
 #signedOut { display: block; }
 #signedIn  { display: none; }
 </style>
+<!-- Cloudflare Turnstile — invisible CAPTCHA. Widget renders hidden; token is
+     fetched programmatically before each auth call to block bot sign-ups. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
 </head>
 <body>
+<!-- Hidden Turnstile widget container. Size=invisible means no UI is shown. -->
+<div id="cfTurnstile" style="display:none"></div>
 <header class="hdr">
   <picture>
     <source srcset="/brand-56.webp?v=1.0 1x, /brand-112.webp?v=1.0 2x" type="image/webp">
@@ -311,6 +316,39 @@
 
 <script src="/auth.js"></script>
 <script>
+// ── Turnstile helpers ────────────────────────────────────────────────────────
+// TURNSTILE_SITE_KEY is the public site key from Cloudflare Turnstile dashboard.
+// Replace with your actual site key before deploying.
+var TURNSTILE_SITE_KEY = '0x4AAAAAADKDgrgt_iRwIndF';
+var _tsWidgetId = null;
+
+// Render the invisible widget once Turnstile is ready.
+// We use the callback approach so it works regardless of script load order.
+window.onTurnstileLoad = function() {
+  _tsWidgetId = turnstile.render('#cfTurnstile', {
+    sitekey:  TURNSTILE_SITE_KEY,
+    size:     'invisible',
+    callback: function() {}, // token available via turnstile.getResponse()
+  });
+};
+
+// Execute the invisible challenge and resolve with the token.
+// Falls back gracefully (null) if Turnstile hasn't loaded (e.g. ad-blocker).
+function getCaptchaToken() {
+  return new Promise(function(resolve) {
+    if (typeof turnstile === 'undefined' || _tsWidgetId === null) {
+      resolve(null); return;
+    }
+    // Reset so we always get a fresh token (tokens are single-use).
+    turnstile.reset(_tsWidgetId);
+    var timeout = setTimeout(function() { resolve(null); }, 8000);
+    turnstile.execute(_tsWidgetId, {
+      callback: function(token) { clearTimeout(timeout); resolve(token); },
+      'error-callback': function() { clearTimeout(timeout); resolve(null); },
+    });
+  });
+}
+
 (function() {
   var PLAN_LABELS = {
     free: 'Free', trial: '1-Day Trial', monthly: 'Monthly',
@@ -416,7 +454,8 @@
     var pass  = document.getElementById('password').value;
     if (!email || !pass) return showError('authError', 'Email and password required.');
     this.disabled = true; this.textContent = 'Signing in…';
-    var result = await acePasteSignIn(email, pass);
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSignIn(email, pass, captchaToken);
     this.disabled = false; this.textContent = 'Sign in';
     if (!result.ok) return showError('authError', result.error);
 
@@ -449,7 +488,8 @@
     if (!email || !pass) return showError('signupError', 'Email and password required.');
     if (pass.length < 8) return showError('signupError', 'Password must be at least 8 characters.');
     this.disabled = true; this.textContent = 'Creating account…';
-    var result = await acePasteSignUp(email, pass);
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSignUp(email, pass, captchaToken);
     this.disabled = false; this.textContent = 'Create account';
     if (!result.ok) return showError('signupError', result.error);
     if (result.confirmPending) {
@@ -489,7 +529,8 @@
     var email = document.getElementById('recoveryEmail').value.trim();
     if (!email) return showError('recoveryError', 'Enter your email address.');
     this.disabled = true; this.textContent = 'Sending…';
-    var result = await acePasteSendRecovery(email);
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSendRecovery(email, captchaToken);
     this.disabled = false; this.textContent = 'Send reset link';
     if (!result.ok) return showError('recoveryError', result.error);
     document.getElementById('recoveryForm').style.display = 'none';
