@@ -1,16 +1,12 @@
 /**
- * create-portal-session — Supabase Edge Function
+ * create-portal-session — Supabase Edge Function v2
  *
  * POST /functions/v1/create-portal-session
  * Authorization: Bearer <supabase_jwt>
  *
- * Creates a Stripe Billing Portal session for the authenticated user
- * and returns the session URL. The client then redirects to it.
- *
- * Env vars:
- *   STRIPE_SECRET_KEY           — sk_live_...
- *   SUPABASE_URL                — auto-injected
- *   SUPABASE_SERVICE_ROLE_KEY   — auto-injected
+ * Security hardening:
+ *  - return_url validated against https://acepaste.xyz origin (open-redirect fix)
+ *  - Lifetime users without stripe_customer_id get a clear 404 (no Stripe call)
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -27,15 +23,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Authorization, apikey, Content-Type',
 };
 
+const ALLOWED_RETURN_ORIGIN = 'https://acepaste.xyz';
+const DEFAULT_RETURN_URL    = 'https://acepaste.xyz/account.html';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return json({ error: 'Unauthorized' }, 401);
-  }
+  if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -46,7 +43,6 @@ Deno.serve(async (req) => {
   const { data: { user }, error: authErr } = await supabase.auth.getUser(jwt);
   if (authErr || !user) return json({ error: 'Unauthorized' }, 401);
 
-  // Fetch the user's Stripe customer ID from the subscriptions table
   const { data: sub, error: subErr } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id')
@@ -54,19 +50,25 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (subErr || !sub?.stripe_customer_id) {
-    return json({ error: 'No billing account found. Make a purchase first.' }, 404);
+    return json({ error: 'No billing account found. Contact support if you believe this is an error.' }, 404);
   }
 
-  // Parse optional return_url from body
-  let returnUrl = 'https://acepaste.xyz/account.html';
+  // Validate return_url — must be same origin as acepaste.xyz
+  let returnUrl = DEFAULT_RETURN_URL;
   try {
     const body = await req.json();
-    if (body.return_url) returnUrl = body.return_url;
-  } catch { /* no body or not JSON — use default */ }
+    if (body.return_url) {
+      const parsed = new URL(body.return_url);
+      if (parsed.origin === ALLOWED_RETURN_ORIGIN) {
+        returnUrl = body.return_url;
+      } else {
+        console.warn('[portal] Rejected non-allowlisted return_url:', body.return_url);
+      }
+    }
+  } catch { /* no body or invalid URL — use default */ }
 
-  // Create a portal session
   const session = await stripe.billingPortal.sessions.create({
-    customer: sub.stripe_customer_id,
+    customer:   sub.stripe_customer_id,
     return_url: returnUrl,
   });
 

@@ -1,6 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <title>Account — Ace Paste Cleaner Pro</title>
 <meta name="description" content="Sign in to your Ace Paste Cleaner Pro account to manage your subscription.">
 <link rel="stylesheet" href="/styles.css?v=1.0">
@@ -352,6 +353,11 @@
     var isPaid = plan !== 'free';
     document.getElementById('upgradeSection').style.display  = isPaid ? 'none'  : 'block';
     document.getElementById('restoreSection').style.display  = isPaid ? 'none'  : 'block';
+    // Lifetime users have no recurring subscription — billing portal is irrelevant
+    var manageBtn = document.getElementById('manageBtn');
+    if (manageBtn) {
+      manageBtn.style.display = (plan === 'lifetime') ? 'none' : 'inline-block';
+    }
     if (isExtSource) {
       document.getElementById('extBridgeNotice').style.display = 'block';
     }

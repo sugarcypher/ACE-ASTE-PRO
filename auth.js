@@ -61,6 +61,35 @@ function _clearSession() {
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
 }
 
+// ── Silent JWT refresh ─────────────────────────────────────────────────────────
+// Supabase JWTs expire after 1 hour. Before each server call we check if the
+// token is within 5 minutes of expiry and silently refresh it. Prevents silent
+// plan-downgrade mid-session when the JWT lapses.
+async function _maybeRefreshJWT(session) {
+  if (!session || !session.refreshToken) return session;
+  const FIVE_MIN = 5 * 60; // seconds
+  if ((Date.now() / 1000) < ((session.expiresAt || 0) - FIVE_MIN)) return session;
+  try {
+    const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: _headers(),
+      body: JSON.stringify({ refresh_token: session.refreshToken }),
+    });
+    const data = await r.json();
+    if (!data.access_token) { _clearSession(); return null; }
+    const refreshed = {
+      ...session,
+      jwt:          data.access_token,
+      refreshToken: data.refresh_token || session.refreshToken,
+      expiresAt:    data.expires_at,
+    };
+    _saveSession(refreshed);
+    return refreshed;
+  } catch(e) {
+    return session; // network failure — use existing token optimistically
+  }
+}
+
 // ── Public API ─────────────────────────────────────────────────────────────
 
 /**
@@ -80,7 +109,14 @@ async function acePasteSignIn(email, password) {
     const jwt   = data.access_token;
     const user  = data.user;
     const plan  = await _fetchPlan(jwt, user.id);
-    const session = { jwt, email: user.email, userId: user.id, plan, expiresAt: data.expires_at };
+    const session = {
+      jwt,
+      refreshToken: data.refresh_token || null,
+      email:        user.email,
+      userId:       user.id,
+      plan,
+      expiresAt:    data.expires_at,
+    };
     _saveSession(session);
     return { ok: true, user, plan };
   } catch(e) {
@@ -210,8 +246,14 @@ function acePasteIsPaid() {
  * Dispatches 'acepaste:auth' custom event with { plan }.
  */
 async function acePasteRefreshPlan() {
-  const s = _loadSession();
+  let s = _loadSession();
   if (!s || !s.jwt) {
+    dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: PLAN_FREE } }));
+    return PLAN_FREE;
+  }
+  // Silently refresh the JWT if it's near expiry before hitting the server
+  s = await _maybeRefreshJWT(s);
+  if (!s) {
     dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: PLAN_FREE } }));
     return PLAN_FREE;
   }
@@ -242,8 +284,6 @@ function acePasteEmail() {
  */
 async function _fetchPlan(jwt, userId) {
   try {
-    // Call the edge function instead of querying the table directly
-    // This keeps the plan logic server-side and avoids RLS complexity
     const r = await fetch(
       ACEPASTE_SUPABASE_URL + '/functions/v1/subscription-check',
       { headers: _headers(jwt) }
