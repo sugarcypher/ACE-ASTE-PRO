@@ -87,6 +87,9 @@
   <label class="lbl">Paste text</label>
   <textarea id="paste" class="ta" rows="8" placeholder="Paste here…"></textarea>
   
+  <div id="upgradeNudge" class="ace-notice" style="display:none">
+    🔒 <strong>Free plan:</strong> some features are locked. <a href="/pricing.html">Upgrade to unlock everything →</a>
+  </div>
   <div class="options-panel">
     <div class="options-top">
       <label title="Always on \u2014 the core feature of this tool"><input type="checkbox" id="removeInvisible" data-tier="free" checked disabled> Remove invisible characters <span style="font-size:11px;opacity:.7">(always on)</span></label>
@@ -126,7 +129,7 @@
       <div class="option-group">
         <div class="group-title">Case Transform</div>
         <div class="case-options">
-          <label><input type="radio" name="caseTx" value="" checked> None</label>
+          <label><input type="radio" id="caseTxNone" name="caseTx" value="" checked> None</label>
           <label><input type="radio" name="caseTx" value="upper"> UPPERCASE</label>
           <label><input type="radio" name="caseTx" value="lower"> lowercase</label>
           <label><input type="radio" name="caseTx" value="capitalize"> Capitalize Each Word</label>

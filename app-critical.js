@@ -48,7 +48,10 @@ let elements = {};
 //   U+180B-180D   Mongolian Free Variation Selectors 1-3
 //   U+FE00-FE0F   Variation Selectors 1-16
 //   U+E0100-E01EF Variation Selectors Supplement (17-256)
-const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u034F\u115F\u1160\u17B4\u17B5\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u0085\u034F\u115F\u1160\u17B4\u17B5\u2028\u2029\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+// \u0085 \u2014 NEL / NEXT LINE (C1 control, Cc \u2014 not Cf, used as hidden line break)
+// \u2028 \u2014 LINE SEPARATOR (Zl \u2014 not Cf, can break JS strings, used in injection)
+// \u2029 \u2014 PARAGRAPH SEPARATOR (Zp \u2014 not Cf, same risk as \u2028)
 
 function stripInvisibleChars(text) {
   let count = 0;
@@ -123,8 +126,8 @@ function normalizeSmartPunctuation(text) {
 // Catches regression if the regex ever gets weakened.
 (function selfTestInvisible() {
   // 12 invisible chars from many languages/categories
-  const sample = 'a\u200Bb\u00ADc\u202Ed\u2060e\uFEFFf\uFE0Fg\u061Ch\u3164i\u070Fj\u034Fk\u180El\uFFFAm';
-  const expected = 'abcdefghijklm';
+  const sample = 'a\u200Bb\u00ADc\u202Ed\u2060e\uFEFFf\uFE0Fg\u061Ch\u3164i\u070Fj\u034Fk\u180El\uFFFAm\u2028n\u2029o\u0085p';
+  const expected = 'abcdefghijklmnop';
   const result = stripInvisibleChars(sample);
   if (result.text !== expected) {
     console.error('[ACEPASTE] CRITICAL: invisible character self-test FAILED. Got:', JSON.stringify(result.text), 'expected:', JSON.stringify(expected));
