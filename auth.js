@@ -304,10 +304,7 @@ async function _fetchPlan(jwt, userId) {
 // extension. Update TRUSTED_EXT_IDS when you publish/update the extension.
 
 var TRUSTED_EXT_IDS = [
-  // TODO: replace with your Chrome Web Store extension ID once published.
-  // Format: 'abcdefghijklmnopqrstuvwxyzabcdef' (32 lowercase hex chars)
-  // e.g. 'jfnnndaijdgfmjgfondaibcglpbnhfph'
-  // Leave empty until extension is published — bridge is disabled by default.
+  'kgnnilelmfchdblcoefmokgcbpccbcci', // Ace Paste Cleaner Pro (Chrome Web Store)
 ];
 
 function acePasteExtensionBridge() {
