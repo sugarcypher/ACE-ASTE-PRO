@@ -194,16 +194,26 @@
       <div class="account-card" id="signupCard" style="display:none">
         <h2>Create account</h2>
         <div class="auth-error" id="signupError"></div>
-        <div class="form-row">
-          <label for="signupEmail">Email</label>
-          <input type="email" id="signupEmail" autocomplete="email" placeholder="you@example.com" required>
+        <div id="signupForm">
+          <div class="form-row">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-row">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" autocomplete="new-password" placeholder="8+ characters" required>
+          </div>
+          <button class="btn-full" id="signupBtn" type="button">Create account</button>
+          <p class="form-switch">Already have one? <a id="switchToLogin">Sign in →</a></p>
         </div>
-        <div class="form-row">
-          <label for="signupPassword">Password</label>
-          <input type="password" id="signupPassword" autocomplete="new-password" placeholder="8+ characters" required>
+        <div id="confirmPendingMsg" style="display:none;text-align:center;padding:0.5rem 0">
+          <p style="font-size:2rem;margin:0 0 0.5rem">📬</p>
+          <p style="font-weight:700;font-size:1rem;margin:0 0 0.4rem;color:var(--text,#111)">Check your inbox</p>
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1.1rem">
+            We sent a confirmation link to <strong id="confirmEmail"></strong>. Click it to activate your account, then sign in.
+          </p>
+          <a id="goToSignIn" href="#" style="color:#2563eb;font-size:0.88rem;font-weight:600;text-decoration:none">← Back to sign in</a>
         </div>
-        <button class="btn-full" id="signupBtn" type="button">Create account</button>
-        <p class="form-switch">Already have one? <a id="switchToLogin">Sign in →</a></p>
       </div>
     </div>
 
@@ -337,7 +347,23 @@
     var result = await acePasteSignUp(email, pass);
     this.disabled = false; this.textContent = 'Create account';
     if (!result.ok) return showError('signupError', result.error);
+    if (result.confirmPending) {
+      // Account created — user must verify email before signing in
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('confirmEmail').textContent = email;
+      document.getElementById('confirmPendingMsg').style.display = 'block';
+      return;
+    }
     showSignedIn(result.plan, email);
+  });
+
+  // Back to sign-in from confirm-pending screen
+  document.getElementById('goToSignIn').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('confirmPendingMsg').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('signupCard').style.display = 'none';
+    document.getElementById('loginCard').style.display  = 'block';
   });
 
   // Toggle login/signup

@@ -70,7 +70,12 @@ async function acePasteSignIn(email, password) {
   try {
     const data = await _post('/auth/v1/token?grant_type=password', { email, password });
     if (!data.access_token) {
-      return { ok: false, error: data.error_description || data.msg || 'Invalid credentials' };
+      // Supabase returns error_code: 'email_not_confirmed' when user hasn't verified
+      const code = data.error_code || data.error || '';
+      if (code === 'email_not_confirmed' || (data.error_description || '').toLowerCase().includes('not confirmed')) {
+        return { ok: false, confirmPending: true, error: 'Please confirm your email before signing in — check your inbox.' };
+      }
+      return { ok: false, error: data.error_description || data.msg || 'Invalid credentials.' };
     }
     const jwt   = data.access_token;
     const user  = data.user;
@@ -84,16 +89,28 @@ async function acePasteSignIn(email, password) {
 }
 
 /**
- * Sign up with email + password. Returns { ok, user, plan, error }.
+ * Sign up with email + password.
+ * Returns { ok, confirmPending, error }.
+ * confirmPending=true means the account was created but the user must verify
+ * their email before they can sign in — do NOT auto-sign-in.
  */
 async function acePasteSignUp(email, password) {
   try {
     const data = await _post('/auth/v1/signup', { email, password });
-    if (data.error || !data.id) {
-      return { ok: false, error: data.msg || data.error || 'Sign-up failed' };
+    // Duplicate email: Supabase returns a fake-success user object (id present, identities=[])
+    // to prevent user enumeration — treat empty identities as "already registered".
+    if (data.id && Array.isArray(data.identities) && data.identities.length === 0) {
+      return { ok: false, error: 'An account with this email already exists. Try signing in.' };
     }
-    // Auto sign-in after successful signup
-    return acePasteSignIn(email, password);
+    if (data.error || !data.id) {
+      return { ok: false, error: data.msg || data.error || 'Sign-up failed. Please try again.' };
+    }
+    // If Supabase has auto-confirm enabled, email_confirmed_at is populated immediately.
+    // In that case we can sign in right away; otherwise the user must verify first.
+    if (data.email_confirmed_at) {
+      return acePasteSignIn(email, password);
+    }
+    return { ok: true, confirmPending: true };
   } catch(e) {
     return { ok: false, error: 'Network error. Please try again.' };
   }
