@@ -405,7 +405,7 @@
       if (!jwt) { showError('restoreError', 'Sign in first, then try restoring.'); return; }
 
       var res = await fetch(
-        (window.ACEPASTE_SUPABASE_URL || 'https://YOUR_PROJECT_REF.supabase.co') +
+        (window.ACEPASTE_SUPABASE_URL || 'https://eqoltjofjlznlirbalrb.supabase.co') +
         '/functions/v1/restore-purchase',
         {
           method: 'POST',
