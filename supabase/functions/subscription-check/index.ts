@@ -11,7 +11,9 @@
  *  - Consistent response shape on all paths
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// Supply-chain hardening: pin to minor version so esm.sh cannot silently
+// serve a compromised patch. Update this pin when intentionally upgrading.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin':  'https://acepaste.xyz',

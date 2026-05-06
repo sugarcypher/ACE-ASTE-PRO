@@ -326,11 +326,12 @@ function acePasteExtensionBridge() {
     if (typeof chrome !== 'undefined' && chrome.runtime) {
       try {
         chrome.runtime.sendMessage(extId, {
-          type: 'ACEPASTE_AUTH_TOKEN',
-          jwt: s.jwt,
-          plan: e.detail.plan,
-          email: s.email,
-          expiresAt: s.expiresAt,
+          type:         'ACEPASTE_AUTH_TOKEN',
+          jwt:          s.jwt,
+          refreshToken: s.refreshToken || null,  // enables silent JWT renewal in background.js
+          plan:         e.detail.plan,
+          email:        s.email,
+          expiresAt:    s.expiresAt,
         }, function() {
           // Close this tab after a brief confirmation delay
           setTimeout(function() { window.close(); }, 800);

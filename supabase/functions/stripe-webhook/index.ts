@@ -11,8 +11,10 @@
  *   SUPABASE_SERVICE_ROLE_KEY — auto-injected by Supabase runtime
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import Stripe from 'https://esm.sh/stripe@14?target=deno';
+// Supply-chain hardening: pin to minor versions so esm.sh cannot silently
+// serve a compromised patch. Update these pins when intentionally upgrading.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2024-04-10',

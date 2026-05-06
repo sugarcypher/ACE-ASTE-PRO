@@ -7,6 +7,61 @@
 
 importScripts('cleaner.js');
 
+// ── Auth constants (used for server-side logout and silent JWT refresh) ───────
+// These match the values in auth.js on the web side.
+const ACE_SUPABASE_URL  = 'https://eqoltjofjlznlirbalrb.supabase.co';
+const ACE_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxb2x0am9mamx6bmxpcmJhbHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMTI2NzAsImV4cCI6MjA5MzU4ODY3MH0.5L6MAZpnPDdlBqFDtHHH3-gKFXUOnsbWgrJfnusw-Zk';
+
+/**
+ * Silently refresh the Supabase JWT stored in chrome.storage.local when it is
+ * within 5 minutes of expiry. Returns the current (possibly refreshed) JWT,
+ * or null if no token is available.
+ *
+ * Called before any plan-gating decision and on popup open via 'ace:refresh-jwt'.
+ */
+async function refreshExtJWT() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['ace_jwt', 'ace_refresh_token', 'ace_expires_at'], async (stored) => {
+      const FIVE_MIN = 5 * 60;
+      const now      = Date.now() / 1000;
+      // Not near expiry — return current token unchanged.
+      if ((stored.ace_expires_at || 0) > now + FIVE_MIN) {
+        resolve(stored.ace_jwt || null);
+        return;
+      }
+      // Near expiry or expired — attempt silent refresh.
+      if (!stored.ace_refresh_token) {
+        resolve(stored.ace_jwt || null); // no refresh token — can't renew
+        return;
+      }
+      try {
+        const r = await fetch(`${ACE_SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': ACE_SUPABASE_ANON,
+          },
+          body: JSON.stringify({ refresh_token: stored.ace_refresh_token }),
+        });
+        const data = await r.json();
+        if (data.access_token) {
+          await new Promise(res => chrome.storage.local.set({
+            ace_jwt:           data.access_token,
+            ace_refresh_token: data.refresh_token || stored.ace_refresh_token,
+            ace_expires_at:    data.expires_at    || 0,
+          }, res));
+          resolve(data.access_token);
+        } else {
+          // Refresh rejected (token revoked/expired) — return stale JWT optimistically.
+          resolve(stored.ace_jwt || null);
+        }
+      } catch {
+        resolve(stored.ace_jwt || null); // network failure — optimistic fallback
+      }
+    });
+  });
+}
+
 const CONTEXT_CLEAN_REPLACE = 'ace-clean-replace';
 const CONTEXT_CLEAN_COPY = 'ace-clean-copy';
 const CONTEXT_OPEN_POPUP = 'ace-open-popup';
@@ -161,18 +216,23 @@ function notify(msg, tabId) {
 // --- Auth bridge (externally_connectable from acepaste.xyz) -----------------
 // When the user signs in at acepaste.xyz/account?source=extension&ext_id=...,
 // auth.js calls chrome.runtime.sendMessage with type ACEPASTE_AUTH_TOKEN.
-// We persist the JWT + plan so popup.js can gate premium features.
+// We persist the JWT + refresh_token + plan so popup.js can gate premium features
+// and background.js can silently renew the JWT before it expires.
 chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
   if (!msg || msg.type !== 'ACEPASTE_AUTH_TOKEN') return;
-  if (sender.url && !sender.url.startsWith('https://acepaste.xyz/')) {
+  // SECURITY: use sender.origin (immutable, set by Chrome from the page's actual
+  // security origin) instead of sender.url (which includes path/query and is
+  // easier to spoof via URL manipulation in crafted phishing pages).
+  if (!sender.origin || sender.origin !== 'https://acepaste.xyz') {
     sendResponse({ ok: false, reason: 'untrusted origin' });
     return;
   }
   chrome.storage.local.set({
-    ace_jwt:        msg.jwt        || '',
-    ace_plan:       msg.plan       || 'free',
-    ace_email:      msg.email      || '',
-    ace_expires_at: msg.expiresAt  || 0
+    ace_jwt:           msg.jwt          || '',
+    ace_refresh_token: msg.refreshToken || '', // enables silent refresh in refreshExtJWT()
+    ace_plan:          msg.plan         || 'free',
+    ace_email:         msg.email        || '',
+    ace_expires_at:    msg.expiresAt    || 0,
   }, () => {
     sendResponse({ ok: true });
     chrome.action.setTitle({ title: 'Ace Paste Cleaner Pro — Pro active ✓' });
@@ -180,12 +240,37 @@ chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-// Called when user signs out from the popup.
+// Called when user signs out from the popup. Also handles jwt refresh requests.
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg && msg.type === 'ace:sign-out') {
-    chrome.storage.local.remove(['ace_jwt','ace_plan','ace_email','ace_expires_at'], () => {
-      sendResponse({ ok: true });
+    // SECURITY: invalidate the JWT server-side before clearing local storage.
+    // Without this, the JWT would remain valid for up to 1 hour after sign-out —
+    // a stolen JWT could still authenticate during that window.
+    chrome.storage.local.get(['ace_jwt'], async (stored) => {
+      if (stored.ace_jwt) {
+        try {
+          await fetch(`${ACE_SUPABASE_URL}/auth/v1/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': ACE_SUPABASE_ANON,
+              'Authorization': 'Bearer ' + stored.ace_jwt,
+            },
+            body: JSON.stringify({}),
+          });
+        } catch { /* fire-and-forget: local clear happens regardless */ }
+      }
+      chrome.storage.local.remove(
+        ['ace_jwt', 'ace_refresh_token', 'ace_plan', 'ace_email', 'ace_expires_at'],
+        () => { sendResponse({ ok: true }); }
+      );
     });
+    return true;
+  }
+
+  // Called by popup.js on open to silently refresh an expiring JWT.
+  if (msg && msg.type === 'ace:refresh-jwt') {
+    refreshExtJWT().then(jwt => sendResponse({ jwt }));
     return true;
   }
 });

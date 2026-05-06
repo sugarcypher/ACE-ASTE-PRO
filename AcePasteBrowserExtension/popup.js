@@ -27,8 +27,17 @@ let _extEmail = '';
 
 function extIsPaid() { return _extPlan !== 'free'; }
 
-/** Load auth state from chrome.storage.local, apply UI gates, return plan. */
+/** Load auth state from chrome.storage.local, apply UI gates, return plan.
+ *  Triggers a silent JWT refresh via background.js before reading plan state,
+ *  so the popup never shows a stale "Free" gate if the token just expired. */
 async function loadExtAuth() {
+  // Ask background.js to refresh the JWT if near expiry. Fire-and-forget from
+  // our perspective — storage is updated in-place; we re-read after the await.
+  await new Promise(resolve => {
+    try {
+      chrome.runtime.sendMessage({ type: 'ace:refresh-jwt' }, () => resolve());
+    } catch { resolve(); }
+  });
   return new Promise(resolve => {
     chrome.storage.local.get(['ace_plan','ace_email','ace_expires_at'], (r) => {
       const expires = Number(r.ace_expires_at || 0);
