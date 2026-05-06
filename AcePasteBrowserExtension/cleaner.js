@@ -166,7 +166,8 @@ function cleanText(text, opts) {
   }
   if (opts.removeHtml) {
     const before = text.length;
-    text = text.replace(/<[^>]*>/g, '');
+    let _prev;
+    do { _prev = text; text = text.replace(/<[^>]*>/g, ''); } while (text !== _prev);
     report.html = before - text.length;
   }
   if (opts.removeComments) {
