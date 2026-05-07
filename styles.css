@@ -176,12 +176,13 @@ body.dark-mode .privacy-trust .pt-fineprint{color:#8a9ab0}
 
 /* Action buttons — semantic color coding (light + dark mode, WCAG AA on text) */
 /* Paste = yellow, Clean = cyan, Copy = green, Clear = red */
-#pasteBtn{background:linear-gradient(#fef9c3,#fef08a);border-color:rgba(202,138,4,.6);color:#713f12}
-#pasteBtn:hover{background:linear-gradient(#fef08a,#fde047);border-color:rgba(202,138,4,.85)}
-#pasteBtn:focus-visible{outline:2px solid #ca8a04;outline-offset:2px}
-body.dark-mode #pasteBtn{background:linear-gradient(#713f12,#854d0e);border-color:rgba(250,204,21,.55);color:#fef08a}
-body.dark-mode #pasteBtn:hover{background:linear-gradient(#854d0e,#a16207);border-color:rgba(250,204,21,.8);color:#fef9c3}
-body.dark-mode #pasteBtn:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+/* Paste — navy (logo background) */
+#pasteBtn{background:linear-gradient(#dbeafe,#bfdbfe);border-color:rgba(30,64,175,.55);color:#1e3a8a;font-weight:600}
+#pasteBtn:hover{background:linear-gradient(#bfdbfe,#93c5fd);border-color:rgba(30,64,175,.85)}
+#pasteBtn:focus-visible{outline:2px solid #1e40af;outline-offset:2px}
+body.dark-mode #pasteBtn{background:linear-gradient(#1e3a8a,#1e40af);border-color:rgba(147,197,253,.55);color:#dbeafe}
+body.dark-mode #pasteBtn:hover{background:linear-gradient(#1e40af,#2563eb);border-color:rgba(147,197,253,.85);color:#eff6ff}
+body.dark-mode #pasteBtn:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
 
 #cleanBtn{background:linear-gradient(#06b6d4,#0891b2);border-color:rgba(14,116,144,.75);color:#ffffff;font-weight:600}
 #cleanBtn:hover{background:linear-gradient(#0891b2,#0e7490);border-color:rgba(14,116,144,.9)}
@@ -190,19 +191,21 @@ body.dark-mode #cleanBtn{background:linear-gradient(#06b6d4,#0891b2);border-colo
 body.dark-mode #cleanBtn:hover{background:linear-gradient(#22d3ee,#06b6d4);border-color:rgba(103,232,249,.85);color:#022730}
 body.dark-mode #cleanBtn:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
 
-#copyBtn{background:linear-gradient(#ecfdf5,#d1fae5);border-color:rgba(16,185,129,.6);color:#065f46}
-#copyBtn:hover{background:linear-gradient(#d1fae5,#a7f3d0);border-color:rgba(16,185,129,.85)}
-#copyBtn:focus-visible{outline:2px solid #059669;outline-offset:2px}
-body.dark-mode #copyBtn{background:linear-gradient(#065f46,#047857);border-color:rgba(52,211,153,.55);color:#d1fae5}
-body.dark-mode #copyBtn:hover{background:linear-gradient(#047857,#10b981);border-color:rgba(52,211,153,.8);color:#ecfdf5}
-body.dark-mode #copyBtn:focus-visible{outline:2px solid #34d399;outline-offset:2px}
+/* Copy — purple (logo right-edge gradient) */
+#copyBtn{background:linear-gradient(#ede9fe,#ddd6fe);border-color:rgba(124,58,237,.55);color:#5b21b6;font-weight:600}
+#copyBtn:hover{background:linear-gradient(#ddd6fe,#c4b5fd);border-color:rgba(124,58,237,.85)}
+#copyBtn:focus-visible{outline:2px solid #6d28d9;outline-offset:2px}
+body.dark-mode #copyBtn{background:linear-gradient(#5b21b6,#6d28d9);border-color:rgba(196,181,253,.55);color:#ede9fe}
+body.dark-mode #copyBtn:hover{background:linear-gradient(#6d28d9,#7c3aed);border-color:rgba(196,181,253,.85);color:#f5f3ff}
+body.dark-mode #copyBtn:focus-visible{outline:2px solid #a78bfa;outline-offset:2px}
 
-#clearBtn,#clearInputBtn{background:linear-gradient(#fef2f2,#fee2e2);border-color:rgba(220,38,38,.5);color:#991b1b}
-#clearBtn:hover,#clearInputBtn:hover{background:linear-gradient(#fee2e2,#fecaca);border-color:rgba(220,38,38,.75)}
-#clearBtn:focus-visible,#clearInputBtn:focus-visible{outline:2px solid #dc2626;outline-offset:2px}
-body.dark-mode #clearBtn,body.dark-mode #clearInputBtn{background:linear-gradient(#7f1d1d,#991b1b);border-color:rgba(248,113,113,.55);color:#fee2e2}
-body.dark-mode #clearBtn:hover,body.dark-mode #clearInputBtn:hover{background:linear-gradient(#991b1b,#b91c1c);border-color:rgba(248,113,113,.8)}
-body.dark-mode #clearBtn:focus-visible,body.dark-mode #clearInputBtn:focus-visible{outline:2px solid #f87171;outline-offset:2px}
+/* Clear — rose-magenta (logo accent, still reads destructive) */
+#clearBtn,#clearInputBtn{background:linear-gradient(#fce7f3,#fbcfe8);border-color:rgba(190,24,93,.55);color:#9d174d;font-weight:600}
+#clearBtn:hover,#clearInputBtn:hover{background:linear-gradient(#fbcfe8,#f9a8d4);border-color:rgba(190,24,93,.85)}
+#clearBtn:focus-visible,#clearInputBtn:focus-visible{outline:2px solid #be185d;outline-offset:2px}
+body.dark-mode #clearBtn,body.dark-mode #clearInputBtn{background:linear-gradient(#831843,#9d174d);border-color:rgba(244,114,182,.55);color:#fce7f3}
+body.dark-mode #clearBtn:hover,body.dark-mode #clearInputBtn:hover{background:linear-gradient(#9d174d,#be185d);border-color:rgba(244,114,182,.85);color:#fdf2f8}
+body.dark-mode #clearBtn:focus-visible,body.dark-mode #clearInputBtn:focus-visible{outline:2px solid #f472b6;outline-offset:2px}
 
 #pasteBtn:disabled,#cleanBtn:disabled,#copyBtn:disabled,#clearBtn:disabled,#clearInputBtn:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.6)}
 
