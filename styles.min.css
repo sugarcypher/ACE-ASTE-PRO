@@ -98,24 +98,24 @@ body.dark-mode .cleaning-report li{color:#a0a0a0}
 body.dark-mode .cleaning-report .report-count{color:#5a9fd2}
 .cleaning-report .report-total{margin-top:12px;padding-top:12px;border-top:1px solid rgba(10,60,120,.1);font-weight:600;color:#0b0d12;transition:border-color 0.3s ease,color 0.3s ease}
 body.dark-mode .cleaning-report .report-total{border-top-color:rgba(255,255,255,.1);color:#e0e0e0}
-#pasteBtn{background:linear-gradient(#eff6ff,#dbeafe);border-color:rgba(59,130,246,.55);color:#1e3a8a}
-#pasteBtn:hover{background:linear-gradient(#dbeafe,#bfdbfe);border-color:rgba(59,130,246,.75)}
-#pasteBtn:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
-body.dark-mode #pasteBtn{background:linear-gradient(#1e3a8a,#1e40af);border-color:rgba(96,165,250,.55);color:#dbeafe}
-body.dark-mode #pasteBtn:hover{background:linear-gradient(#1e40af,#2563eb);border-color:rgba(96,165,250,.8)}
-body.dark-mode #pasteBtn:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
-#cleanBtn{background:linear-gradient(#10b981,#059669);border-color:rgba(5,150,105,.7);color:#fff;font-weight:600}
-#cleanBtn:hover{background:linear-gradient(#059669,#047857);border-color:rgba(4,120,87,.85)}
-#cleanBtn:focus-visible{outline:2px solid #047857;outline-offset:2px}
-body.dark-mode #cleanBtn{background:linear-gradient(#10b981,#059669);border-color:rgba(52,211,153,.6);color:#062a1e}
-body.dark-mode #cleanBtn:hover{background:linear-gradient(#34d399,#10b981);border-color:rgba(52,211,153,.85);color:#052017}
-body.dark-mode #cleanBtn:focus-visible{outline:2px solid #34d399;outline-offset:2px}
-#copyBtn{background:linear-gradient(#eef2ff,#e0e7ff);border-color:rgba(99,102,241,.55);color:#3730a3}
-#copyBtn:hover{background:linear-gradient(#e0e7ff,#c7d2fe);border-color:rgba(99,102,241,.75)}
-#copyBtn:focus-visible{outline:2px solid #4f46e5;outline-offset:2px}
-body.dark-mode #copyBtn{background:linear-gradient(#3730a3,#4338ca);border-color:rgba(129,140,248,.55);color:#e0e7ff}
-body.dark-mode #copyBtn:hover{background:linear-gradient(#4338ca,#4f46e5);border-color:rgba(129,140,248,.8)}
-body.dark-mode #copyBtn:focus-visible{outline:2px solid #818cf8;outline-offset:2px}
+#pasteBtn{background:linear-gradient(#fef9c3,#fef08a);border-color:rgba(202,138,4,.6);color:#713f12}
+#pasteBtn:hover{background:linear-gradient(#fef08a,#fde047);border-color:rgba(202,138,4,.85)}
+#pasteBtn:focus-visible{outline:2px solid #ca8a04;outline-offset:2px}
+body.dark-mode #pasteBtn{background:linear-gradient(#713f12,#854d0e);border-color:rgba(250,204,21,.55);color:#fef08a}
+body.dark-mode #pasteBtn:hover{background:linear-gradient(#854d0e,#a16207);border-color:rgba(250,204,21,.8);color:#fef9c3}
+body.dark-mode #pasteBtn:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+#cleanBtn{background:linear-gradient(#f97316,#ea580c);border-color:rgba(194,65,12,.75);color:#fff;font-weight:600}
+#cleanBtn:hover{background:linear-gradient(#ea580c,#c2410c);border-color:rgba(154,52,18,.9)}
+#cleanBtn:focus-visible{outline:2px solid #c2410c;outline-offset:2px}
+body.dark-mode #cleanBtn{background:linear-gradient(#f97316,#ea580c);border-color:rgba(253,186,116,.6);color:#431407}
+body.dark-mode #cleanBtn:hover{background:linear-gradient(#fb923c,#f97316);border-color:rgba(253,186,116,.85);color:#3a1106}
+body.dark-mode #cleanBtn:focus-visible{outline:2px solid #fdba74;outline-offset:2px}
+#copyBtn{background:linear-gradient(#ecfdf5,#d1fae5);border-color:rgba(16,185,129,.6);color:#065f46}
+#copyBtn:hover{background:linear-gradient(#d1fae5,#a7f3d0);border-color:rgba(16,185,129,.85)}
+#copyBtn:focus-visible{outline:2px solid #059669;outline-offset:2px}
+body.dark-mode #copyBtn{background:linear-gradient(#065f46,#047857);border-color:rgba(52,211,153,.55);color:#d1fae5}
+body.dark-mode #copyBtn:hover{background:linear-gradient(#047857,#10b981);border-color:rgba(52,211,153,.8);color:#ecfdf5}
+body.dark-mode #copyBtn:focus-visible{outline:2px solid #34d399;outline-offset:2px}
 #clearBtn{background:linear-gradient(#fef2f2,#fee2e2);border-color:rgba(220,38,38,.5);color:#991b1b}
 #clearBtn:hover{background:linear-gradient(#fee2e2,#fecaca);border-color:rgba(220,38,38,.75)}
 #clearBtn:focus-visible{outline:2px solid #dc2626;outline-offset:2px}
