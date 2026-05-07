@@ -146,10 +146,16 @@ if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
 // Plan is set by auth.js via sessionStorage. Falls back to 'free' silently.
 const FREE_CHAR_LIMIT = 2000;
 
-// Features locked on the free tier (checkbox IDs + input IDs)
+// Demo gates EVERYTHING except the always-on invisible-character removal.
+// removeInvisible is intentionally NOT in this list — it's the one cleaning
+// option Demo users get. Every other checkbox is locked + force-unchecked
+// when the user is on the Demo (free) plan.
 const PREMIUM_FEATURE_IDS = [
-  'removeAIMarkup','removeEmojis','removeFormatting',
-  'removeHtml','removeComments',
+  'removeMarkdown','removeAIMarkup','removeEmojis','removeFormatting',
+  'normalizeSmartPunct','privacyMode',
+  'collapseSpaces','collapseNewlines','trimPerLine',
+  'removeHtml','removeNumerals','removeDates','removeSymbolPairs',
+  'removeComments',
   'customFind','customReplace','customRegex',
   'removePunctuation'
 ];

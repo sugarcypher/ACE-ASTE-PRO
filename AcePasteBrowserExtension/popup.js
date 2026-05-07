@@ -9,9 +9,11 @@
 // ── Freemium gate (extension) ─────────────────────────────────────────────
 const EXT_FREE_CHAR_LIMIT = 2000;
 
-// Premium feature IDs locked on the free tier
+// Demo gates everything except invisible-character removal.
+// removeInvisible is the only cleaning option Demo can use.
 const PREMIUM_FEATURE_IDS_EXT = [
-  'removeAIMarkup','removeEmojis','removeFormatting',
+  'removeMarkdown','removeAIMarkup','removeEmojis','removeFormatting',
+  'collapseSpaces','collapseNewlines','trimPerLine',
   'removeHtml','removeComments',
   'customFind','customReplace','customRegex',
   'removePunctuation'
@@ -61,7 +63,7 @@ function applyExtFreemiumUI() {
   const statusEl = document.getElementById('aceAccountStatus');
   if (statusEl) {
     if (_extEmail) {
-      const PLAN_LABELS = { free:'Free', trial:'Trial', monthly:'Monthly', yearly:'Annual', lifetime:'Lifetime' };
+      const PLAN_LABELS = { free:'Demo', trial:'Day Pass', monthly:'Pro · Monthly', yearly:'Pro · Yearly', lifetime:'Founders Lifetime' };
       statusEl.textContent = _extEmail.split('@')[0] + ' · ' + (PLAN_LABELS[_extPlan] || _extPlan);
       statusEl.style.display = 'block';
     } else {
@@ -298,13 +300,16 @@ function doClean() {
     }
     // Freemium char limit
     if (!extIsPaid() && text.length > EXT_FREE_CHAR_LIMIT) {
-      showNotice('Free plan: text truncated at 2,000 chars. Upgrade at acepaste.xyz/pricing', 'warn');
+      showNotice('Demo: text truncated at 2,000 chars. Upgrade to Pro at acepaste.xyz/pricing', 'warn');
       text = text.slice(0, EXT_FREE_CHAR_LIMIT);
       $('paste').value = text;
     }
-    // Free tier: force only invisible + markdown
+    // Demo: force ONLY invisible-character removal. Every other cleaning
+    // option is overridden to off, regardless of checkbox state.
     const opts = extIsPaid() ? readOpts() : Object.assign(readOpts(), {
+      removeMarkdown: false,
       removeAIMarkup: false, removeEmojis: false, removeFormatting: false,
+      collapseSpaces: false, collapseNewlines: false, trimPerLine: false,
       removeHtml: false, removeComments: false,
       customFind: '', customRegex: false, caseTx: '', punctuation: []
     });

@@ -265,7 +265,7 @@
     <!-- ── Signed-in view ─────────────────────────────────────────────── -->
     <div id="signedIn">
       <div class="account-card">
-        <h2>Account <span class="plan-chip" id="planChip">free</span></h2>
+        <h2>Account <span class="plan-chip" id="planChip">Demo</span></h2>
         <p class="account-info" id="accountInfo">Loading…</p>
 
         <!-- Restore purchases — shown only on free plan -->
@@ -351,8 +351,8 @@ function getCaptchaToken() {
 
 (function() {
   var PLAN_LABELS = {
-    free: 'Free', trial: '1-Day Trial', monthly: 'Monthly',
-    yearly: 'Annual', lifetime: 'Lifetime'
+    free: 'Demo', trial: 'Day Pass', monthly: 'Pro · Monthly',
+    yearly: 'Pro · Yearly', lifetime: 'Founders Lifetime'
   };
 
   // Dark mode
@@ -385,7 +385,7 @@ function getCaptchaToken() {
     chip.className   = 'plan-chip' + (plan === 'free' ? ' free' : '');
     var info = document.getElementById('accountInfo');
     info.textContent = email + ' · ' + (plan === 'free'
-      ? 'Free plan — upgrade to unlock all features.'
+      ? 'Demo — upgrade to Pro to unlock all features.'
       : 'Active plan: ' + (PLAN_LABELS[plan] || plan) + '.');
     // Show/hide upgrade + restore sections
     var isPaid = plan !== 'free';

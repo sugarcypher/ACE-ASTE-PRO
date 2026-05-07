@@ -221,3 +221,10 @@ body.dark-mode .options-toggle:hover{background:rgba(55,55,55,.95);border-color:
 .options-panel.options-collapsed{padding:0;background:transparent;border:none}
 .options-panel.options-collapsed .options-body{display:none}
 .options-body{margin-top:12px}
+
+/* Centered action buttons */
+.button-group{justify-content:center;flex-wrap:wrap}
+.button-group .btn{flex:0 1 auto;min-width:200px;max-width:280px}
+.button-group .btn-secondary{min-width:120px}
+.paste-actions{justify-content:center}
+.trust-badges{margin:32px auto 8px}
