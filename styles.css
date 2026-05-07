@@ -228,3 +228,20 @@ body.dark-mode .options-toggle:hover{background:rgba(55,55,55,.95);border-color:
 .button-group .btn-secondary{min-width:120px}
 .paste-actions{justify-content:center}
 .trust-badges{margin:32px auto 8px}
+
+/* Mobile responsiveness fixes — kill horizontal overflow + reachable header nav */
+html,body{overflow-x:hidden;max-width:100%}
+.hero{max-width:min(320px,100%);height:auto;width:auto}
+.hdr{flex-wrap:wrap}
+@media (max-width:600px){
+  .hdr{padding:8px 12px;gap:6px}
+  .hdr h1{font-size:15px;min-width:0}
+  .domain{display:none}
+  .hero-description{width:auto;left:auto;right:auto;margin-left:0;margin-right:0;padding:18px 14px}
+  .hdr-nav{gap:2px}
+  .hdr-nav a{padding:4px 6px;font-size:12px}
+}
+@media (max-width:380px){
+  .hdr h1{font-size:13px}
+  .hdr-nav a{font-size:11px;padding:3px 4px}
+}
