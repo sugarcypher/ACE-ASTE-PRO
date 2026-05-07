@@ -297,3 +297,12 @@ html,body{overflow-x:hidden;max-width:100%}
   .hdr h1{font-size:13px}
   .hdr-nav a{font-size:11px;padding:3px 4px}
 }
+
+/* ThinkWell Labs attribution — sits above the legal links in the footer */
+.twl-credit{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:0 auto 14px;font-size:14px;color:#475569}
+body.dark-mode .twl-credit{color:#94a3b8}
+.twl-credit .twl-link{color:#0891b2;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:color .15s,opacity .15s}
+.twl-credit .twl-link:hover{color:#0e7490;text-decoration:underline}
+body.dark-mode .twl-credit .twl-link{color:#22d3ee}
+body.dark-mode .twl-credit .twl-link:hover{color:#67e8f9}
+.twl-logo{height:20px;width:auto;border-radius:4px;vertical-align:middle}
