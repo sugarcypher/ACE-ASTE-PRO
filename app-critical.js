@@ -53,20 +53,67 @@ const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u0085\u034F\u115F\u1160\u17B4\u17B5\u2028
 // \u2028 \u2014 LINE SEPARATOR (Zl \u2014 not Cf, can break JS strings, used in injection)
 // \u2029 \u2014 PARAGRAPH SEPARATOR (Zp \u2014 not Cf, same risk as \u2028)
 
+// Classify an invisible/format codepoint by attack-surface severity.
+// CRITICAL: real attack surface — tag-character prompt-injection payloads,
+//   bidirectional override attacks (Trojan Source style).
+// HIGH:     stealth / steganography vectors — zero-width, soft hyphen,
+//   Hangul fillers, combining grapheme joiner. Almost always intentional.
+// MEDIUM:   sometimes legit but abusable — variation selectors (emoji
+//   skin-tone is fine; data-hiding is not), Unicode whitespace, line/para
+//   separators, NEL.
+function classifyInvisibleCodepoint(cp) {
+  if (cp >= 0xE0000 && cp <= 0xE007F)
+    return { key:'tag',         severity:'critical', label:'Unicode tag character (prompt-injection payload)' };
+  if ((cp >= 0x202A && cp <= 0x202E) || (cp >= 0x2066 && cp <= 0x2069) || cp === 0x061C)
+    return { key:'bidi',        severity:'critical', label:'Bidi override (visual-reorder attack vector)' };
+  if (cp === 0x200B || cp === 0x200C || cp === 0x200D || cp === 0x2060 || cp === 0xFEFF)
+    return { key:'zerowidth',   severity:'high',     label:'Zero-width / word-joiner' };
+  if (cp === 0x00AD)
+    return { key:'softhyphen',  severity:'high',     label:'Soft hyphen' };
+  if (cp >= 0x180B && cp <= 0x180F)
+    return { key:'mongolian',   severity:'high',     label:'Mongolian variation/free selector' };
+  if (cp === 0x1160 || cp === 0x3164 || cp === 0xFFA0)
+    return { key:'hangul',      severity:'high',     label:'Hangul filler (visual-spoof vector)' };
+  if (cp === 0x034F)
+    return { key:'cgj',         severity:'high',     label:'Combining grapheme joiner' };
+  if (cp === 0x070F)
+    return { key:'syriac',      severity:'high',     label:'Syriac abbreviation mark' };
+  if (cp >= 0xFFF9 && cp <= 0xFFFB)
+    return { key:'interlinear', severity:'high',     label:'Interlinear annotation marker' };
+  if (cp >= 0xFE00 && cp <= 0xFE0F)
+    return { key:'variation',   severity:'medium',   label:'Variation selector' };
+  if (cp >= 0xE0100 && cp <= 0xE01EF)
+    return { key:'variation',   severity:'medium',   label:'Variation selector supplement' };
+  if (cp >= 0x2000 && cp <= 0x200A)
+    return { key:'unispace',    severity:'medium',   label:'Unicode whitespace (non-breaking, em/en, etc.)' };
+  if (cp === 0x2028 || cp === 0x2029)
+    return { key:'lineparasep', severity:'medium',   label:'Line / paragraph separator' };
+  if (cp === 0x0085)
+    return { key:'nel',         severity:'medium',   label:'Next-line control character' };
+  return   { key:'other',       severity:'medium',   label:'Other invisible / format character' };
+}
+
 function stripInvisibleChars(text) {
   let count = 0;
-  const removedHex = [];
+  const byCategory = Object.create(null); // key -> { count, severity, label, codepoints: {U+xxxx -> count} }
   const out = text.replace(INVISIBLE_CHAR_REGEX, (ch) => {
     count++;
-    if (removedHex.length < 50) {
-      removedHex.push('U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0'));
+    const cp = ch.codePointAt(0);
+    const cls = classifyInvisibleCodepoint(cp);
+    const cpKey = 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+    let bucket = byCategory[cls.key];
+    if (!bucket) {
+      bucket = { count: 0, severity: cls.severity, label: cls.label, codepoints: Object.create(null) };
+      byCategory[cls.key] = bucket;
     }
+    bucket.count++;
+    bucket.codepoints[cpKey] = (bucket.codepoints[cpKey] || 0) + 1;
     return '';
   });
   if (count > 0 && typeof console !== 'undefined') {
-    console.log('[ACEPASTE] stripped', count, 'invisible char(s):', removedHex.join(' '));
+    console.log('[ACEPASTE] stripped', count, 'invisible char(s) across', Object.keys(byCategory).length, 'categor(ies)');
   }
-  return { text: out, count };
+  return { text: out, count, byCategory };
 }
 
 // =============================================================================
@@ -115,11 +162,20 @@ const SMART_PUNCT_REGEX = new RegExp(
 
 function normalizeSmartPunctuation(text) {
   let count = 0;
+  const replacements = Object.create(null); // U+xxxx -> { from, to, count }
   const out = text.replace(SMART_PUNCT_REGEX, ch => {
     count++;
-    return SMART_PUNCT_MAP[ch] || ch;
+    const to = SMART_PUNCT_MAP[ch] || ch;
+    const cpKey = 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    let bucket = replacements[cpKey];
+    if (!bucket) {
+      bucket = { from: ch, to: to, count: 0 };
+      replacements[cpKey] = bucket;
+    }
+    bucket.count++;
+    return to;
   });
-  return { text: out, count };
+  return { text: out, count, replacements };
 }
 
 // Self-test on load: verify invisible removal still works for many scripts.
@@ -559,7 +615,10 @@ function cleanText() {
     dates: 0,
     symbolPairs: 0,
     smartPunct: 0,
-    custom: 0
+    custom: 0,
+    // Detail breakdowns populated by stripInvisibleChars / normalizeSmartPunctuation
+    invisibleByCategory: null,
+    smartPunctReplacements: null
   };
   
   // DIAGNOSTIC: log all non-ASCII characters present in the input so we can
@@ -587,6 +646,7 @@ function cleanText() {
     const stripped = stripInvisibleChars(text);
     text = stripped.text;
     report.zeroWidth = stripped.count;
+    report.invisibleByCategory = stripped.byCategory;
   }
 
   // Smart punctuation normalization (curly quotes, em dash, ellipsis, etc.)
@@ -594,6 +654,7 @@ function cleanText() {
     const normalized = normalizeSmartPunctuation(text);
     text = normalized.text;
     report.smartPunct = normalized.count;
+    report.smartPunctReplacements = normalized.replacements;
   }
   
   if (getElement('removeEmojis').checked) {
@@ -805,95 +866,130 @@ function cleanText() {
 function displayCleaningReport(report, originalLength, finalLength, totalRemoved) {
   const reportDiv = getElement('cleaningReport');
   if (!reportDiv) return;
-  // Build HTML first, then batch DOM writes together to avoid forced reflows
-  let html = '<h3>Cleaning Report</h3><ul>';
-  let hasItems = false;
-  if (report.zeroWidth > 0) {
-    html += `<li class="report-item"><span class="report-label">Invisible characters removed</span><span class="report-count">${report.zeroWidth}</span></li>`;
-    hasItems = true;
-  }
-  if (report.emojis > 0) {
-    html += `<li class="report-item"><span class="report-label">Emojis removed</span><span class="report-count">${report.emojis} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.formatting > 0) {
-    html += `<li class="report-item"><span class="report-label">Formatting characters removed</span><span class="report-count">${report.formatting} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.markdown > 0) {
-    html += `<li class="report-item"><span class="report-label">Markdown formatting removed</span><span class="report-count">${report.markdown} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.aiMarkup > 0) {
-    html += `<li class="report-item"><span class="report-label">AI markup removed</span><span class="report-count">${report.aiMarkup} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.spaces > 0) {
-    html += `<li class="report-item"><span class="report-label">Extra spaces collapsed</span><span class="report-count">${report.spaces} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.newlines > 0) {
-    html += `<li class="report-item"><span class="report-label">Extra newlines collapsed</span><span class="report-count">${report.newlines} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.html > 0) {
-    html += `<li class="report-item"><span class="report-label">HTML tags removed</span><span class="report-count">${report.html} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.comments > 0) {
-    html += `<li class="report-item"><span class="report-label">Comments removed</span><span class="report-count">${report.comments} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.punctuation > 0) {
-    html += `<li class="report-item"><span class="report-label">Punctuation removed</span><span class="report-count">${report.punctuation} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.numerals > 0) {
-    html += `<li class="report-item"><span class="report-label">Numerals removed</span><span class="report-count">${report.numerals} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.dates > 0) {
-    html += `<li class="report-item"><span class="report-label">Dates removed</span><span class="report-count">${report.dates} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.symbolPairs > 0) {
-    html += `<li class="report-item"><span class="report-label">Symbol+word pairs removed</span><span class="report-count">${report.symbolPairs} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.smartPunct > 0) {
-    html += `<li class="report-item"><span class="report-label">Smart punctuation normalized</span><span class="report-count">${report.smartPunct} chars</span></li>`;
-    hasItems = true;
-  }
-  if (report.custom > 0) {
-    html += `<li class="report-item"><span class="report-label">Custom replacements</span><span class="report-count">${report.custom} chars</span></li>`;
-    hasItems = true;
-  }
-  if (!hasItems) {
-    html += '<li class="report-item"><span class="report-label">No changes detected</span></li>';
-  }
-  html += '</ul>';
 
-  // Total line. Three cases:
-  //  1. Length changed (chars removed): show "X → Y chars (N removed, P%)"
-  //  2. Length unchanged but in-place modifications happened (smart punct, case
-  //     transforms, normalization): show "X chars (N normalized in place)"
-  //  3. Nothing happened: show "X chars (no changes)"
-  const inPlaceChanges = (report.smartPunct || 0);
+  // tiny escaper — DOMPurify also runs via Trusted Types, but defence in depth
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // Format a {U+xxxx: count} dict into "U+200B ×3, U+E0061 ×1" (cap at 8 distinct codepoints)
+  const fmtCps = (cps) => {
+    const entries = Object.entries(cps).sort((a, b) => b[1] - a[1]);
+    const head = entries.slice(0, 8).map(([k, n]) => esc(k) + (n > 1 ? ' ×' + n : '')).join(', ');
+    const more = entries.length - 8;
+    return head + (more > 0 ? `, +${more} more` : '');
+  };
+
+  // Visible glyph for a smart-punct mapping: show the literal char in a
+  // mono-spaced block. The chars in SMART_PUNCT_MAP are all printable.
+  const fmtSamples = (reps) => {
+    const entries = Object.entries(reps).sort((a, b) => b[1].count - a[1].count);
+    const head = entries.slice(0, 6).map(([cp, b]) =>
+      `<code class="rep-cp">${esc(cp)}</code> <code class="rep-glyph">${esc(b.from)}</code> &rarr; <code class="rep-glyph">${esc(b.to)}</code> &times;${b.count}`
+    ).join(' &middot; ');
+    const more = entries.length - 6;
+    return head + (more > 0 ? ` <span class="rep-more">+${more} more</span>` : '');
+  };
+
+  // Build items list, each {severity, title, count, action, detailHtml?}
+  const items = [];
+
+  // ─── Invisible characters, broken down by category ──────────────────────
+  const inv = report.invisibleByCategory || {};
+  for (const key of Object.keys(inv)) {
+    const b = inv[key];
+    items.push({
+      severity: b.severity,
+      title: b.label,
+      count: b.count,
+      action: b.severity === 'critical' ? 'Stripped (security)' : 'Removed',
+      detailHtml: `<span class="report-codepoints">${fmtCps(b.codepoints)}</span>`
+    });
+  }
+
+  // ─── Smart punctuation normalization (in-place substitutions) ───────────
+  if (report.smartPunct > 0 && report.smartPunctReplacements) {
+    items.push({
+      severity: 'low',
+      title: 'Smart punctuation normalized to ASCII',
+      count: report.smartPunct,
+      action: 'Replaced in place',
+      detailHtml: `<span class="report-samples">${fmtSamples(report.smartPunctReplacements)}</span>`
+    });
+  }
+
+  // ─── Bulk-removal categories with no codepoint detail ───────────────────
+  const bulk = [
+    { key: 'html',        sev: 'medium', label: 'HTML tags',                         action: 'Removed' },
+    { key: 'comments',    sev: 'medium', label: 'Code / HTML comments',              action: 'Removed' },
+    { key: 'aiMarkup',    sev: 'medium', label: 'AI markup runs (##, ***, +++)',     action: 'Removed' },
+    { key: 'emojis',      sev: 'low',    label: 'Emoji characters',                  action: 'Removed' },
+    { key: 'formatting',  sev: 'low',    label: 'Format / soft-break characters',    action: 'Removed' },
+    { key: 'markdown',    sev: 'low',    label: 'Markdown formatting',               action: 'Stripped' },
+    { key: 'spaces',      sev: 'low',    label: 'Extra spaces',                      action: 'Collapsed' },
+    { key: 'newlines',    sev: 'low',    label: 'Extra newlines',                    action: 'Collapsed' },
+    { key: 'punctuation', sev: 'low',    label: 'Punctuation',                       action: 'Removed' },
+    { key: 'numerals',    sev: 'low',    label: 'Numeric digits',                    action: 'Removed' },
+    { key: 'dates',       sev: 'low',    label: 'Date strings',                      action: 'Removed' },
+    { key: 'symbolPairs', sev: 'low',    label: 'Symbol+word tokens',                action: 'Removed' },
+    { key: 'custom',      sev: 'low',    label: 'Custom find/replace rules',         action: 'Replaced' }
+  ];
+  for (const b of bulk) {
+    const n = report[b.key];
+    if (n && n > 0) {
+      items.push({ severity: b.sev, title: b.label, count: n, action: b.action, detailHtml: '' });
+    }
+  }
+
+  // Sort by severity (critical first), then by count desc within same severity.
+  const sevOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
+  items.sort((a, b) => (sevOrder[a.severity] - sevOrder[b.severity]) || (b.count - a.count));
+
+  // ─── Build HTML ────────────────────────────────────────────────────────
+  let html = '<h3>Cleaning report</h3>';
+
+  if (items.length === 0) {
+    html += `
+      <div class="report-section severity-info">
+        <div class="severity-badge">CLEAN</div>
+        <div class="report-title">Nothing suspicious found.</div>
+        <div class="report-detail"><span class="report-action">No invisible characters, no markup, no formatting changes.</span></div>
+      </div>`;
+  } else {
+    // Highest-severity present drives a small banner
+    const highest = items[0].severity;
+    if (highest === 'critical') {
+      html += `<div class="report-banner severity-critical">⚠ <strong>Critical:</strong> a known prompt-injection / visual-spoof vector was present in your text. Removed.</div>`;
+    } else if (highest === 'high') {
+      html += `<div class="report-banner severity-high">▲ <strong>Heads up:</strong> stealth / steganography characters were present. Removed.</div>`;
+    }
+    for (const it of items) {
+      html += `
+        <div class="report-section severity-${esc(it.severity)}">
+          <div class="severity-badge">${esc(it.severity)}</div>
+          <div class="report-title">${esc(it.title)}</div>
+          <div class="report-detail">
+            <span class="report-count">${it.count} ${it.count === 1 ? 'char' : 'chars'}</span>
+            <span class="report-action">${esc(it.action)}</span>
+            ${it.detailHtml || ''}
+          </div>
+        </div>`;
+    }
+  }
+
+  // Total summary line — same logic as before, three cases.
+  const inPlaceChanges = report.smartPunct || 0;
+  let summary;
   if (totalRemoved !== 0) {
-    const percentage = originalLength > 0 ? ((totalRemoved/originalLength)*100).toFixed(1) : '0.0';
-    let summary = `Total: ${originalLength} → ${finalLength} characters (${totalRemoved} removed, ${percentage}%`;
+    const pct = originalLength > 0 ? ((totalRemoved / originalLength) * 100).toFixed(1) : '0.0';
+    summary = `${originalLength} → ${finalLength} chars (${totalRemoved} removed, ${pct}%`;
     if (inPlaceChanges > 0) summary += `; ${inPlaceChanges} normalized in place`;
     summary += ')';
-    html += `<div class="report-total">${summary}</div>`;
-  } else if (inPlaceChanges > 0 || hasItems) {
-    html += `<div class="report-total">Total: ${originalLength} characters (${inPlaceChanges} normalized in place — length unchanged)</div>`;
+  } else if (inPlaceChanges > 0) {
+    summary = `${originalLength} chars (${inPlaceChanges} normalized in place — length unchanged)`;
   } else {
-    html += `<div class="report-total">Total: ${originalLength} characters (no changes)</div>`;
+    summary = `${originalLength} chars (no changes)`;
   }
-  // Direct DOM update (not wrapped in rAF — rAF callbacks get throttled or
-  // paused when the tab is in the background, which made the report silently
-  // fail to appear. The microoptimization of "batching DOM writes" wasn't
-  // worth a broken report).
+  html += `<div class="report-total">${esc(summary)}</div>`;
+
   setInnerHTML(reportDiv, html);
   reportDiv.classList.remove('hidden');
 }
