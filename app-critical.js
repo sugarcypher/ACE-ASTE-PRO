@@ -350,13 +350,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const cleanBtn = getElement('cleanBtn');
   const pasteBtn = getElement('pasteBtn');
   const clearBtn = getElement('clearBtn');
+  const clearInputBtn = getElement('clearInputBtn');
   const copyBtn = getElement('copyBtn');
   const moreOptions = getElement('moreOptions');
-  
+  const optionsToggle = getElement('optionsToggle');
+
   if (cleanBtn) cleanBtn.addEventListener('click', cleanText);
   if (pasteBtn) pasteBtn.addEventListener('click', pasteFromClipboard);
   if (clearBtn) clearBtn.addEventListener('click', clearFields);
+  if (clearInputBtn) clearInputBtn.addEventListener('click', clearInputOnly);
   if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
+  if (optionsToggle) {
+    optionsToggle.addEventListener('click', () => {
+      const panel = optionsToggle.closest('.options-panel');
+      const body = getElement('optionsBody');
+      if (!panel || !body) return;
+      const isCollapsed = panel.classList.contains('options-collapsed');
+      if (isCollapsed) {
+        panel.classList.remove('options-collapsed');
+        body.hidden = false;
+        optionsToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        panel.classList.add('options-collapsed');
+        body.hidden = true;
+        optionsToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
   if (moreOptions) {
     moreOptions.addEventListener('click', () => {
       const adv = getElement('advanced');
@@ -447,6 +467,13 @@ function clearFields() {
     reportDiv.classList.add('hidden');
     setInnerHTML(reportDiv, '');
   }
+  pasteField.focus();
+}
+
+function clearInputOnly() {
+  const pasteField = getElement('paste');
+  if (!pasteField) return;
+  pasteField.value = '';
   pasteField.focus();
 }
 
