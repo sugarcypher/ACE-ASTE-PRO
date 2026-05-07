@@ -158,9 +158,11 @@ body.dark-mode .hdr-nav a:hover{background:rgba(255,255,255,.1);color:#a8d4f5}
 .trust-badges{text-align:center;margin:0 auto 20px;max-width:312px}.trust-badges img{max-width:100%;height:auto;display:inline-block}
 .ext-promo{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.65);border:1px solid rgba(10,60,120,.12);border-radius:12px;padding:11px 18px;margin:0 auto 18px;max-width:600px;font-size:14px;color:#1a1f26;flex-wrap:wrap;text-align:center}
 body.dark-mode .ext-promo{background:rgba(40,40,40,.65);border-color:rgba(255,255,255,.12);color:#d0d0d0}
-.ext-promo-btn{background:linear-gradient(135deg,#e8f0fe,#d0e0fd);border:1px solid rgba(66,133,244,.35);border-radius:8px;color:#1a56c4;font-size:13px;font-weight:600;padding:6px 14px;text-decoration:none;transition:opacity 0.15s ease;white-space:nowrap;flex-shrink:0}
-.ext-promo-btn:hover{opacity:0.75}
-body.dark-mode .ext-promo-btn{background:linear-gradient(135deg,#1e2f4a,#162240);border-color:rgba(100,150,244,.4);color:#7baaf7}
+/* Add to Chrome — logo eraser teal/cyan gradient */
+.ext-promo-btn{background:linear-gradient(135deg,#0e7490,#06b6d4);border:1px solid rgba(255,255,255,.18);border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:7px 14px;text-decoration:none;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(8,145,178,.25);transition:background .15s,box-shadow .15s,transform .1s}
+.ext-promo-btn:hover{background:linear-gradient(135deg,#0891b2,#22d3ee);box-shadow:0 3px 10px rgba(8,145,178,.4);transform:translateY(-1px)}
+body.dark-mode .ext-promo-btn{background:linear-gradient(135deg,#0891b2,#06b6d4);border-color:rgba(103,232,249,.35)}
+body.dark-mode .ext-promo-btn:hover{background:linear-gradient(135deg,#22d3ee,#67e8f9);color:#042f3a}
 @media(max-width:480px){.hdr-nav a{font-size:13px;padding:5px 7px}.ext-promo{font-size:13px;gap:8px}}
 body{margin:0;background:#eef5fb;color:#0b0d12;font-family:system-ui,Inter,Segoe UI,Arial;min-height:100vh;display:flex;flex-direction:column}.hdr{position:sticky;top:0;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(10,60,120,.15);z-index:100;contain:layout style paint}.logo{height:28px;border-radius:8px}.wrap{max-width:800px;margin:24px auto;padding:0 16px;flex:1}.hero{display:block;margin:10px auto 18px;max-width:320px;border-radius:12px;box-shadow:0 10px 24px rgba(10,60,120,.18)}.hero-description{width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;margin-bottom:24px;padding:24px 20px;background:rgba(255,255,255,.7);border-bottom:1px solid rgba(10,60,120,.1)}.hero-description p{margin:0 auto 16px;color:#0b0d12;font-size:15px;line-height:1.7;max-width:800px}.hero-description p:last-child{margin-bottom:0}.privacy-notice{background:linear-gradient(135deg,#e8f7fb,#d0f0f5);border:2px solid rgba(10,166,194,.3);border-radius:12px;padding:14px 18px;margin:0 auto 20px;text-align:center;max-width:600px;color:#0b0d12;font-size:15px;line-height:1.5}.lbl{color:#2c3e50;margin:6px 0;display:block}.ta{width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(10,60,120,.2);border-radius:12px;padding:12px;box-sizing:border-box;font-family:inherit;font-size:14px;color:#0b0d12}.button-group{display:flex;gap:10px;margin:10px 0 14px 0}.btn{margin:0;flex:1;padding:12px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer;font-size:16px;font-weight:500;color:#0b0d12;transition:opacity 0.3s ease,transform 0.2s ease;will-change:opacity}.btn-secondary{flex:0 0 auto;padding:12px 20px;border-radius:12px;border:1px solid rgba(10,166,194,.45);background:linear-gradient(#ffffff,#e8f7fb);cursor:pointer;font-size:16px;font-weight:500;color:#0b0d12;min-width:100px;transition:opacity 0.3s ease,transform 0.2s ease;will-change:opacity}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}.options-top label,.option-group label,.case-options label{min-height:44px;min-width:44px;padding:12px 8px;box-sizing:border-box}.use-heading{color:#005a8f}.use-description{color:#1a1f26}.footer small{color:#1a1f26}.footer a{color:#005a8f}.footer a:hover{color:#003d5f}
 /* ── Marketing additions: positioning, demo, audience strip ─────────────── */
@@ -195,18 +197,22 @@ body.dark-mode .audience-card{background:rgba(40,40,40,.7);border-color:rgba(255
 .audience-card .ac-desc{font-size:12.5px;color:#3a4a5e;margin:0;line-height:1.45}
 body.dark-mode .audience-card .ac-title{color:#e8edf3}
 body.dark-mode .audience-card .ac-desc{color:#aab4c4}
-.ext-value{margin:18px auto;max-width:760px;background:linear-gradient(135deg,#eef5fb,#e3eefb);border:1px solid rgba(37,99,235,.18);border-radius:12px;padding:18px}
-body.dark-mode .ext-value{background:linear-gradient(135deg,#1c2434,#1a2840);border-color:rgba(74,144,226,.25)}
-.ext-value h2{font-size:16px;margin:0 0 6px;color:#0b0d12;font-weight:700}
-.ext-value .ext-sub{font-size:13px;color:#3a4a5e;margin:0 0 12px;line-height:1.55}
+/* Browser-extension marketing block — centered, logo-tinted */
+.ext-value{margin:28px auto;max-width:680px;background:linear-gradient(135deg,rgba(8,145,178,.06),rgba(124,58,237,.07));border:1px solid rgba(8,145,178,.22);border-radius:14px;padding:28px 24px;text-align:center}
+body.dark-mode .ext-value{background:linear-gradient(135deg,rgba(8,145,178,.14),rgba(124,58,237,.16));border-color:rgba(34,211,238,.3)}
+.ext-value h2{font-size:19px;margin:0 0 10px;color:#0b0d12;font-weight:700;letter-spacing:-.01em}
+.ext-value .ext-sub{font-size:14px;color:#3a4a5e;margin:0 auto 18px;max-width:520px;line-height:1.55}
 body.dark-mode .ext-value h2{color:#e8edf3}
 body.dark-mode .ext-value .ext-sub{color:#aab4c4}
-.ext-feats{list-style:none;padding:0;margin:0 0 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
-.ext-feats li{font-size:13px;color:#1a3a5c;line-height:1.45;padding-left:22px;position:relative}
-.ext-feats li::before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:700}
-body.dark-mode .ext-feats li{color:#cdd5e0}
-.ext-cta{display:inline-block;background:#2563eb;color:#fff;text-decoration:none;font-size:13.5px;font-weight:600;padding:8px 16px;border-radius:8px}
-.ext-cta:hover{opacity:.88}
+.ext-feats{list-style:none;padding:0;margin:0 auto 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;max-width:600px}
+.ext-feats li{font-size:13.5px;color:#1a3a5c;line-height:1.5;padding:9px 12px 9px 32px;position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(8,145,178,.12);border-radius:8px;text-align:left}
+.ext-feats li::before{content:"✓";position:absolute;left:11px;top:9px;color:#0891b2;font-weight:700;font-size:14px}
+body.dark-mode .ext-feats li{color:#cdd5e0;background:rgba(0,0,0,.25);border-color:rgba(34,211,238,.18)}
+body.dark-mode .ext-feats li::before{color:#22d3ee}
+.ext-cta{display:inline-block;background:linear-gradient(135deg,#0e7490,#06b6d4);color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:10px;box-shadow:0 2px 8px rgba(8,145,178,.3);transition:background .15s,box-shadow .15s,transform .1s}
+.ext-cta:hover{background:linear-gradient(135deg,#0891b2,#22d3ee);box-shadow:0 4px 12px rgba(8,145,178,.45);transform:translateY(-1px)}
+body.dark-mode .ext-cta{background:linear-gradient(135deg,#0891b2,#06b6d4)}
+body.dark-mode .ext-cta:hover{background:linear-gradient(135deg,#22d3ee,#67e8f9);color:#042f3a}
 .privacy-trust{margin:18px auto;max-width:760px;background:rgba(232,247,251,.7);border:1px solid rgba(10,166,194,.3);border-radius:12px;padding:14px 18px}
 body.dark-mode .privacy-trust{background:rgba(40,55,60,.7);border-color:rgba(100,166,194,.4)}
 .privacy-trust h2{font-size:15px;margin:0 0 4px;color:#0a7ac2;font-weight:700}
