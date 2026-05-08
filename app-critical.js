@@ -306,49 +306,10 @@ function updateDarkModeIcon(isDark) {
 }
 
 
-// Lazy load third-party scripts after page load to reduce initial bundle size
-function loadTermlyScript() {
-  if (window.termlyLoaded) return;
-  window.termlyLoaded = true;
-  const script = document.createElement('script');
-  script.defer = true;
-  script.src = 'https://app.termly.io/resource-blocker/da56ec80-6621-4889-a102-bf6598ab88ae?autoBlock=on';
-  // SRI cannot be pinned: Termly updates this resource server-side.
-  // Integrity is enforced via the Trusted Types createScriptURL allowlist instead.
-  script.crossOrigin = 'anonymous';
-  document.head.appendChild(script);
-}
-
 // Basic event listeners - load on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   // Update dark mode icon on load (dark mode class applied by default in HTML)
   updateDarkModeIcon(true);
-
-  // Lazy load Termly resource blocker and handler only when consent link is clicked
-  const consentLinks = document.querySelectorAll('.termly-display-preferences');
-  consentLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Load Termly resource blocker script first (if not already loaded)
-      loadTermlyScript();
-      // Load Termly handler script only when needed
-      if (!window.termlyHandlerLoaded) {
-        const script = document.createElement('script');
-        script.src = '/app-termly.js?v=1.0';
-        script.integrity = 'sha384-osftMLwri1ylK62yKFnxFqz9fg9T5jq1E3aAo/o1umwrUPRl5CtO6nc4Vkm3UUwk';
-        script.crossOrigin = 'anonymous';
-        script.onload = () => {
-          if (window.handleTermlyPreferences) {
-            window.handleTermlyPreferences();
-          }
-        };
-        document.head.appendChild(script);
-        window.termlyHandlerLoaded = true;
-      } else if (window.handleTermlyPreferences) {
-        window.handleTermlyPreferences();
-      }
-    });
-  });
 
   // TOS acceptance check
   if (!localStorage.getItem('tosAccepted')) {
