@@ -31,21 +31,22 @@
 default-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'
 ```
 
-**After**:
+**After** (current state — third-party consent platform removed entirely):
 ```
 default-src 'none';
-script-src 'self' [sha256 hashes] https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com;
-style-src 'self';
+script-src 'self' [sha256 hashes];
+style-src 'self' [sha256 hash for the one inline <style> block];
 img-src 'self' data:;
 font-src 'self' data:;
-connect-src 'self' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com;
-frame-src 'self';
+connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co;
+frame-src 'self' https://www.youtube-nocookie.com;
 object-src 'none';
 base-uri 'self';
 form-action 'self';
 frame-ancestors 'none';
 require-trusted-types-for 'script';
 upgrade-insecure-requests;
+report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report;
 ```
 
 **Changes**:
@@ -57,16 +58,9 @@ upgrade-insecure-requests;
 **Files Modified**: All HTML files, _headers
 
 #### 4. Subresource Integrity (SRI)
-**Added SRI to**:
-- `https://cmp.gatekeeperconsent.com/min.js` (SHA-384)
-- `https://the.gatekeeperconsent.com/cmp.min.js` (SHA-384)
-
-**Attributes Added**:
-```html
-integrity="sha384-<hash>" crossorigin="anonymous"
-```
-
-**Files Modified**: All HTML files with third-party scripts
+Originally applied to the third-party consent scripts (Termly / Gatekeeper).
+Those scripts have since been removed entirely — no third-party scripts remain
+in any served HTML. SRI is therefore no longer applicable on this site.
 
 #### 5. Missing HTTP Security Headers
 **Added**:

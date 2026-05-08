@@ -62,9 +62,7 @@ Go to **Rules** → **Transform Rules** → **HTTP Response Header Modification*
 - Header name: `Content-Security-Policy`
 - Value: (copy from `_headers` file, line 13)
 
-```
-default-src 'self'; script-src 'self' 'sha256-86c2365ca49c78f7eaabd6bce2bd492268a07e72859cc270b77257a25d483565' 'sha256-42990002847620bd43394d03506c00174cf9f20728e4f8e0bdd34280b13d37d4' 'sha256-677730f7750ae982a69c8602a9209ea987622664008738755182f71fa65f3876' 'sha256-hsI2XKScePfqq9a84r1JImigfnKFnMJwt3JXol1INWU=' 'sha256-QpkAAoR2IL1DOU0DUGwAF0z58gco5PjgvdNCgLE9N9Q=' 'sha256-Z3cw93UK6YKmnIYCqSCeqYdiJmQAhzh1UYL3H6ZfOHY=' 'sha256-sPGq/oAjfsmBw0Nqmju6/7Fn6jAZZTO8490AQ3YIkjs=' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com ; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com ; frame-src 'self' https://app.termly.io; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; require-trusted-types-for 'script'; upgrade-insecure-requests;
-```
+> Copy the live `Content-Security-Policy:` line from `_headers` rather than pasting a snapshot here. The current policy is hash-pinned with no third-party host allowlists; pasting an outdated example here would just diverge again. The single source of truth is `_headers`.
 
 **Important**: The CSP includes `frame-ancestors 'self'` which prevents clickjacking attacks.
 

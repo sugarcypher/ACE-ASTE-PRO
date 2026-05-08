@@ -117,7 +117,7 @@ Create `vercel.json`:
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-...' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://app.termly.io https://cmp.gatekeeperconsent.com https://the.gatekeeperconsent.com https://privacy.gatekeeperconsent.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests"
+          "value": "default-src 'none'; script-src 'self' 'sha256-...'; style-src 'self' 'sha256-...'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-src 'self' https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests"
         }
       ]
     }

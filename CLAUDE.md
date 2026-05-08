@@ -16,8 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`index.html`** — Main SPA page with inline Trusted Types policy, CSP meta tag, and structured data (JSON-LD).
 - **`app-critical.js`** — Core application logic loaded immediately: text cleaning engine (`cleanText()`), clipboard operations, dark mode, GPC/privacy detection, Ezoic button contrast fix. All cleaning options (invisible chars, markdown, emoji, HTML, comments, custom regex, case transforms, punctuation) are processed here.
-- **`app.js`** — Older/duplicate version of the app logic (includes Termly consent handling and event listeners). Note: `index.html` loads `app-critical.js`, not `app.js`.
-- **`app-termly.js`** — Lazy-loaded Termly consent preference handler. Only loaded when a user clicks the consent preferences link.
+- **`app.js`** — Older/duplicate version of the app logic. Note: `index.html` loads `app-critical.js`, not `app.js`. Kept around for reference; not active.
 - **`styles.css` / `styles.min.css`** — Hand-written CSS with dark mode support via `.dark-mode` class on `body`.
 - **`public/`** — Alternate deployment directory with copies of core files. `public/index.html` is a separate version.
 
@@ -25,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Trusted Types:** A default Trusted Types policy is defined inline in `index.html <head>` to sanitize HTML and validate script URLs against an allowlist. `app-critical.js` uses `setInnerHTML()` helper to go through this policy.
 - **CSP:** Content Security Policy is set both via `<meta http-equiv>` in HTML and via `_headers` for platforms that support HTTP headers. Uses script hash allowlisting (no `unsafe-inline`).
-- **Lazy loading:** Termly consent scripts are deferred and only loaded on first user interaction (scroll/click/touch) to reduce initial JS payload.
+- **No third-party consent script:** Site uses no cookies that require a banner. Termly / Gatekeeper-style consent platforms were removed; CSP no longer allowlists any third-party host for scripts or connections (only Supabase for auth + the YouTube no-cookie host for the demo iframe).
 - **DOM performance:** `getElement()` caches DOM lookups. DOM writes are batched in `requestAnimationFrame()` to avoid forced reflows.
 - **Privacy:** GPC (Global Privacy Control) detection disables personalized ads. Dark mode preference stored in-memory only (not localStorage) in the critical path.
 - **Custom rules:** Users can define find/replace with optional regex, stored client-side.

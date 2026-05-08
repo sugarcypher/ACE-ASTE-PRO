@@ -9,35 +9,38 @@ This document describes the security headers implemented for acepaste.xyz to pro
 
 The CSP restricts which resources can be loaded and executed, significantly reducing XSS attack risk.
 
-**Current Policy**:
+**Current Policy** (see `_headers` for the authoritative version):
 ```
-default-src 'self';
-script-src 'self' 'sha256-712bfa754fe3855d3d08005957bf0fddfe3ec7d3614533ee83580505b56092ce' 'sha256-42990002847620bd43394d03506c00174cf9f20728e4f8e0bdd34280b13d37d4' https://app.termly.io 'strict-dynamic';
-style-src 'self' 'unsafe-inline';
-img-src 'self' data: https:;
+default-src 'none';
+script-src 'self' 'sha256-…' (one hash per inline script, no host allowlist);
+style-src 'self' 'sha256-…' (hash for the inline ap-video block);
+img-src 'self' data:;
 font-src 'self' data:;
-connect-src 'self' https://app.termly.io;
-frame-src 'self' https://app.termly.io https://googleads.g.doubleclick.net;
+connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co;
+frame-src 'self' https://www.youtube-nocookie.com;
 object-src 'none';
 base-uri 'self';
 form-action 'self';
-frame-ancestors 'self';
+frame-ancestors 'none';
+require-trusted-types-for 'script';
 upgrade-insecure-requests;
+report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report;
 ```
 
 **Directives Explained**:
-- `default-src 'self'`: Only allow resources from same origin by default
-- `script-src`: 
-  - `'self'`: Allows scripts from same origin
-  - `'sha256-...'`: SHA-256 hashes for inline scripts (loadCSS polyfill and dark mode init)
-  - `https://app.termly.io`: External scripts from Termly
-  - `'strict-dynamic'`: Allows scripts loaded by trusted scripts
-  - **No `'unsafe-inline'`**: Removed for better security - using hashes instead
-- `style-src`: Allows inline styles (critical CSS) and stylesheets from same origin
-- `img-src`: Allows images from same origin, data URIs, and HTTPS sources
-- `frame-src`: Allows embedding Termly consent UI
-- `object-src 'none'`: Blocks plugins (Flash, etc.)
-- `frame-ancestors`: Not supported in meta tags - must be set via HTTP header (see `_headers` file)
+- `default-src 'none'`: Block everything by default; only the directives below allowlist anything.
+- `script-src`:
+  - `'self'`: scripts loaded from the same origin via `<script src=>`
+  - `'sha256-…'`: per-inline-script hashes (no `'unsafe-inline'`)
+  - **No third-party hosts.** External consent platforms / analytics are not allowed.
+- `style-src`: same-origin stylesheets + a hash for the one inline `<style>` block on the homepage.
+- `img-src`: same-origin and `data:` URIs only. No remote images, no third-party image hosts.
+- `connect-src`: same-origin XHR/fetch + the Supabase project URL (auth + edge functions).
+- `frame-src`: same-origin + `https://www.youtube-nocookie.com` (the demo-video facade after click — no-cookie variant only).
+- `object-src 'none'`: blocks plugins (Flash, etc.)
+- `frame-ancestors 'none'`: prevents the page from being embedded in any iframe (clickjacking protection). Must be set via HTTP header — meta-tag form is ignored by browsers.
+- `require-trusted-types-for 'script'`: enforces the Trusted Types API on DOM XSS sinks.
+- `report-uri`: violations stream to the `csp-report` Supabase Edge Function.
 
 **Security Improvements**:
 - ✅ Removed `'unsafe-inline'` from `script-src` - using SHA-256 hashes instead
