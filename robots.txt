@@ -1,0 +1,9 @@
+# https://acepaste.xyz/robots.txt
+# Static, privacy-first text-cleaning tool. No tracking. Crawlers welcome.
+
+User-agent: *
+Allow: /
+Disallow: /account.html
+Disallow: /indeBADx.html
+
+Sitemap: https://acepaste.xyz/sitemap.xml
