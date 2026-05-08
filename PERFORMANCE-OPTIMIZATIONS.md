@@ -5,11 +5,10 @@
 ### ✅ Completed
 1. **Critical CSS Inlined** - Above-the-fold CSS is now inlined in `<head>` to eliminate render-blocking
 2. **Non-Critical CSS Async Loading** - Main stylesheet loads asynchronously using preload pattern
-3. **Resource Hints Added** - Preconnect and DNS-prefetch for external domains (Termly)
-4. **Script Optimization** - App.js now uses `defer`, Termly script uses `defer`
-5. **Script Optimization** - All scripts use defer/async for non-blocking loading
-6. **Image Dimensions Added** - Explicit width/height attributes to prevent CLS
-7. **Image Priority** - Hero image uses `fetchpriority="high"` and `loading="eager"`
+3. **No third-party preconnects** - Site no longer loads any cross-origin scripts; preconnect/DNS-prefetch hints removed.
+4. **Script Optimization** - All first-party scripts use defer/async for non-blocking loading
+5. **Image Dimensions Added** - Explicit width/height attributes to prevent CLS
+6. **Image Priority** - Hero image uses `fetchpriority="high"` and `loading="eager"`
 
 ## Image Optimization (REQUIRED - Manual Action Needed)
 

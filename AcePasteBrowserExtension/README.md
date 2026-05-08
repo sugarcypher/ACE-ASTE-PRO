@@ -66,8 +66,7 @@ The popup never uses `innerHTML` for user-derived content — the report DOM is 
 ## What was changed vs. the web version
 
 Stripped (not relevant in an extension):
-- Termly consent loader and resource blocker
-- Global Privacy Control detection
+- Global Privacy Control detection (no analytics or tracking either way)
 - Trusted Types web-script allowlist policy
 - Ezoic / ads.txt / Cloudflare worker / nginx configs
 - Hero illustration, marketing prose, FAQ/About/Privacy/Security pages

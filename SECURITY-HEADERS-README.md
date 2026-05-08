@@ -164,9 +164,8 @@ Current inline scripts:
 - No data stored on servers
 
 ### ✅ Consent Management
-- GatekeeperConsent for GDPR/CCPA compliance
-- Required third-party scripts have SRI
-- Lazy-loaded to reduce initial bundle size
+- No third-party consent platform required: site sets no tracking, analytics, or advertising cookies. The only browser storage is a sessionStorage entry for the optional account login (cleared on tab close) and `chrome.storage.local` inside the browser extension.
+- All scripts are first-party. Subresource Integrity is no longer applicable because no cross-origin scripts are loaded.
 
 ## Testing
 
