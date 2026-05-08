@@ -12,6 +12,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Hosting:** GitHub Pages (primary), with `_headers`/`_redirects` files for Cloudflare Pages/Netlify if deployed there.
 - **CNAME:** `acepaste.xyz`
 
+## Deploy workflow — IMPORTANT
+
+Every push to `main` deploys live to acepaste.xyz in ~18 seconds via `.github/workflows/deploy.yml`. There is no staging, no PR review gate, and no rollback button — reverting requires another commit.
+
+**Default rule for any agent working in this repo: commit locally, then stop. Do NOT run `git push` until the user explicitly authorizes it for that specific change** (with words like "push", "deploy", "ship", "go live", or by running the push themselves). Treating "go ahead with the work" as deploy approval skips the only review step the user has, since the Bash permission prompt shows the command but not the diff being deployed.
+
 ## Architecture
 
 - **`index.html`** — Main SPA page with inline Trusted Types policy, CSP meta tag, and structured data (JSON-LD).
