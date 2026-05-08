@@ -8,6 +8,26 @@
  * Replace the two constants below with your actual Supabase project values.
  */
 
+// ── Recovery-link fallback ────────────────────────────────────────────────
+// If a Supabase recovery/signup link drops the user on any page other than
+// /account.html (e.g. the Site URL falls back to the homepage), forward them
+// to /account.html with the hash preserved so the set-new-password handler
+// can run. Without this, the access_token in the URL hash is silently
+// ignored and the user just sees the homepage.
+(function() {
+  try {
+    if (typeof window === 'undefined' || !window.location.hash) return;
+    var params = new URLSearchParams(window.location.hash.slice(1));
+    var t = params.get('type');
+    if ((t === 'recovery' || t === 'signup') && params.get('access_token')) {
+      var path = window.location.pathname;
+      if (path !== '/account.html' && path !== '/account') {
+        window.location.replace('/account.html' + window.location.search + window.location.hash);
+      }
+    }
+  } catch(e) {}
+})();
+
 // ── Config ────────────────────────────────────────────────────────────────
 const ACEPASTE_SUPABASE_URL  = 'https://eqoltjofjlznlirbalrb.supabase.co';
 const ACEPASTE_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxb2x0am9mamx6bmxpcmJhbHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMTI2NzAsImV4cCI6MjA5MzU4ODY3MH0.5L6MAZpnPDdlBqFDtHHH3-gKFXUOnsbWgrJfnusw-Zk';
@@ -164,7 +184,16 @@ async function acePasteSendRecovery(email, captchaToken) {
   try {
     const body = { email };
     if (captchaToken) body.gotrue_meta_security = { captcha_token: captchaToken };
-    const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/recover', {
+    // Force the recovery email to land on /account.html, which has the
+    // set-new-password handler. Without this, Supabase falls back to the
+    // project's Site URL (currently the homepage), where the recovery hash
+    // is silently ignored. Note: this URL must be on the Supabase
+    // Redirect URLs allowlist or it's dropped server-side.
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin)
+      ? window.location.origin
+      : 'https://acepaste.xyz';
+    const redirectTo = origin + '/account.html';
+    const r = await fetch(ACEPASTE_SUPABASE_URL + '/auth/v1/recover?redirect_to=' + encodeURIComponent(redirectTo), {
       method: 'POST',
       headers: _headers(),
       body: JSON.stringify(body),
