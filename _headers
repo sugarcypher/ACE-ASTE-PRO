@@ -54,7 +54,7 @@
 /*
   # Content Security Policy
   # Strict CSP with no unsafe-inline, explicit hashes for all inline scripts
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-2NFZLe1ZMYnjhp/bALi/jzo8Nio3u2HDtsRMofMn3os=' 'sha256-lnJQdXRJFHDW1I2K2VoyiPzp0fChDfgjzlm7YbAH98c=' 'sha256-mM2W+OlckW6Avb1far8FzkQ3hsZBoZDxGwMKFlZAE6I=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' 'sha256-zxi3aA1YohTUDe0NtDU66A7N17nwQIddEZn9jzw5atA='; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-2NFZLe1ZMYnjhp/bALi/jzo8Nio3u2HDtsRMofMn3os=' 'sha256-dFctY4XoXT2LFXZgfa/NpRvunIId5hiEe9E5VE26L4Y=' 'sha256-lnJQdXRJFHDW1I2K2VoyiPzp0fChDfgjzlm7YbAH98c=' 'sha256-mM2W+OlckW6Avb1far8FzkQ3hsZBoZDxGwMKFlZAE6I=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA=' 'sha256-zxi3aA1YohTUDe0NtDU66A7N17nwQIddEZn9jzw5atA='; style-src 'self' 'sha256-fS8G0iKgMQhZgmsnPeqkx3uyxYudDqgzuIHHVzsmQmQ='; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-src 'self' https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report
 
   # Prevent MIME type sniffing
   X-Content-Type-Options: nosniff
