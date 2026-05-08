@@ -4,75 +4,112 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Privacy Policy - Ace Paste Cleaner Pro</title>
+<title>Privacy Policy — Ace Paste Cleaner Pro</title>
+<meta name="description" content="Ace Paste Cleaner Pro processes text 100% in your browser. No tracking cookies, no analytics, no advertising. This page explains exactly what we collect (just account credentials) and what we don't.">
+<link rel="canonical" href="https://acepaste.xyz/privacy.html">
+<link rel="stylesheet" href="/styles.css?v=3.0">
+<style>
+.legal-wrap { max-width: 720px; margin: 2.5rem auto 4rem; padding: 0 1.25rem; line-height: 1.7; color: var(--text, #111); }
+.legal-wrap .page-title { font-size: 2rem; font-weight: 800; margin: 0 0 0.25rem; }
+.legal-wrap .updated { color: var(--muted, #666); font-size: 0.9rem; margin-bottom: 2rem; }
+.legal-wrap h2 { font-size: 1.2rem; font-weight: 700; margin: 2rem 0 0.5rem; }
+.legal-wrap p, .legal-wrap ul { margin: 0.75rem 0; }
+.legal-wrap ul { padding-left: 1.5rem; }
+</style>
 </head>
 <body>
-<h1>Privacy Policy</h1>
 
-<p><strong>Last Updated:</strong> 19 Nov 2025</p>
+<header class="hdr">
+  <picture>
+    <source srcset="/brand-56.webp?v=2.1 1x, /brand-112.webp?v=2.1 2x" type="image/webp">
+    <img src="/brand-56.jpg?v=2.1" srcset="/brand-56.jpg?v=2.1 1x, /brand-112.jpg?v=2.1 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
+  </picture>
+  <h1>Ace Paste Cleaner Pro</h1>
+  <span class="domain">acepaste.xyz</span>
+  <nav class="hdr-nav">
+    <a href="https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci" rel="noopener" target="_blank">Add to Chrome</a>
+    <a href="/pricing.html">Pricing</a>
+    <a href="/account.html">Account</a>
+  </nav>
+</header>
 
-<h2>1. Introduction</h2>
+<main class="legal-wrap">
 
-<p>Ace Paste Cleaner Pro ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose and safeguard your information when you use our service at acepaste.xyz ("the Service").</p>
+  <h2 class="page-title">Privacy Policy</h2>
+  <p class="updated">Last updated: May 2026 · ThinkWell Labs LLC</p>
 
-<h2>2. Client‑Side Processing</h2>
+  <h2>The short version</h2>
+  <p><strong>Text you paste into the cleaner never leaves your browser.</strong> All cleaning runs locally on your device. We do not transmit, store, log, or have access to the content you paste. We do not use tracking cookies, analytics, advertising, fingerprinting, or session-replay tools.</p>
 
-<p>All text processing occurs entirely in your browser.  We do not transmit, store or have access to any text you paste into the Service.  Your data never leaves your device, ensuring maximum privacy and security.</p>
+  <h2>1. What we don't collect</h2>
+  <p>The text you paste into the tool — at any time, in any form, anywhere. The cleaner runs entirely client-side. The text never crosses the network.</p>
 
-<h2>3. Information We Collect</h2>
+  <h2>2. What we do collect (only if you create a Pro account)</h2>
+  <p>To run the optional Pro account system we collect the minimum necessary:</p>
+  <ul>
+    <li><strong>Email address</strong> — used to identify your account and deliver receipts.</li>
+    <li><strong>Hashed password</strong> — stored as a one-way bcrypt hash by Supabase Auth. We cannot read it.</li>
+    <li><strong>Subscription status</strong> — which plan you're on and whether it's active. Stored against your user ID.</li>
+    <li><strong>Stripe customer + subscription IDs</strong> — opaque identifiers Stripe gives us so the webhook can update your plan.</li>
+  </ul>
+  <p>We do not collect: name, address, phone, IP, device fingerprint, location, browsing history, or analytics. Cookies are not used at all on the marketing pages; on the sign-in page, Cloudflare Turnstile may set a short-lived technical cookie strictly for bot detection (no personal information, no tracking).</p>
 
-<p>We collect only limited technical information automatically, such as device type, operating system, browser type and general usage data (e.g., pages visited). We do not collect or store the content you paste into the tool.</p>
+  <h2>3. Service providers we use</h2>
+  <ul>
+    <li><strong>Supabase</strong> (US-hosted) — manages account authentication and the subscriptions table. Receives: your email, hashed password, subscription state.</li>
+    <li><strong>Stripe</strong> (US-hosted) — processes payments. Receives: payment-card information you enter on Stripe's checkout page (we never see card data) and your email. Stripe sends us a webhook with your customer/subscription IDs and plan.</li>
+    <li><strong>Cloudflare Turnstile</strong> — invisible bot detection on the sign-in/sign-up forms. Does not track across sites; does not identify you.</li>
+    <li><strong>GitHub Pages and/or Cloudflare Pages</strong> — static hosting for the website itself. No analytics, no cookies set by the host.</li>
+  </ul>
+  <p>We do not use Google Analytics, Facebook Pixel, Hotjar, Mixpanel, ad networks, or any other analytics or advertising provider.</p>
 
-<h2>4. How We Use Information</h2>
+  <h2>4. Browser storage</h2>
+  <p>The website itself sets nothing persistent. The optional sign-in flow uses <code>sessionStorage</code> (a per-tab in-memory store cleared on close) to remember your active session. The browser extension uses <code>chrome.storage.local</code> on your device only.</p>
 
-<ul>
-  <li>Provide and maintain the Service.</li>
-  <li>Analyze usage patterns to improve the Service.</li>
-  <li>Ensure security and prevent abuse.</li>
-  <li>Comply with legal obligations.</li>
-</ul>
+  <h2>5. Your privacy rights</h2>
+  <p>Depending on where you live, you have the right to:</p>
+  <ul>
+    <li>Access the personal data we hold about you (an email address and subscription state, in our case).</li>
+    <li>Have it deleted.</li>
+    <li>Object to or restrict our processing of it.</li>
+    <li>Withdraw consent.</li>
+    <li>Receive a portable copy.</li>
+  </ul>
+  <p>EU/UK/Swiss residents (GDPR) and California residents (CCPA/CPRA) have additional rights described on our <a href="/privacy-eu.html">EU privacy page</a> and <a href="/privacy-ca.html">California privacy page</a>. To exercise any right, email <a href="mailto:privacy@acepaste.xyz">privacy@acepaste.xyz</a>; we'll respond within 30 days.</p>
 
-<h2>5. Data Sharing</h2>
+  <h2>6. Children's privacy</h2>
+  <p>The Service is not directed to children under 13 (under 16 in the EU). We do not knowingly collect personal information from children. If we learn we have collected such information, we will delete it.</p>
 
-<p>We may share automatically‑collected usage information with third‑party service providers (e.g., analytics providers) to help us operate and improve the Service.  We do <em>not</em> share the text content you paste, since it never leaves your device.</p>
+  <h2>7. International data transfers</h2>
+  <p>Account data is stored with Supabase in the United States. Payment data is processed by Stripe in the United States. By creating an account, you consent to these transfers.</p>
 
-<h2>6. Third‑Party Services</h2>
+  <h2>8. Data retention</h2>
+  <p>Account data is kept for as long as your account exists. Email us to delete it. Webhook idempotency records and CSP violation reports auto-purge after 7 and 30 days respectively. Restore-purchase attempt logs auto-purge after 30 days.</p>
 
-<p>We may use analytics services (such as Google Analytics) to understand how visitors use the Service.  These services may use cookies to collect anonymous statistics.  You can opt out of Google Analytics by installing their official opt‑out browser add‑on.</p>
+  <h2>9. Changes to this policy</h2>
+  <p>If we add tracking, analytics, or new third-party processors, we will update this page and update the "Last updated" date.</p>
 
-<h2>7. Cookies and Tracking Technologies</h2>
+  <h2>10. Contact</h2>
+  <p><strong>ThinkWell Labs LLC</strong><br>
+  Privacy contact: <a href="mailto:privacy@acepaste.xyz">privacy@acepaste.xyz</a><br>
+  General contact: <a href="mailto:b@twl.today">b@twl.today</a></p>
 
-<p>We and our partners may use cookies or similar technologies to remember your preferences and analyze service usage.  Types of cookies used:</p>
+  <h2>11. Compliance</h2>
+  <p>This Privacy Policy is designed to comply with the General Data Protection Regulation (GDPR), the California Consumer Privacy Act / California Privacy Rights Act (CCPA/CPRA), and the Children's Online Privacy Protection Act (COPPA).</p>
 
-<ul>
-  <li><strong>Essential Cookies:</strong> Required for the Service to function properly.</li>
-  <li><strong>Analytics Cookies:</strong> Help us understand how visitors interact with the Service.</li>
-</ul>
+</main>
 
-<h2>8. Your Privacy Rights</h2>
-
-<p>Depending on your jurisdiction, you may have rights to access, delete, object to or restrict processing of your personal data; opt out of certain data uses; request portability; and withdraw consent. California (CCPA) and EU/UK/Swiss (GDPR) residents have additional specific rights. To exercise these rights, contact us as set out below.</p>
-
-<h2>9. Children's Privacy</h2>
-
-<p>The Service is not intended for children under 13. We do not knowingly collect personal information from children under 13.</p>
-
-<h2>10. International Transfers</h2>
-
-<p>Your information may be processed in countries other than your own. By using the Service, you consent to such transfers.</p>
-
-<h2>11. Changes to This Policy</h2>
-
-<p>We may update this Privacy Policy from time to time. We will post the updated policy and update the "Last Updated" date.</p>
-
-<h2>12. Contact Us</h2>
-
-<p>Website: <a href="https://acepaste.xyz/">acepaste.xyz</a><br>
-Email: privacy@acepaste.xyz</p>
-
-<h2>13. Compliance</h2>
-
-<p>This Privacy Policy is designed to comply with the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA) and the Children's Online Privacy Protection Act (COPPA).</p>
+<footer class="site-footer">
+  <nav class="footer-links">
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/cookie-policy.html">Cookie Policy</a>
+    <a href="/security.html">Security</a>
+    <a href="/account.html">Account</a>
+  </nav>
+  <p class="footer-copy">© 2026 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a></p>
+</footer>
 
 </body>
 </html>
