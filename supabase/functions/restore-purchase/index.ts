@@ -153,10 +153,16 @@ Deno.serve(async (req) => {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const PRICE_TO_PLAN: Record<string, string> = {
+  // Legacy prices
   'price_1TTrW9EsqFDVCVgWlpNMG4sP': 'trial',
   'price_1TTrWCEsqFDVCVgWmFQoIZI2': 'monthly',
   'price_1TTrWFEsqFDVCVgWkcunxJHq': 'yearly',
   'price_1TTrWIEsqFDVCVgWrFGPxiZ7': 'lifetime',
+  // 2026-05 prices
+  'price_1TUIg7EsqFDVCVgWxVD6pppb': 'trial',     // Day Pass
+  'price_1TUIg7EsqFDVCVgWZBUt4aMC': 'monthly',   // Pro Monthly
+  'price_1TUIg7EsqFDVCVgW9Huv2nr6': 'yearly',    // Pro Yearly
+  'price_1TUIg6EsqFDVCVgWfe6lMyhd': 'lifetime',  // Founders Lifetime
 };
 
 function json(body: unknown, status = 200) {

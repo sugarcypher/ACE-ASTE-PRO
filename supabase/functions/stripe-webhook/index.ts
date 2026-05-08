@@ -29,12 +29,19 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
 const WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 
 // Map Stripe Price IDs → internal plan names.
-// Replace with your actual price IDs from Stripe Dashboard → Products.
+// Both legacy and new (2026-05) Price IDs are mapped so existing customers'
+// recurring subscriptions and new checkouts both resolve correctly.
 const PRICE_TO_PLAN: Record<string, string> = {
+  // Legacy prices ($1.23 / $12.34 / $123.45 / $234.56)
   'price_1TTrW9EsqFDVCVgWlpNMG4sP': 'trial',
   'price_1TTrWCEsqFDVCVgWmFQoIZI2': 'monthly',
   'price_1TTrWFEsqFDVCVgWkcunxJHq': 'yearly',
   'price_1TTrWIEsqFDVCVgWrFGPxiZ7': 'lifetime',
+  // 2026-05 prices ($2.99 / $14.99 / $119 / $499)
+  'price_1TUIg7EsqFDVCVgWxVD6pppb': 'trial',     // Day Pass
+  'price_1TUIg7EsqFDVCVgWZBUt4aMC': 'monthly',   // Pro Monthly
+  'price_1TUIg7EsqFDVCVgW9Huv2nr6': 'yearly',    // Pro Yearly
+  'price_1TUIg6EsqFDVCVgWfe6lMyhd': 'lifetime',  // Founders Lifetime
 };
 
 Deno.serve(async (req) => {
