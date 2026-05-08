@@ -3,18 +3,24 @@
 <meta name="referrer" content="no-referrer">
 <script src="/purify.min.js"></script>
 <script>!function(){if(window.trustedTypes&&window.trustedTypes.createPolicy){var _s=false;window.trustedTypes.createPolicy("default",{createHTML:function(e){if(_s)return e;_s=true;try{return DOMPurify.sanitize(e)}finally{_s=false}},createScriptURL:function(e){var t=["https://acepaste.xyz"];return t.some(function(t){return e.startsWith(t)})?e:void console.error("Untrusted script URL:",e)}})}}();</script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dFctY4XoXT2LFXZgfa/NpRvunIId5hiEe9E5VE26L4Y=' 'sha256-lnJQdXRJFHDW1I2K2VoyiPzp0fChDfgjzlm7YbAH98c=' 'sha256-mM2W+OlckW6Avb1far8FzkQ3hsZBoZDxGwMKFlZAE6I=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA='; style-src 'self' 'sha256-5aQ20rEKDEe4j84OIDXWd8pFigAoe47m0HH0DMhX+Oo='; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-src 'self' https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dFctY4XoXT2LFXZgfa/NpRvunIId5hiEe9E5VE26L4Y=' 'sha256-z0T+zI4I0laBJu1X+bBRKZbpOqldd1IOCb4znhFo4Cw=' 'sha256-Syy1i1613jWyPD7ylFLc+J6CxAFN9WbzohgfWaf3vSk=' 'sha256-mM2W+OlckW6Avb1far8FzkQ3hsZBoZDxGwMKFlZAE6I=' 'sha256-zS73P5wKtXDP7d1hEljlRxqwP1PqhD2MSrJKqdNv2EA='; style-src 'self' 'sha256-5aQ20rEKDEe4j84OIDXWd8pFigAoe47m0HH0DMhX+Oo='; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co; frame-src 'self' https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
 <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
-<title>Ace Paste Cleaner Pro — Privacy-First Text Cleaner · Invisible Unicode &amp; AI Debris Remover</title>
-<meta name="description" content="Privacy-first text cleaner. AcePaste cleans, inspects, and neutralizes hidden paste artifacts — invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML — locally in your browser. Free web app and Chrome extension.">
-<meta name="keywords" content="privacy-first text cleaner, invisible character remover, prompt injection scanner, zero-width space, unicode cleaner, AI text cleaner, paste cleaner, text sanitizer, markdown stripper, strip formatting, browser extension paste cleaner">
-<meta property="og:title" content="Ace Paste Cleaner Pro — Privacy-First Text Cleaner">
-<meta property="og:description" content="Clean, inspect, and neutralize hidden paste artifacts locally in the browser. Strips invisible Unicode, prompt-injection tags, markdown, and AI debris. Free web app + Chrome extension.">
+<title>Remove Invisible Unicode &amp; AI Debris from Text — AcePaste</title>
+<meta name="description" content="Strip invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML from any text — entirely in your browser. Free web app + Chrome extension.">
+<meta property="og:title" content="AcePaste — Remove Invisible Unicode &amp; AI Debris from Text">
+<meta property="og:description" content="Strip invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML from any text — entirely in your browser. Free web app + Chrome extension.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://acepaste.xyz">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ace Paste Cleaner Pro — Privacy-First Text Cleaner">
-<meta name="twitter:description" content="Clean, inspect, and neutralize hidden paste artifacts locally in your browser. Invisible Unicode, prompt-injection tags, markdown, AI debris.">
+<meta property="og:image" content="https://acepaste.xyz/brand-640.jpg?v=2.1">
+<meta property="og:image:width" content="640">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="AcePaste — privacy-first text cleaner">
+<meta property="og:site_name" content="AcePaste">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AcePaste — Remove Invisible Unicode &amp; AI Debris from Text">
+<meta name="twitter:description" content="Strip invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML — entirely in your browser. Free web app + Chrome extension.">
+<meta name="twitter:image" content="https://acepaste.xyz/brand-640.jpg?v=2.1">
+<meta name="twitter:image:alt" content="AcePaste — privacy-first text cleaner">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -23,13 +29,19 @@
   "alternateName": "Ace Paste Cleaner Pro",
   "url": "https://acepaste.xyz",
   "applicationCategory": "UtilitiesApplication",
-  "description": "Client-side text cleaner: removes markup, invisible characters, emojis, formatting, and cleans text. Works entirely in your browser with no data stored.",
-  "operatingSystem": "Web",
+  "applicationSubCategory": "PrivacyApplication",
+  "description": "Privacy-first text cleaner. Strips invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML — entirely in your browser. Web app + Chrome extension.",
+  "operatingSystem": "Web, Chrome",
   "browserRequirements": "Modern browser with JavaScript enabled",
+  "image": "https://acepaste.xyz/brand-640.jpg?v=2.1",
+  "screenshot": "https://acepaste.xyz/assets/video-poster.jpg",
   "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
+    "@type": "AggregateOffer",
+    "priceCurrency": "USD",
+    "lowPrice": "0",
+    "highPrice": "499",
+    "offerCount": "5",
+    "availability": "https://schema.org/InStock"
   },
   "featureList": [
     "Strip invisible Unicode characters across every script (zero-width, bidi, tag chars, variation selectors, prompt-injection tags)",
@@ -52,11 +64,28 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "AcePaste demo — clean invisible Unicode and AI debris from pasted text",
+  "description": "Watch AcePaste strip invisible Unicode characters, prompt-injection tags, AI markup, markdown, and HTML from a sample piece of AI-generated text — entirely client-side.",
+  "thumbnailUrl": "https://acepaste.xyz/assets/video-poster.jpg",
+  "uploadDate": "2026-05-08",
+  "embedUrl": "https://www.youtube-nocookie.com/embed/whugBAOLq1M",
+  "contentUrl": "https://www.youtube.com/watch?v=whugBAOLq1M",
+  "publisher": {
+    "@type": "Organization",
+    "name": "ThinkWell Labs",
+    "url": "https://twl.today"
+  }
+}
+</script>
 
 <link rel="canonical" href="https://acepaste.xyz/">
 <link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
 <link rel="icon" type="image/webp" sizes="56x56" href="/brand-56.webp?v=2.1">
-<link rel="stylesheet" href="/styles.css?v=3.1">
+<link rel="stylesheet" href="/styles.css?v=3.2">
 <style>
 /* AcePaste demo video — privacy-first facade */
 .ap-video{margin:24px auto;max-width:760px;background:rgba(255,255,255,.7);border:1px solid rgba(10,60,120,.12);border-radius:12px;padding:18px}
@@ -86,9 +115,10 @@ body.dark-mode .ap-video__facade,body.dark-mode .ap-video__iframe{box-shadow:0 4
     <span>🧩 Also available as a Chrome extension — clean text right from your clipboard</span>
     <a href="https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci" class="ext-promo-btn" rel="noopener" target="_blank">Add to Chrome →</a>
   </div>
-  <picture><source srcset="/brand-320.webp?v=2.1 320w, /brand-640.webp?v=2.1 640w, /brand-960.webp?v=2.1 960w" sizes="(max-width: 640px) 320px, (max-width: 960px) 640px, 960px" type="image/webp"><img src="/brand-320.jpg?v=2.1" srcset="/brand-320.jpg?v=2.1 320w, /brand-640.jpg?v=2.1 640w, /brand-960.jpg?v=2.1 960w" sizes="(max-width: 640px) 320px, (max-width: 960px) 640px, 960px" class="hero" alt="Ace Logo" width="320" height="320" loading="eager" fetchpriority="high"></picture>
+  <picture><source srcset="/brand-320.webp?v=2.1 320w, /brand-640.webp?v=2.1 640w, /brand-960.webp?v=2.1 960w" sizes="(max-width: 640px) 320px, (max-width: 960px) 640px, 960px" type="image/webp"><img src="/brand-320.jpg?v=2.1" srcset="/brand-320.jpg?v=2.1 320w, /brand-640.jpg?v=2.1 640w, /brand-960.jpg?v=2.1 960w" sizes="(max-width: 640px) 320px, (max-width: 960px) 640px, 960px" class="hero" alt="Ace Paste Cleaner Pro logo — privacy-first text cleaner" width="320" height="320" loading="eager" fetchpriority="high"></picture>
   <section class="product-positioning" aria-label="What AcePaste does">
     <p class="trust-line"><span class="dot" aria-hidden="true"></span>Privacy-first by design · Secure by architecture</p>
+    <h1 class="page-h1">Strip invisible Unicode and AI debris from pasted text</h1>
     <p class="lede">Clean, inspect, and neutralize hidden paste artifacts — locally in your browser.</p>
     <p class="sub">AcePaste strips invisible Unicode, prompt-injection tags, AI debris, markdown, and HTML before that text ever reaches your editor, prompt window, or codebase. Cleaning runs entirely on your device.</p>
     <div class="pos-tags">
