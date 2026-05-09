@@ -60,6 +60,16 @@ body.dark-mode .recipe-demo figcaption { color:#94a3b8; }
 }
 body.dark-mode .recipe-block { background:rgba(255,255,255,.05); color:#d6dde6; border-color:rgba(255,255,255,.14); }
 
+.report-figure { margin:1.6rem 0; }
+.report-figure img {
+  display:block; max-width:100%; height:auto;
+  border:1px solid rgba(10,60,120,.18); border-radius:8px;
+  background:#fff;
+}
+body.dark-mode .report-figure img { border-color:rgba(255,255,255,.14); }
+.report-figure figcaption { font-size:0.92rem; color:#5b6776; margin:0.55rem 0 0; font-style:italic; }
+body.dark-mode .report-figure figcaption { color:#94a3b8; }
+
 .post-cta { margin:2rem 0 1.5rem; padding:1.1rem 1.2rem; background:rgba(10,60,120,.06); border-left:3px solid #0b5fbf; border-radius:6px; }
 body.dark-mode .post-cta { background:rgba(255,255,255,.05); border-left-color:#7cc0ff; }
 .post-cta p { margin:0; font-size:1rem; }
@@ -137,6 +147,10 @@ body.dark-mode .post-back { color:#7cc0ff; }
     </tbody>
   </table>
 </figure>
+<figure class="report-figure">
+  <img src="/blog/img/cleaning-report-lede.png" width="788" height="410" loading="lazy" decoding="async" alt="Ace Paste Cleaner Pro cleaning report. Critical alert: a known prompt-injection or visual-spoof vector was present in the text and was removed. Critical: Unicode tag character (prompt-injection payload), 4 chars stripped, code points U+E0074 ×2, U+E0065, U+E0073. High: Zero-width / word-joiner, 2 chars removed, U+200B, U+200C. Low: Smart punctuation normalized to ASCII, 2 chars replaced in place, U+2014 em-dash to hyphen ×2. 281 to 271 chars (10 removed, 3.6%; 2 normalized in place).">
+  <figcaption>What Ace Paste Cleaner Pro reports when the lede paragraph above is pasted in: the tag-character payload spelling &ldquo;test&rdquo; is flagged Critical and stripped; zero-width characters are flagged High and removed; smart-punctuation is normalized in place.</figcaption>
+</figure>
 <p>The demonstration is empirical, not rhetorical. The characters are real; they survived the publishing pipeline; they will survive the paste into your LLM of choice. The interesting question is what else could travel through the same channel.</p>
 <h2>Text is not what you think it is</h2>
 <p>Modern text handling is layered. A browser paints glyphs from a font; a clipboard transports an encoded string; an editor renders a subset of characters and silently passes the rest; a tokenizer breaks the resulting bytes into pieces a model can compute over. Invisible characters can survive every one of these stages. They are not corruption; they are conformance. The Unicode standard requires their preservation.</p>
@@ -182,6 +196,10 @@ Pro tip: Add blueberries for extra flavor.</pre>
 
 <p>Embedded inside this block, flanking the injection paragraph, is a sequence of invisible TAG characters from the U+E0000-U+E007F range that decodes to the lowercase string "ignore" - six tag characters, no visible glyphs. They function as a marker invisible to the human reader and trivially legible to the model at the codepoint level.</p>
 <p>A human skimming this block sees a recipe with an oddly worded paragraph in the middle. The injection text itself is in plain English, but the signature - the marker that bounds it for the model - is invisible. Whether any given LLM acts on the embedded instruction depends on its current alignment posture, but the instruction is unambiguously present in the model's context window, and the underlying technique is generalizable: any text source, any clipboard, any paste destination.</p>
+<figure class="report-figure">
+  <img src="/blog/img/cleaning-report-recipe.png" width="785" height="224" loading="lazy" decoding="async" alt="Ace Paste Cleaner Pro cleaning report for the recipe block above. Critical alert: a known prompt-injection or visual-spoof vector was present and was removed. Critical: Unicode tag character (prompt-injection payload), 6 chars stripped, code points U+E0069, U+E0067, U+E006E, U+E006F, U+E0072, U+E0065. 557 to 544 chars (13 removed, 2.3%).">
+  <figcaption>Same recipe block, fed through Ace Paste Cleaner Pro: the six tag characters flanking the injection paragraph &mdash; spelling &ldquo;ignore&rdquo; &mdash; are surfaced as a Critical prompt-injection payload and stripped before the text would reach a model.</figcaption>
+</figure>
 <p>I built that example in under five minutes. The same pattern can live inside Wikipedia articles copied by millions of users and ingested into countless RAG corpora; inside Stack Overflow answers routinely pasted into coding assistants; inside Markdown files in public GitHub repositories that Copilot and similar tools draw from automatically; inside corporate documents shared in Slack and pasted into internal LLM tooling; inside resumes, legal briefs, academic papers, contracts, and any other text that travels from an untrusted origin through a clipboard into a context the user trusts.</p>
 <p>The paste-channel attack is not a clever exploit so much as a structural consequence of treating clipboard text as already-reviewed.</p>
 
