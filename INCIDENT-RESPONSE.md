@@ -1,4 +1,4 @@
-# Incident Response Policy — Ace Paste Cleaner Pro
+# Incident Response Policy — AcePaste Cleaner Pro
 
 **Owner:** ThinkWell Labs  
 **Last updated:** 2026-05-06  
@@ -141,9 +141,9 @@ Rotate in this order to avoid downtime:
 
 ## 6. User Notification Template
 
-**Subject:** Important security notice — your Ace Paste account
+**Subject:** Important security notice — your AcePaste account
 
-> We are writing to inform you of a security incident that may have affected your Ace Paste Cleaner Pro account.
+> We are writing to inform you of a security incident that may have affected your AcePaste Cleaner Pro account.
 >
 > **What happened:** [Brief, plain-language description]
 >

@@ -157,7 +157,7 @@
     if (settings.quarantinePaste) states.push('paste');
     sub.textContent = states.length
       ? `Auto-sanitize on ${states.join(' & ')} is ON. Click to highlight contaminated text.`
-      : 'Click to highlight contaminated text. Open Ace Paste to sanitize.';
+      : 'Click to highlight contaminated text. Open AcePaste to sanitize.';
     bannerEl.appendChild(title);
     bannerEl.appendChild(sub);
 
@@ -183,7 +183,7 @@
       p.style.outline = '2px solid #b8261c';
       p.style.outlineOffset = '2px';
       p.style.background = 'rgba(184, 38, 28, 0.08)';
-      p.title = 'Contains hostile invisible characters (Ace Paste flag)';
+      p.title = 'Contains hostile invisible characters (AcePaste flag)';
     }
   }
 

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>FAQ — AcePaste Cleaner Pro</title>
+<meta name="description" content="Common questions about AcePaste Cleaner Pro: what it does, how privacy works, the browser extension, pricing, and account management.">
+<link rel="canonical" href="https://acepaste.xyz/faq.html">
+<link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
+</head>
+<body>
+<a href="/" aria-label="AcePaste Cleaner Pro home" style="display:inline-block;margin:12px 0"><img src="/brand-56.jpg?v=2.1" alt="AcePaste Cleaner Pro" width="28" height="28" style="border-radius:8px;vertical-align:middle"></a>
+<h1>Frequently Asked Questions</h1>
+
+<h2>What is AcePaste?</h2>
+
+<p>AcePaste is a simple browser‑based paste tool that gives you a clean space to drop, format and edit text.  It is optimized for speed, privacy and convenience.</p>
+
+<h2>Why would I use a paste tool?</h2>
+
+<p>Copying text often brings unwanted formatting, weird spacing or hidden characters.  AcePaste acts as a clean staging area so you can inspect or fix text before using it elsewhere.</p>
+
+<h2>Does AcePaste save my text or upload it anywhere?</h2>
+
+<p>No.  Everything happens locally in your browser.  Your text never leaves your device, and nothing is stored or logged.</p>
+
+<h2>Is AcePaste free?</h2>
+
+<p>Yes.  AcePaste is free to use.</p>
+
+<h2>Who created AcePaste?</h2>
+
+<p>AcePaste was created by ThinkWell Labs LLC.  See the About page for more information.</p>
+
+<h2>How can I get support or give feedback?</h2>
+
+<p>Email us at privacy@acepaste.xyz.</p>
+
+</body>
+</html>

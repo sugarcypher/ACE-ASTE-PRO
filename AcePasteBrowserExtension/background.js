@@ -87,17 +87,17 @@ async function getOpts() {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: CONTEXT_CLEAN_REPLACE,
-    title: 'Ace Paste: clean & replace selection',
+    title: 'AcePaste: clean & replace selection',
     contexts: ['selection', 'editable']
   });
   chrome.contextMenus.create({
     id: CONTEXT_CLEAN_COPY,
-    title: 'Ace Paste: clean selection → copy',
+    title: 'AcePaste: clean selection → copy',
     contexts: ['selection']
   });
   chrome.contextMenus.create({
     id: CONTEXT_OPEN_POPUP,
-    title: 'Ace Paste: open cleaner with selection…',
+    title: 'AcePaste: open cleaner with selection…',
     contexts: ['selection']
   });
 });
@@ -235,7 +235,7 @@ chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
     ace_expires_at:    msg.expiresAt    || 0,
   }, () => {
     sendResponse({ ok: true });
-    chrome.action.setTitle({ title: 'Ace Paste Cleaner Pro — Pro active ✓' });
+    chrome.action.setTitle({ title: 'AcePaste Cleaner Pro — Pro active ✓' });
   });
   return true;
 });
@@ -300,11 +300,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       chrome.action.setBadgeText({ text: String(Math.min(msg.count, 999)), tabId });
       chrome.action.setTitle({
         tabId,
-        title: `Ace Paste — ⚠ ${msg.count} hostile invisible character${msg.count === 1 ? '' : 's'} on this page. Click to clean.`
+        title: `AcePaste — ⚠ ${msg.count} hostile invisible character${msg.count === 1 ? '' : 's'} on this page. Click to clean.`
       });
     } else {
       chrome.action.setBadgeText({ text: '', tabId });
-      chrome.action.setTitle({ tabId, title: 'Ace Paste Cleaner Pro — page is clean' });
+      chrome.action.setTitle({ tabId, title: 'AcePaste Cleaner Pro — page is clean' });
     }
     return;
   }

@@ -1,4 +1,4 @@
-# Ace Paste Cleaner — Browser Extension
+# AcePaste Cleaner — Browser Extension
 
 Manifest V3 Chrome / Edge / Brave extension port of [acepaste.xyz](https://acepaste.xyz). Strips markup, invisible characters, emojis, HTML, comments, and AI debris (`##`, `***`, `+++`) from text. 100% local; nothing leaves the browser.
 
@@ -129,4 +129,4 @@ Same as upstream [ACE-ASTE-PRO](https://github.com/sugarcypher/ACE-ASTE-PRO) —
 
 ## Attribution
 
-Ported from the [Ace Paste Cleaner Pro](https://acepaste.xyz) web app by ThinkWell Labs.
+Ported from the [AcePaste Cleaner Pro](https://acepaste.xyz) web app by ThinkWell Labs.

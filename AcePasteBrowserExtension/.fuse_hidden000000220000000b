@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ace Paste Cleaner Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <style>
+    /* Freemium lock styles — inlined to avoid extra HTTP request */
+    .ace-premium-locked { opacity: 0.45; cursor: not-allowed; position: relative; }
+    .ace-premium-locked::after {
+      content: "🔒";
+      font-size: 0.7em;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    #aceUpgradeNudge {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: 0.78rem;
+      color: #92400e;
+      margin-bottom: 8px;
+      display: none;
+    }
+    #aceUpgradeNudge a { color: #b45309; font-weight: 700; text-decoration: none; }
+    #aceAccountStatus {
+      font-size: 0.72rem;
+      color: #555;
+      display: none;
+      padding: 2px 0 4px;
+    }
+    .ace-auth-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0 2px;
+      font-size: 0.78rem;
+    }
+    .ace-auth-btn {
+      font-size: 0.75rem;
+      padding: 3px 9px;
+      border-radius: 5px;
+      border: 1px solid #2563eb;
+      background: transparent;
+      color: #2563eb;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.12s;
+    }
+    .ace-auth-btn:hover { background: #eff6ff; }
+    .ace-auth-btn.danger { border-color: #dc2626; color: #dc2626; }
+    .ace-auth-btn.danger:hover { background: #fef2f2; }
+    .dark-mode #aceUpgradeNudge { background: #2d1f00; border-color: #78450a; color: #fcd34d; }
+    .dark-mode #aceAccountStatus { color: #8a9ab0; }
+    .dark-mode .ace-auth-btn { border-color: #4a90e2; color: #7eb8f7; }
+    .dark-mode .ace-auth-btn:hover { background: #1a2f42; }
+    .dark-mode .ace-auth-btn.danger { border-color: #f87171; color: #f87171; }
+    .dark-mode .ace-premium-locked { opacity: 0.3; }
+  </style>
+
+  <header class="hdr">
+    <img src="icons/icon32.png" alt="" class="logo" width="24" height="24">
+    <h1>Ace Paste Cleaner</h1>
+    <button id="darkModeToggle" class="dark-toggle" aria-label="Toggle dark mode" type="button">🌙</button>
+  </header>
+
+  <main class="wrap">
+    <div class="privacy-notice">100% local. Nothing leaves your browser.</div>
+
+    <!-- Auth status + upgrade nudge -->
+    <div id="aceAccountStatus"></div>
+    <div class="ace-auth-row">
+      <button id="aceSignInBtn" class="ace-auth-btn" type="button">Sign in for Pro</button>
+      <button id="aceSignOutBtn" class="ace-auth-btn danger" type="button" style="display:none">Sign out</button>
+    </div>
+    <div id="aceUpgradeNudge">
+      🔒 Demo — upgrade to Pro to unlock auto-clean, scanner &amp; all features.
+      <a id="aceUpgradeBtn" href="https://acepaste.xyz/pricing.html" target="_blank">View pricing →</a>
+    </div>
+
+    <label class="lbl" for="paste">Paste text</label>
+    <textarea id="paste" class="ta" rows="6" placeholder="Paste here…" spellcheck="false"></textarea>
+
+    <div class="protection-panel">
+      <div class="group-title">Quarantine (auto-clean clipboard)</div>
+      <label><input type="checkbox" id="quarantineCopy" checked> Auto-clean text on <strong>copy</strong> from any page</label>
+      <label><input type="checkbox" id="quarantinePaste" checked> Auto-clean text on <strong>paste</strong> into any page</label>
+      <label><input type="checkbox" id="quarantineFullPipeline"> Apply the <strong>full</strong> cleaner (not just invisibles)</label>
+      <label><input type="checkbox" id="quarantineSilent"> Silent mode (suppress on-page sanitised toast)</label>
+      <div class="row-flex">
+        <label for="quarantineBypassKey">Hold this key to bypass:</label>
+        <select id="quarantineBypassKey" class="input-small inline">
+          <option value="none">— none —</option>
+          <option value="shift" selected>Shift</option>
+          <option value="alt">Alt / Option</option>
+          <option value="ctrl">Ctrl</option>
+          <option value="meta">Cmd / Win</option>
+        </select>
+      </div>
+      <p class="hint">Hold the chosen key while copying or pasting to skip cleaning for that single action.</p>
+
+      <div class="group-title group-title--spaced">Page scanner</div>
+      <label><input type="checkbox" id="scanEnabled"> Scan every page for hostile invisible characters</label>
+      <label><input type="checkbox" id="bannerEnabled" checked> Show on-page warning banner when hits are found</label>
+      <div class="scan-status" id="scanStatus">Scanner inactive on this tab.</div>
+      <div class="button-group-tight">
+        <button id="scanNowBtn" class="btn-secondary" type="button">Scan this page now</button>
+        <button id="highlightBtn" class="btn-secondary" type="button">Highlight contaminated text</button>
+      </div>
+    </div>
+
+    <div class="options-panel">
+      <div class="options-top">
+        <label><input type="checkbox" id="removeInvisible" checked> Invisible chars</label>
+        <label><input type="checkbox" id="removeMarkdown" checked> Markdown</label>
+        <label><input type="checkbox" id="removeAIMarkup" checked> AI debris (##, ***, +++)</label>
+        <label><input type="checkbox" id="removeEmojis"> Emojis</label>
+        <label><input type="checkbox" id="removeFormatting"> Formatting</label>
+      </div>
+
+      <button id="moreOptions" class="btn-ghost" type="button">Advanced ▾</button>
+      <div id="advanced" class="advanced hidden">
+        <div class="option-group">
+          <div class="group-title">Whitespace</div>
+          <label><input type="checkbox" id="collapseSpaces" checked> Collapse extra spaces</label>
+          <label><input type="checkbox" id="collapseNewlines" checked> Collapse 3+ newlines</label>
+          <label><input type="checkbox" id="trimPerLine" checked> Trim per line</label>
+          <label><input type="checkbox" id="removeHtml"> Remove HTML tags</label>
+        </div>
+
+        <div class="option-group">
+          <div class="group-title">Code / AI</div>
+          <label><input type="checkbox" id="removeComments" checked> Remove comments (#, //, /* */, &lt;!-- --&gt;)</label>
+        </div>
+
+        <div class="option-group">
+          <div class="group-title">Case</div>
+          <div class="case-options">
+            <label><input type="radio" name="caseTx" value="" checked> None</label>
+            <label><input type="radio" name="caseTx" value="upper"> UPPER</label>
+            <label><input type="radio" name="caseTx" value="lower"> lower</label>
+            <label><input type="radio" name="caseTx" value="capitalize"> Capitalize</label>
+            <label><input type="radio" name="caseTx" value="title"> Title</label>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <div class="group-title">Strip punctuation</div>
+          <label for="removePunctuation" class="sr-only">Punctuation to remove</label>
+          <select id="removePunctuation" class="input-small" multiple size="5" aria-label="Punctuation to remove">
+            <option value=".">Period (.)</option>
+            <option value=",">Comma (,)</option>
+            <option value="!">Exclamation (!)</option>
+            <option value="?">Question (?)</option>
+            <option value=";">Semicolon (;)</option>
+            <option value=":">Colon (:)</option>
+            <option value="'">Apostrophe (')</option>
+            <option value='"'>Quote (")</option>
+            <option value="-">Hyphen (-)</option>
+            <option value="—">Dash (—)</option>
+            <option value="(">Left paren (</option>
+            <option value=")">Right paren )</option>
+            <option value="[">Left bracket [</option>
+            <option value="]">Right bracket ]</option>
+            <option value="{">Left brace {</option>
+            <option value="}">Right brace }</option>
+            <option value="/">Slash (/)</option>
+            <option value="\">Backslash (\)</option>
+            <option value="&">Ampersand (&amp;)</option>
+            <option value="@">At sign (@)</option>
+          </select>
+          <p class="hint">Hold Ctrl/Cmd to multi-select</p>
+        </div>
+
+        <div class="option-group">
+          <div class="group-title">Find / Replace</div>
+          <input id="customFind" class="input-small" placeholder="Find text or /regex/">
+          <input id="customReplace" class="input-small" placeholder="Replace with (empty = remove)">
+          <label><input type="checkbox" id="customRegex"> Use regex</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="pasteBtn" class="btn-secondary" type="button">Paste</button>
+      <button id="cleanBtn" class="btn" type="button">Clean</button>
+      <button id="clearBtn" class="btn-secondary" type="button">Clear</button>
+    </div>
+
+    <div class="output-header">
+      <label class="lbl" for="cleaned">Cleaned</label>
+      <button id="copyBtn" class="btn-secondary" type="button">Copy</button>
+    </div>
+    <textarea id="cleaned" class="ta" rows="6" placeholder="Cleaned output…" readonly spellcheck="false"></textarea>
+
+    <div id="cleaningReport" class="cleaning-report hidden"></div>
+    <div id="aceNotice" class="ace-notice hidden" role="alert"></div>
+  </main>
+
+  <footer class="footer">
+    <a href="https://acepaste.xyz" target="_blank" rel="noopener noreferrer">acepaste.xyz</a>
+    · v1.0.0 · client-side only
+  </footer>
+
+  <script src="cleaner.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

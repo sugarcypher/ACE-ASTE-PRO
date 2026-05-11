@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Ace Paste Cleaner Pro",
+  "name": "AcePaste Cleaner Pro",
   "short_name": "AcePaste",
   "version": "1.0.0",
   "description": "Strip markup, invisible characters, emojis, HTML, and AI debris from any text. 100% local. Nothing leaves your browser.",
@@ -8,7 +8,7 @@
   "author": "ThinkWell Labs",
   "minimum_chrome_version": "102",
   "action": {
-    "default_title": "Ace Paste Cleaner Pro",
+    "default_title": "AcePaste Cleaner Pro",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -50,7 +50,7 @@
         "default": "Alt+Shift+V",
         "mac": "Alt+Shift+V"
       },
-      "description": "Open Ace Paste Cleaner"
+      "description": "Open AcePaste Cleaner"
     },
     "clean-selection": {
       "suggested_key": {

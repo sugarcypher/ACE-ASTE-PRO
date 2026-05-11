@@ -4,3 +4,8 @@ server.js
 .git/
 .github/
 .DS_Store
+
+# FUSE sandbox artifacts
+.fuse_hidden*
+*/.fuse_hidden*
+.claude/

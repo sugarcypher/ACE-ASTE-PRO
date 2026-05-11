@@ -1,5 +1,5 @@
 /**
- * auth.js — Ace Paste Cleaner Pro shared auth + subscription layer
+ * auth.js — AcePaste Cleaner Pro shared auth + subscription layer
  *
  * Loaded by index.html and account.html. Also imported by the extension
  * indirectly via a REST API. Uses Supabase Auth (email/password) and a
@@ -339,7 +339,7 @@ async function _fetchPlan(jwt, userId) {
 // extension. Update TRUSTED_EXT_IDS when you publish/update the extension.
 
 var TRUSTED_EXT_IDS = [
-  'kgnnilelmfchdblcoefmokgcbpccbcci', // Ace Paste Cleaner Pro (Chrome Web Store)
+  'kgnnilelmfchdblcoefmokgcbpccbcci', // AcePaste Cleaner Pro (Chrome Web Store)
 ];
 
 function acePasteExtensionBridge() {

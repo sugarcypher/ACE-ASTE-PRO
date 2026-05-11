@@ -1,0 +1,664 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
+<title>Account — Ace Paste Cleaner Pro</title>
+<meta name="description" content="Sign in to your Ace Paste Cleaner Pro account to manage your subscription.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://acepaste.xyz/account.html">
+<link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
+<link rel="stylesheet" href="/styles.css?v=3.0">
+<style>
+.account-wrap {
+  max-width: 420px;
+  margin: 2.5rem auto 4rem;
+  padding: 0 1rem;
+}
+.account-card {
+  border: 1.5px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 1.75rem 1.5rem;
+  background: var(--card-bg, #fff);
+}
+.dark-mode .account-card {
+  background: #1e2530;
+  border-color: #2e3a4a;
+}
+.account-card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--text, #111);
+}
+.dark-mode .account-card h2 { color: #e8edf3; }
+
+.form-row {
+  margin-bottom: 0.9rem;
+}
+.form-row label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted, #555);
+  margin-bottom: 0.3rem;
+}
+.form-row input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border: 1.5px solid var(--border, #ccc);
+  border-radius: 7px;
+  font-size: 0.95rem;
+  background: var(--input-bg, #fff);
+  color: var(--text, #111);
+  transition: border-color 0.15s;
+}
+.form-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+.dark-mode .form-row input {
+  background: #141b24;
+  border-color: #2e3a4a;
+  color: #e8edf3;
+}
+
+.btn-full {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: opacity 0.15s;
+}
+.btn-full:hover { opacity: 0.87; }
+.btn-full:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.form-switch {
+  font-size: 0.84rem;
+  color: var(--muted, #666);
+  text-align: center;
+  margin-top: 0.9rem;
+}
+.form-switch a { color: #2563eb; text-decoration: none; cursor: pointer; font-weight: 600; }
+.form-switch a:hover { text-decoration: underline; }
+
+.auth-error {
+  font-size: 0.84rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  display: none;
+}
+.auth-error.visible { display: block; }
+.dark-mode .auth-error { background: #3b1515; border-color: #7f1d1d; }
+
+/* ── Logged-in state ─────────────────────────────────────────────────── */
+.plan-chip {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+  text-transform: capitalize;
+}
+.dark-mode .plan-chip { background: #14432a; color: #4ade80; }
+.plan-chip.free { background: #f3f4f6; color: #6b7280; }
+.dark-mode .plan-chip.free { background: #1e2530; color: #8a9ab0; }
+
+.account-info {
+  font-size: 0.88rem;
+  color: var(--muted, #555);
+  margin: 0.4rem 0 1.25rem;
+  line-height: 1.5;
+}
+.dark-mode .account-info { color: #8a9ab0; }
+
+.btn-outline {
+  display: inline-block;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid #2563eb;
+  color: #2563eb;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.15s;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.btn-outline:hover { background: #eff6ff; }
+.dark-mode .btn-outline { color: #7eb8f7; border-color: #3b6ea8; }
+.dark-mode .btn-outline:hover { background: #1a2f42; }
+
+.btn-danger {
+  display: inline-block;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid #dc2626;
+  color: #dc2626;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.15s;
+}
+.btn-danger:hover { background: #fef2f2; }
+
+#signedOut { display: block; }
+#signedIn  { display: none; }
+</style>
+<!-- Cloudflare Turnstile — invisible CAPTCHA. Widget renders hidden; token is
+     fetched programmatically before each auth call to block bot sign-ups. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" async defer></script>
+</head>
+<body>
+<!-- Hidden Turnstile widget container. Size=invisible means no UI is shown. -->
+<div id="cfTurnstile" style="display:none"></div>
+<header class="hdr">
+  <a href="/" aria-label="Ace Paste Cleaner Pro home" style="display:inline-flex;align-items:center;text-decoration:none">
+    <picture>
+      <source srcset="/brand-56.webp?v=1.0 1x, /brand-112.webp?v=1.0 2x" type="image/webp">
+      <img src="/brand-56.jpg?v=1.0" srcset="/brand-56.jpg?v=1.0 1x, /brand-112.jpg?v=1.0 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
+    </picture>
+  </a>
+  <h1>Ace Paste Cleaner Pro</h1>
+  <span class="domain">acepaste.xyz</span>
+  <button id="darkModeToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+</header>
+
+<main class="wrap">
+  <div class="account-wrap">
+
+    <!-- ── Signed-out view (login / signup) ───────────────────────────── -->
+    <div id="signedOut">
+      <div class="account-card" id="loginCard">
+        <h2>Sign in</h2>
+        <div class="auth-error" id="authError"></div>
+        <div id="loginForm">
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-row">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="Password" required>
+          </div>
+          <button class="btn-full" id="loginBtn" type="button">Sign in</button>
+          <p class="form-switch">No account? <a id="switchToSignup">Create one →</a></p>
+          <p class="form-switch" style="margin-top:0.25rem"><a id="switchToRecovery" href="#">Forgot password?</a></p>
+          <p class="form-switch" style="margin-top:0.25rem"><a href="/pricing.html">View pricing →</a></p>
+        </div>
+      </div>
+
+      <!-- Forgot password card -->
+      <div class="account-card" id="recoveryCard" style="display:none">
+        <h2>Reset password</h2>
+        <div class="auth-error" id="recoveryError"></div>
+        <div id="recoveryForm">
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1rem">Enter your email and we'll send a reset link.</p>
+          <div class="form-row">
+            <label for="recoveryEmail">Email</label>
+            <input type="email" id="recoveryEmail" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <button class="btn-full" id="sendRecoveryBtn" type="button">Send reset link</button>
+          <p class="form-switch" style="margin-top:0.75rem"><a id="switchBackToLogin" href="#">← Back to sign in</a></p>
+        </div>
+        <div id="recoverySuccessMsg" style="display:none;text-align:center;padding:0.5rem 0">
+          <p style="font-size:2rem;margin:0 0 0.5rem">📧</p>
+          <p style="font-weight:700;font-size:1rem;margin:0 0 0.4rem;color:var(--text,#111)">Check your inbox</p>
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1rem">A reset link was sent. Click it to set a new password.</p>
+          <a id="backToLoginFromRecovery" href="#" style="color:#2563eb;font-size:0.88rem;font-weight:600;text-decoration:none">← Back to sign in</a>
+        </div>
+      </div>
+
+      <!-- Set new password card (shown when arriving via recovery link) -->
+      <div class="account-card" id="setPasswordCard" style="display:none">
+        <h2>Set new password</h2>
+        <div class="auth-error" id="setPasswordError"></div>
+        <div class="form-row">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" autocomplete="new-password" placeholder="8+ characters" required>
+        </div>
+        <div class="form-row">
+          <label for="confirmNewPassword">Confirm password</label>
+          <input type="password" id="confirmNewPassword" autocomplete="new-password" placeholder="Repeat password" required>
+        </div>
+        <button class="btn-full" id="setPasswordBtn" type="button">Set password</button>
+      </div>
+
+      <div class="account-card" id="signupCard" style="display:none">
+        <h2>Create account</h2>
+        <div class="auth-error" id="signupError"></div>
+        <div id="signupForm">
+          <div class="form-row">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-row">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" autocomplete="new-password" placeholder="8+ characters" required>
+          </div>
+          <button class="btn-full" id="signupBtn" type="button">Create account</button>
+          <p class="form-switch">Already have one? <a id="switchToLogin">Sign in →</a></p>
+        </div>
+        <div id="confirmPendingMsg" style="display:none;text-align:center;padding:0.5rem 0">
+          <p style="font-size:2rem;margin:0 0 0.5rem">📬</p>
+          <p style="font-weight:700;font-size:1rem;margin:0 0 0.4rem;color:var(--text,#111)">Check your inbox</p>
+          <p style="font-size:0.875rem;color:var(--muted,#555);margin:0 0 1.1rem">
+            We sent a confirmation link to <strong id="confirmEmail"></strong>. Click it to activate your account, then sign in.
+          </p>
+          <a id="goToSignIn" href="#" style="color:#2563eb;font-size:0.88rem;font-weight:600;text-decoration:none">← Back to sign in</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Signed-in view ─────────────────────────────────────────────── -->
+    <div id="signedIn">
+      <div class="account-card">
+        <h2>Account <span class="plan-chip" id="planChip">Demo</span></h2>
+        <p class="account-info" id="accountInfo">Loading…</p>
+
+        <!-- Restore purchases — shown only on free plan -->
+        <div id="restoreSection" style="display:none;margin-top:0.5rem;padding-top:0.85rem;border-top:1px solid var(--border,#eee)">
+          <p style="font-size:0.82rem;color:var(--muted,#666);margin:0 0 0.6rem">
+            Paid with a different email? Enter the address from your Stripe receipt.
+          </p>
+          <div class="auth-error" id="restoreError"></div>
+          <div style="display:flex;gap:0.5rem;align-items:flex-start">
+            <input type="email" id="restoreEmail" placeholder="receipt@email.com"
+              style="flex:1;padding:0.55rem 0.7rem;border:1.5px solid var(--border,#ccc);border-radius:7px;font-size:0.88rem;background:var(--input-bg,#fff);color:var(--text,#111)">
+            <button id="restoreBtn" class="btn-outline" type="button" style="white-space:nowrap">Restore</button>
+          </div>
+          <p id="restoreSuccess" style="display:none;font-size:0.82rem;color:#16a34a;margin:0.5rem 0 0">
+            ✓ Purchase found — your plan has been updated.
+          </p>
+        </div>
+
+        <div style="margin-bottom:0.75rem">
+          <a href="/" class="btn-full" style="text-align:center;text-decoration:none;display:block">Use Ace Paste →</a>
+        </div>
+        <div id="upgradeSection">
+          <a href="/pricing.html" class="btn-outline">View plans →</a>
+        </div>
+        <div id="manageSection" style="margin-top:0.75rem">
+          <button class="btn-outline" id="manageBtn" type="button">Manage billing →</button>
+          <button class="btn-danger" id="signoutBtn" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <!-- Extension auth bridge notice (shown only when source=extension) -->
+      <div id="extBridgeNotice" style="display:none;margin-top:1rem;text-align:center;font-size:0.86rem;color:var(--muted,#666)">
+        ✓ Extension authenticated — you can close this tab.
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-links">
+    <a href="/">Home</a>
+    <a href="/pricing.html">Pricing</a>
+    <a href="/founders.html">Founders</a>
+    <a href="/blog/">Blog</a>
+    <a href="/privacy.html">Privacy</a>
+  </nav>
+  <p class="footer-copy">© 2025 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a></p>
+</footer>
+
+<script src="/auth.js"></script>
+<script>
+// ── Turnstile helpers ────────────────────────────────────────────────────────
+// TURNSTILE_SITE_KEY is the public site key from Cloudflare Turnstile dashboard.
+// Replace with your actual site key before deploying.
+var TURNSTILE_SITE_KEY = '0x4AAAAAADKDgrgt_iRwIndF';
+var _tsWidgetId = null;
+
+// Render the invisible widget once Turnstile is ready.
+// We use the callback approach so it works regardless of script load order.
+window.onTurnstileLoad = function() {
+  _tsWidgetId = turnstile.render('#cfTurnstile', {
+    sitekey:  TURNSTILE_SITE_KEY,
+    size:     'invisible',
+    callback: function() {}, // token available via turnstile.getResponse()
+  });
+};
+
+// Execute the invisible challenge and resolve with the token.
+// Falls back gracefully (null) if Turnstile hasn't loaded (e.g. ad-blocker).
+function getCaptchaToken() {
+  return new Promise(function(resolve) {
+    if (typeof turnstile === 'undefined' || _tsWidgetId === null) {
+      resolve(null); return;
+    }
+    // Reset so we always get a fresh token (tokens are single-use).
+    turnstile.reset(_tsWidgetId);
+    var timeout = setTimeout(function() { resolve(null); }, 8000);
+    turnstile.execute(_tsWidgetId, {
+      callback: function(token) { clearTimeout(timeout); resolve(token); },
+      'error-callback': function() { clearTimeout(timeout); resolve(null); },
+    });
+  });
+}
+
+(function() {
+  var PLAN_LABELS = {
+    free: 'Demo', trial: 'Day Pass', monthly: 'Pro · Monthly',
+    yearly: 'Pro · Yearly', lifetime: 'Founders Lifetime'
+  };
+
+  // Dark mode
+  var dmBtn = document.getElementById('darkModeToggle');
+  if (dmBtn) dmBtn.addEventListener('click', function() {
+    var d = document.body.classList.toggle('dark-mode');
+    dmBtn.textContent = d ? '☀️' : '🌙';
+  });
+
+  // Check params
+  var params = new URLSearchParams(location.search);
+  var isExtSource = params.get('source') === 'extension';
+  var isPurchased = params.get('purchased') === '1';
+
+  // Show purchase success banner if returning from Stripe
+  if (isPurchased) {
+    var banner = document.createElement('div');
+    banner.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:1rem;font-size:0.875rem;color:#166534';
+    banner.innerHTML = '🎉 <strong>Payment successful!</strong> Sign in below to unlock your features.<br>'
+      + '<span style="font-size:0.8rem;opacity:0.8">Used a different email at checkout? Use the <em>Restore purchases</em> form after signing in.</span>';
+    document.querySelector('.account-wrap').insertBefore(banner, document.getElementById('signedOut'));
+    history.replaceState(null, '', '/account.html');
+  }
+
+  function showSignedIn(plan, email) {
+    document.getElementById('signedOut').style.display = 'none';
+    document.getElementById('signedIn').style.display  = 'block';
+    var chip = document.getElementById('planChip');
+    chip.textContent = PLAN_LABELS[plan] || plan;
+    chip.className   = 'plan-chip' + (plan === 'free' ? ' free' : '');
+    var info = document.getElementById('accountInfo');
+    info.textContent = email + ' · ' + (plan === 'free'
+      ? 'Demo — upgrade to Pro to unlock all features.'
+      : 'Active plan: ' + (PLAN_LABELS[plan] || plan) + '.');
+    // Show/hide upgrade + restore sections
+    var isPaid = plan !== 'free';
+    document.getElementById('upgradeSection').style.display  = isPaid ? 'none'  : 'block';
+    document.getElementById('restoreSection').style.display  = isPaid ? 'none'  : 'block';
+    // Lifetime users have no recurring subscription — billing portal is irrelevant
+    var manageBtn = document.getElementById('manageBtn');
+    if (manageBtn) {
+      manageBtn.style.display = (plan === 'lifetime') ? 'none' : 'inline-block';
+    }
+    if (isExtSource) {
+      document.getElementById('extBridgeNotice').style.display = 'block';
+    }
+  }
+
+  function showConfirming(email) {
+    document.getElementById('signedOut').style.display = 'none';
+    document.getElementById('signedIn').style.display  = 'block';
+    var chip = document.getElementById('planChip');
+    chip.textContent = 'Confirming…';
+    chip.className   = 'plan-chip';
+    document.getElementById('accountInfo').textContent = email + ' · Confirming your purchase…';
+    document.getElementById('upgradeSection').style.display = 'none';
+    document.getElementById('restoreSection').style.display = 'none';
+  }
+
+  function showError(elId, msg) {
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+  function clearError(elId) {
+    var el = document.getElementById(elId);
+    el.textContent = '';
+    el.classList.remove('visible');
+  }
+
+  // Auto sign-in if session already exists
+  (function() {
+    var email = acePasteEmail();
+    if (!email) return;
+    if (isPurchased) {
+      // Returning from Stripe — show "Confirming…" state while waiting for
+      // the webhook to land (typically 1–3 s), then retry up to 3 times.
+      showConfirming(email);
+      (function retryRefresh(attempts) {
+        acePasteRefreshPlan().then(function(plan) {
+          if (plan !== 'free') {
+            showSignedIn(plan, email);          // webhook landed — show real plan
+          } else if (attempts > 0) {
+            setTimeout(function() { retryRefresh(attempts - 1); }, 2000);
+          } else {
+            showSignedIn(plan, email);          // exhausted — show free (edge case)
+          }
+        });
+      })(3);
+    } else {
+      showSignedIn(acePasteCurrentPlan(), email);
+    }
+  })();
+
+  // Sign in
+  document.getElementById('loginBtn').addEventListener('click', async function() {
+    clearError('authError');
+    var email = document.getElementById('email').value.trim();
+    var pass  = document.getElementById('password').value;
+    if (!email || !pass) return showError('authError', 'Email and password required.');
+    this.disabled = true; this.textContent = 'Signing in…';
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSignIn(email, pass, captchaToken);
+    this.disabled = false; this.textContent = 'Sign in';
+    if (!result.ok) return showError('authError', result.error);
+
+    // Path B: user wasn't signed in when they returned from Stripe.
+    // Webhook may not have landed yet — retry if plan is still free.
+    if (isPurchased && result.plan === 'free') {
+      showConfirming(email);
+      (function retryAfterSignIn(attempts) {
+        acePasteRefreshPlan().then(function(plan) {
+          if (plan !== 'free') {
+            showSignedIn(plan, email);
+          } else if (attempts > 0) {
+            setTimeout(function() { retryAfterSignIn(attempts - 1); }, 2000);
+          } else {
+            showSignedIn(plan, email);
+          }
+        });
+      })(3);
+    } else {
+      showSignedIn(result.plan, email);
+    }
+    // Extension bridge fires automatically via auth.js DOMContentLoaded listener
+  });
+
+  // Sign up
+  document.getElementById('signupBtn').addEventListener('click', async function() {
+    clearError('signupError');
+    var email = document.getElementById('signupEmail').value.trim();
+    var pass  = document.getElementById('signupPassword').value;
+    if (!email || !pass) return showError('signupError', 'Email and password required.');
+    if (pass.length < 8) return showError('signupError', 'Password must be at least 8 characters.');
+    this.disabled = true; this.textContent = 'Creating account…';
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSignUp(email, pass, captchaToken);
+    this.disabled = false; this.textContent = 'Create account';
+    if (!result.ok) return showError('signupError', result.error);
+    if (result.confirmPending) {
+      // Account created — user must verify email before signing in
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('confirmEmail').textContent = email;
+      document.getElementById('confirmPendingMsg').style.display = 'block';
+      return;
+    }
+    showSignedIn(result.plan, email);
+  });
+
+  // Back to sign-in from confirm-pending screen
+  document.getElementById('goToSignIn').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('confirmPendingMsg').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('signupCard').style.display = 'none';
+    document.getElementById('loginCard').style.display  = 'block';
+  });
+
+  // Toggle login/signup/recovery
+  function showCard(id) {
+    ['loginCard','signupCard','recoveryCard','setPasswordCard'].forEach(function(c) {
+      document.getElementById(c).style.display = c === id ? 'block' : 'none';
+    });
+  }
+  document.getElementById('switchToSignup').addEventListener('click', function() { showCard('signupCard'); });
+  document.getElementById('switchToLogin').addEventListener('click', function() { showCard('loginCard'); });
+  document.getElementById('switchToRecovery').addEventListener('click', function(e) { e.preventDefault(); showCard('recoveryCard'); });
+  document.getElementById('switchBackToLogin').addEventListener('click', function(e) { e.preventDefault(); showCard('loginCard'); });
+  document.getElementById('backToLoginFromRecovery').addEventListener('click', function(e) { e.preventDefault(); showCard('loginCard'); });
+
+  // Send recovery email
+  document.getElementById('sendRecoveryBtn').addEventListener('click', async function() {
+    clearError('recoveryError');
+    var email = document.getElementById('recoveryEmail').value.trim();
+    if (!email) return showError('recoveryError', 'Enter your email address.');
+    this.disabled = true; this.textContent = 'Sending…';
+    var captchaToken = await getCaptchaToken();
+    var result = await acePasteSendRecovery(email, captchaToken);
+    this.disabled = false; this.textContent = 'Send reset link';
+    if (!result.ok) return showError('recoveryError', result.error);
+    document.getElementById('recoveryForm').style.display = 'none';
+    document.getElementById('recoverySuccessMsg').style.display = 'block';
+  });
+
+  // Set new password (when arriving via recovery link in URL hash)
+  (function() {
+    var token = acePasteParseHashToken();
+    if (!token || token.type !== 'recovery') return;
+    // Hide all other cards, show set-password card
+    showCard('setPasswordCard');
+    // Clear the hash so the token isn't visible / reusable from history
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    document.getElementById('setPasswordBtn').addEventListener('click', async function() {
+      clearError('setPasswordError');
+      var pass1 = document.getElementById('newPassword').value;
+      var pass2 = document.getElementById('confirmNewPassword').value;
+      if (pass1.length < 8) return showError('setPasswordError', 'Password must be at least 8 characters.');
+      if (pass1 !== pass2) return showError('setPasswordError', 'Passwords do not match.');
+      this.disabled = true; this.textContent = 'Saving…';
+      var result = await acePasteSetNewPassword(token.accessToken, pass1);
+      this.disabled = false; this.textContent = 'Set password';
+      if (!result.ok) return showError('setPasswordError', result.error);
+      // Success — sign in with new password
+      showCard('loginCard');
+      showError('authError', '✓ Password updated — sign in with your new password.');
+      document.getElementById('authError').style.color = '#16a34a';
+      document.getElementById('authError').style.background = '#f0fdf4';
+      document.getElementById('authError').style.borderColor = '#bbf7d0';
+    });
+  })();
+
+  // Manage billing — creates a Stripe portal session then redirects
+  document.getElementById('manageBtn').addEventListener('click', async function() {
+    this.disabled = true; this.textContent = 'Loading…';
+    try {
+      var s = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
+      var jwt = s && s.jwt ? s.jwt : null;
+      if (!jwt) { alert('Sign in first.'); this.disabled = false; this.textContent = 'Manage billing →'; return; }
+
+      var res = await fetch(
+        (window.ACEPASTE_SUPABASE_URL || 'https://eqoltjofjlznlirbalrb.supabase.co') +
+        '/functions/v1/create-portal-session',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + jwt,
+            'apikey': window.ACEPASTE_SUPABASE_ANON || '',
+          },
+          body: JSON.stringify({ return_url: window.location.href }),
+        }
+      );
+      var data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not open billing portal. Contact support.');
+        this.disabled = false; this.textContent = 'Manage billing →';
+      }
+    } catch(e) {
+      alert('Could not open billing portal. Contact support.');
+      this.disabled = false; this.textContent = 'Manage billing →';
+    }
+  });
+
+  // Sign out
+  document.getElementById('signoutBtn').addEventListener('click', async function() {
+    await acePasteSignOut();
+    document.getElementById('signedIn').style.display  = 'none';
+    document.getElementById('signedOut').style.display = 'block';
+  });
+
+  // Restore purchases — calls the restore-purchase edge function
+  document.getElementById('restoreBtn').addEventListener('click', async function() {
+    clearError('restoreError');
+    var receiptEmail = document.getElementById('restoreEmail').value.trim();
+    if (!receiptEmail) return showError('restoreError', 'Enter the email from your Stripe receipt.');
+
+    this.disabled = true; this.textContent = 'Checking…';
+
+    try {
+      var s = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
+      var jwt = s && s.jwt ? s.jwt : null;
+      if (!jwt) { showError('restoreError', 'Sign in first, then try restoring.'); return; }
+
+      var res = await fetch(
+        (window.ACEPASTE_SUPABASE_URL || 'https://eqoltjofjlznlirbalrb.supabase.co') +
+        '/functions/v1/restore-purchase',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + jwt,
+            'apikey': window.ACEPASTE_SUPABASE_ANON || '',
+          },
+          body: JSON.stringify({ receipt_email: receiptEmail }),
+        }
+      );
+      var data = await res.json();
+
+      if (data.plan && data.plan !== 'free') {
+        document.getElementById('restoreSuccess').style.display = 'block';
+        document.getElementById('restoreSection').style.display = 'none';
+        // Refresh the plan display
+        var plan = await acePasteRefreshPlan();
+        showSignedIn(plan, acePasteEmail());
+      } else if (data.error) {
+        showError('restoreError', data.error);
+      } else {
+        showError('restoreError', 'No purchase found for that email. Check your Stripe receipt and try again.');
+      }
+    } catch(e) {
+      showError('restoreError', 'Network error. Please try again.');
+    } finally {
+      this.disabled = false; this.textContent = 'Restore';
+    }
+  });
+})();
+</script>
+</body>
+</html>

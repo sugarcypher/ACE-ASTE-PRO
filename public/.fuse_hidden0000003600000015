@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ace Paste Cleaner Pro</title><link rel="stylesheet" href="/styles.css">
+</head><body>
+<header class="hdr"><img src="/brand.jpg" class="logo" alt="Ace"><h1>Ace Paste Cleaner Pro</h1><span class="domain">acepaste.xyz</span></header>
+<main class="wrap">
+  <img src="/brand.jpg" class="hero" alt="Ace Logo">
+  <label class="lbl">Paste text</label>
+  <textarea id="paste" class="ta" rows="8" placeholder="Paste here…"></textarea>
+  <button id="cleanBtn" class="btn">Clean my paste</button>
+  <label class="lbl">Cleaned output</label>
+  <textarea id="cleaned" class="ta" rows="8" placeholder="Cleaned output…" readonly></textarea>
+</main>
+<script src="/app.js"></script>
+</body></html>

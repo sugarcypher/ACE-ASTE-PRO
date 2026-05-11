@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Pricing — Ace Paste Cleaner Pro</title>
-<meta name="description" content="Pricing for Ace Paste Cleaner Pro: free local cleaning, $2.99 Day Pass, $14.99/mo and $119/yr Pro plans, $499 Founders Lifetime, and Enterprise. One subscription covers web + extension.">
-<meta property="og:title" content="Pricing — Ace Paste Cleaner Pro">
+<title>Pricing — AcePaste Cleaner Pro</title>
+<meta name="description" content="Pricing for AcePaste Cleaner Pro: free local cleaning, $2.99 Day Pass, $14.99/mo and $119/yr Pro plans, $499 Founders Lifetime, and Enterprise. One subscription covers web + extension.">
+<meta property="og:title" content="Pricing — AcePaste Cleaner Pro">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://acepaste.xyz/pricing">
 <link rel="canonical" href="https://acepaste.xyz/pricing.html">
@@ -246,11 +246,12 @@
   color: #fff;
 }
 .tier-btn.secondary {
-  background: transparent;
+  background: #eff6ff;
   border: 1.5px solid #2563eb;
   color: #2563eb;
 }
 .dark-mode .tier-btn.secondary {
+  background: #1a2a45;
   border-color: #4a90e2;
   color: #7eb8f7;
 }
@@ -374,6 +375,26 @@ details[open] summary::after { content: "－"; }
 .dark-mode .faq-item summary { color: #cdd5e0; border-color: #2a3344; }
 .dark-mode .faq-item p { color: #8a9ab0; }
 
+/* ── Golden ratio stagger ─────────────────────────────────────────────────
+   Offsets use Fibonacci values: 8 / 13 / 21 px — each adjacent pair ≈ 1:φ.
+   Featured card (4th) is the anchor at translateY(0).
+   Grid gets extra vertical breathing room so the deepest offset never clips.
+────────────────────────────────────────────────────────────────────────── */
+.tier-grid {
+  padding-bottom: 2.75rem; /* absorb max 21px drop + safe margin */
+}
+.tier-grid .tier-card:nth-child(1) { transform: translateY(13px); } /* 13 — 1 level below anchor */
+.tier-grid .tier-card:nth-child(2) { transform: translateY(0);    } /* 0  — secondary anchor     */
+.tier-grid .tier-card:nth-child(3) { transform: translateY(21px); } /* 21 — φ × 13               */
+.tier-grid .tier-card:nth-child(4) { transform: translateY(0);    } /* 0  — featured anchor      */
+.tier-grid .tier-card:nth-child(5) { transform: translateY(8px);  } /* 8  — 13 ÷ φ               */
+.tier-grid .tier-card:nth-child(6) { transform: translateY(13px); } /* 13 — 1 level below anchor */
+
+/* On narrow screens the stagger collapses to a single column — reset offsets */
+@media (max-width: 420px) {
+  .tier-grid .tier-card { transform: none; }
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .tier-grid { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
@@ -388,13 +409,13 @@ details[open] summary::after { content: "－"; }
 </head>
 <body>
 <header class="hdr">
-  <a href="/" aria-label="Ace Paste Cleaner Pro home" style="display:inline-flex;align-items:center;text-decoration:none">
+  <a href="/" aria-label="AcePaste Cleaner Pro home" style="display:inline-flex;align-items:center;text-decoration:none">
     <picture>
       <source srcset="/brand-56.webp?v=1.0 1x, /brand-112.webp?v=1.0 2x" type="image/webp">
       <img src="/brand-56.jpg?v=1.0" srcset="/brand-56.jpg?v=1.0 1x, /brand-112.jpg?v=1.0 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
     </picture>
   </a>
-  <h1>Ace Paste Cleaner Pro</h1>
+  <h1>AcePaste Cleaner Pro</h1>
   <span class="domain">acepaste.xyz</span>
   <button id="darkModeToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
 </header>
@@ -489,7 +510,7 @@ details[open] summary::after { content: "－"; }
       <div class="tier-vs">Teams · compliance · private deploy</div>
       <div class="savings-badge invisible">—</div>
       <div class="tier-desc">Volume seats, SSO, audit logs, custom DLP rules, on-prem or private deployment, and security review support. Built for teams that handle sensitive copy.</div>
-      <a href="mailto:enterprise@acepaste.xyz?subject=Ace%20Paste%20Cleaner%20Pro%20%E2%80%94%20Enterprise%20inquiry" class="tier-btn secondary" id="enterpriseBtn">Contact sales →</a>
+      <a href="mailto:enterprise@acepaste.xyz?subject=AcePaste%20Cleaner%20Pro%20%E2%80%94%20Enterprise%20inquiry" class="tier-btn secondary" id="enterpriseBtn">Contact sales →</a>
     </div>
 
   </div>

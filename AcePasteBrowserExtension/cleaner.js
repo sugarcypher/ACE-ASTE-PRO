@@ -1,4 +1,4 @@
-// Ace Paste Cleaner — pure cleaning engine.
+// AcePaste Cleaner — pure cleaning engine.
 // Same logic as the web app's cleanText() (app-critical.js), refactored to a pure
 // function that takes (text, options) and returns { text, report, errors, ... }.
 // Used by popup.js, background.js (context-menu cleaning), and node smoke tests.

@@ -1,4 +1,4 @@
-# Ace Paste Cleaner Pro — Monetization Setup Guide
+# AcePaste Cleaner Pro — Monetization Setup Guide
 
 **Owner:** ThinkWell Labs  
 **Last updated:** 2026-05-06  
@@ -109,10 +109,10 @@ Stripe Dashboard → Products → Add product. Create four:
 
 | Name | Price | Billing |
 |------|-------|---------|
-| Ace Paste — 1-Day Trial | $1.23 | One-time |
-| Ace Paste — Monthly | $12.34/mo | Recurring monthly |
-| Ace Paste — Annual | $123.45/yr | Recurring yearly |
-| Ace Paste — Lifetime | $234.56 | One-time |
+| AcePaste — 1-Day Trial | $1.23 | One-time |
+| AcePaste — Monthly | $12.34/mo | Recurring monthly |
+| AcePaste — Annual | $123.45/yr | Recurring yearly |
+| AcePaste — Lifetime | $234.56 | One-time |
 
 Copy the four **Price IDs** (`price_abc123...`).
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Ace Paste Cleaner Pro** (acepaste.xyz) — a client-side text cleaning tool that strips markup, invisible characters, emojis, HTML, and formatting. Pure HTML/CSS/JS with no build step. All cleaning runs locally in the browser; no data leaves the client.
+**AcePaste Cleaner Pro** (acepaste.xyz) — a client-side text cleaning tool that strips markup, invisible characters, emojis, HTML, and formatting. Pure HTML/CSS/JS with no build step. All cleaning runs locally in the browser; no data leaves the client.
 
 ## Development
 

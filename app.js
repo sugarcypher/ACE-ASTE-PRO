@@ -1,4 +1,4 @@
-// Ace Paste Cleaner Pro - Client-side text cleaning
+// AcePaste Cleaner Pro - Client-side text cleaning
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize dark mode
   initDarkMode();
