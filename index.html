@@ -68,8 +68,8 @@
 {
   "@context": "https://schema.org",
   "@type": "VideoObject",
-  "name": "AcePaste demo — clean invisible Unicode and AI debris from pasted text",
-  "description": "Watch AcePaste strip invisible Unicode characters, prompt-injection tags, AI markup, markdown, and HTML from a sample piece of AI-generated text — entirely client-side.",
+  "name": "AcePaste explainer — why invisible characters in AI text are a security risk and how AcePaste removes them",
+  "description": "A 2-minute walkthrough of what AcePaste actually finds and cleans: invisible Unicode, prompt-injection tag characters, AI markup debris, and broken formatting — stripped entirely client-side with no data leaving your browser.",
   "thumbnailUrl": "https://acepaste.xyz/assets/video-poster.jpg",
   "uploadDate": "2026-05-08",
   "embedUrl": "https://www.youtube-nocookie.com/embed/whugBAOLq1M",
@@ -99,6 +99,8 @@ body.dark-mode .ap-video h2{color:#e8edf3}
 .ap-video__facade:hover .ap-video__play{transform:translate(-50%,-50%) scale(1.08);opacity:1}
 .ap-video__iframe{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:10px;background:#000;box-shadow:0 4px 20px rgba(10,60,120,.18)}
 body.dark-mode .ap-video__facade,body.dark-mode .ap-video__iframe{box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.ap-video__sub{font-size:13.5px;color:var(--muted,#555);margin:0 0 12px;line-height:1.5}
+body.dark-mode .ap-video__sub{color:#8a9ab0}
 .ap-video__nojs{text-align:center;margin:10px 0 0;font-size:14px}
 @media(max-width:600px){.ap-video{margin:16px auto;padding:14px}}
 </style>
@@ -318,12 +320,13 @@ Please review when you can.</div>
   </section>
 
 
-  <section class="ap-video" aria-label="AcePaste Cleaner Pro demo">
-    <h2>See it in action</h2>
+  <section class="ap-video" aria-label="AcePaste explainer video">
+    <h2>2-min explainer — what gets cleaned and why it matters</h2>
+    <p class="ap-video__sub">Not just a demo: this explains what invisible characters actually are, why AI-generated text carries them, and what AcePaste removes on every pass.</p>
     <button
       type="button"
       class="ap-video__facade"
-      aria-label="Play video — AcePaste Cleaner Pro demo"
+      aria-label="Play 2-minute explainer — what AcePaste cleans and why it matters"
       data-video-id="whugBAOLq1M">
       <span class="ap-video__play" aria-hidden="true">
         <svg viewBox="0 0 68 48" width="68" height="48">
@@ -334,7 +337,7 @@ Please review when you can.</div>
     </button>
     <noscript>
       <p class="ap-video__nojs">
-        <a href="https://www.youtube.com/watch?v=whugBAOLq1M" rel="noopener">Watch the demo on YouTube →</a>
+        <a href="https://www.youtube.com/watch?v=whugBAOLq1M" rel="noopener">Watch the explainer on YouTube →</a>
       </p>
     </noscript>
   </section>
@@ -427,7 +430,7 @@ Please review when you can.</div>
     var id=f.dataset.videoId;
     var i=document.createElement('iframe');
     i.className='ap-video__iframe';
-    i.title='AcePaste Cleaner Pro — demo';
+    i.title='AcePaste — what gets cleaned and why it matters (explainer)';
     i.allow='accelerated-2d-canvas; autoplay; encrypted-media; picture-in-picture; web-share';
     i.allowFullscreen=true;
     i.referrerPolicy='strict-origin-when-cross-origin';

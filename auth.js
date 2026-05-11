@@ -81,6 +81,65 @@ function _clearSession() {
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
 }
 
+// ── Cross-tab session relay (extension auth bridge) ────────────────────────
+// BroadcastChannel is origin-scoped — only acepaste.xyz pages participate.
+// It cannot be accessed cross-origin, so sharing the session this way is safe.
+//
+// Problem it solves: sessionStorage is tab-isolated. When the extension opens
+// account.html?source=extension in a new tab, that tab has an empty
+// sessionStorage even if the user is already signed in on another tab. Without
+// this relay the user is forced to sign in a second time.
+//
+// All signed-in pages act as responders. The bridge tab is the sole requester.
+const _sessionChannel = (function() {
+  try {
+    return typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('acepaste_session_v1')
+      : null;
+  } catch(e) { return null; }
+})();
+
+if (_sessionChannel) {
+  _sessionChannel.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'ace:session_request') return;
+    const s = _loadSession();
+    if (!s || !s.jwt) return;                   // this tab has no session to share
+    _sessionChannel.postMessage({
+      type:    'ace:session_response',
+      reqId:   e.data.reqId,
+      session: s,
+    });
+  });
+}
+
+/**
+ * Broadcast a session request and wait up to `timeoutMs` for the first peer reply.
+ * Resolves with the session object or null. Only called by the bridge tab.
+ */
+function _requestPeerSession(timeoutMs) {
+  return new Promise(function(resolve) {
+    if (!_sessionChannel) return resolve(null);
+    const reqId = Math.random().toString(36).slice(2, 10);
+    let settled = false;
+    const timer = setTimeout(function() {
+      if (settled) return;
+      settled = true;
+      _sessionChannel.removeEventListener('message', onReply);
+      resolve(null);
+    }, timeoutMs || 1500);
+    function onReply(e) {
+      if (!e.data || e.data.type !== 'ace:session_response') return;
+      if (e.data.reqId !== reqId || settled) return;
+      settled = true;
+      clearTimeout(timer);
+      _sessionChannel.removeEventListener('message', onReply);
+      resolve(e.data.session || null);
+    }
+    _sessionChannel.addEventListener('message', onReply);
+    _sessionChannel.postMessage({ type: 'ace:session_request', reqId });
+  });
+}
+
 // ── Silent JWT refresh ─────────────────────────────────────────────────────────
 // Supabase JWTs expire after 1 hour. Before each server call we check if the
 // token is within 5 minutes of expiry and silently refresh it. Prevents silent
@@ -140,6 +199,11 @@ async function acePasteSignIn(email, password, captchaToken) {
       expiresAt:    data.expires_at,
     };
     _saveSession(session);
+    // Dispatch the auth event so any listener (including the extension bridge)
+    // knows sign-in succeeded without waiting for a separate acePasteRefreshPlan call.
+    dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan, email: user.email } }));
+    // Proactively push auth to the extension if it's installed in this browser.
+    _tryPushToExtension(session);
     return { ok: true, user, plan };
   } catch(e) {
     return { ok: false, error: 'Network error. Please try again.' };
@@ -294,8 +358,10 @@ async function acePasteRefreshPlan() {
   }
   try {
     const plan = await _fetchPlan(s.jwt, s.userId);
-    _saveSession({ ...s, plan });
+    const updated = { ...s, plan };
+    _saveSession(updated);
     dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan, email: s.email } }));
+    _tryPushToExtension(updated);
     return plan;
   } catch(e) {
     dispatchEvent(new CustomEvent('acepaste:auth', { detail: { plan: s.plan || PLAN_FREE } }));
@@ -342,6 +408,33 @@ var TRUSTED_EXT_IDS = [
   'kgnnilelmfchdblcoefmokgcbpccbcci', // AcePaste Cleaner Pro (Chrome Web Store)
 ];
 
+/**
+ * Proactively push auth state from any acepaste.xyz page to the installed extension.
+ * Requires externally_connectable to be configured in the extension manifest (it is).
+ * Fire-and-forget — safe to call when the extension is not installed; errors are swallowed.
+ *
+ * This is what makes "sign in once on the web" propagate automatically to the extension
+ * without the user having to go through the bridge URL manually.
+ */
+function _tryPushToExtension(session) {
+  if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) return;
+  if (!session || !session.jwt) return;
+  for (var i = 0; i < TRUSTED_EXT_IDS.length; i++) {
+    try {
+      chrome.runtime.sendMessage(TRUSTED_EXT_IDS[i], {
+        type:         'ACEPASTE_AUTH_TOKEN',
+        jwt:          session.jwt,
+        refreshToken: session.refreshToken || null,
+        plan:         session.plan,
+        email:        session.email,
+        expiresAt:    session.expiresAt,
+      });
+      // No callback needed — background.js handles it asynchronously.
+      // chrome.runtime.lastError is consumed implicitly by the no-callback path.
+    } catch(e) { /* extension not installed or context unavailable — ignore */ }
+  }
+}
+
 function acePasteExtensionBridge() {
   const params = new URLSearchParams(location.search);
   const source = params.get('source');
@@ -354,8 +447,8 @@ function acePasteExtensionBridge() {
     return;
   }
 
-  // After auth, send token to extension and close the tab
-  window.addEventListener('acepaste:auth', function(e) {
+  // Send token to extension and close the tab once auth is confirmed.
+  function _sendToExtension(detail) {
     const s = _loadSession();
     if (!s || !s.jwt) return;
     if (typeof chrome !== 'undefined' && chrome.runtime) {
@@ -363,18 +456,53 @@ function acePasteExtensionBridge() {
         chrome.runtime.sendMessage(extId, {
           type:         'ACEPASTE_AUTH_TOKEN',
           jwt:          s.jwt,
-          refreshToken: s.refreshToken || null,  // enables silent JWT renewal in background.js
-          plan:         e.detail.plan,
+          refreshToken: s.refreshToken || null,
+          plan:         detail.plan,
           email:        s.email,
           expiresAt:    s.expiresAt,
         }, function() {
-          // Close this tab after a brief confirmation delay
           setTimeout(function() { window.close(); }, 800);
         });
       } catch(err) {
         console.warn('[AcePaste] Could not reach extension:', err);
       }
     }
+  }
+
+  window.addEventListener('acepaste:auth', function(e) {
+    _sendToExtension(e.detail);
+  });
+
+  // ── Silent single-sign-on via cross-tab session relay ──────────────────
+  // If this tab already has a session (edge case: user signed in before the
+  // bridge was triggered), fire immediately without any network round-trip.
+  const existing = _loadSession();
+  if (existing && existing.jwt) {
+    acePasteRefreshPlan();
+    return;
+  }
+
+  // No local session — ask other open acepaste.xyz tabs for theirs.
+  // This is the fix for "already signed in on web but extension still asks
+  // for login": sessionStorage is tab-isolated so the new bridge tab starts
+  // empty even though the original tab has a valid session. We relay it here
+  // via BroadcastChannel (origin-scoped, safe) so the user never has to
+  // sign in twice.
+  const notice = document.getElementById('extBridgeNotice');
+  if (notice) {
+    notice.textContent = 'Connecting to extension…';
+    notice.style.display = 'block';
+  }
+
+  _requestPeerSession(1500).then(function(peerSession) {
+    if (!peerSession || !peerSession.jwt) {
+      // No peer session found — fall through to the normal login form.
+      if (notice) notice.style.display = 'none';
+      return;
+    }
+    // Inherit the session from the signed-in tab, then trigger the bridge.
+    _saveSession(peerSession);
+    acePasteRefreshPlan(); // fires acepaste:auth → _sendToExtension → tab closes
   });
 }
 
