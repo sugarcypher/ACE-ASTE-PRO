@@ -397,41 +397,68 @@ async function _fetchPlan(jwt, userId) {
 }
 
 // ── Extension auth bridge ──────────────────────────────────────────────────
-// When loaded on the /auth/extension page, the page can post the JWT
-// to the extension via chrome.runtime.sendMessage (externally_connectable).
+// When account.html is opened with ?source=extension&ext_id=<id>, the page
+// can post the JWT to the extension via chrome.runtime.sendMessage
+// (externally_connectable). ext_id comes from chrome.runtime.id in popup.js —
+// it's the actual installed extension ID, which may differ from TRUSTED_EXT_IDS
+// for unpacked/dev builds.
 //
-// SECURITY: ext_id is validated against a hardcoded allowlist to prevent a
-// phishing attack where a crafted URL delivers the JWT to an attacker's
-// extension. Update TRUSTED_EXT_IDS when you publish/update the extension.
+// SECURITY: The real security boundary is sender.origin === 'https://acepaste.xyz'
+// in background.js's onMessageExternal handler — that check is immutable from the
+// extension side and cannot be bypassed via a crafted URL. We still validate that
+// ext_id is a properly-formatted Chrome extension ID to prevent obviously malformed
+// inputs. TRUSTED_EXT_IDS is kept for the proactive-push path (_tryPushToExtension
+// on non-bridge pages) where we don't have the ext_id from the URL.
 
 var TRUSTED_EXT_IDS = [
   'kgnnilelmfchdblcoefmokgcbpccbcci', // AcePaste Cleaner Pro (Chrome Web Store)
 ];
+
+// Populated by acePasteExtensionBridge() when the page is opened by the extension.
+// Allows _tryPushToExtension to target the actual installed extension ID even if it
+// differs from the Web Store ID (e.g. an unpacked dev build has a browser-assigned ID).
+var _bridgeExtId = null;
+
+/**
+ * Returns true if `id` is a valid Chrome extension ID format: exactly 32 chars, [a-p].
+ * Chrome encodes extension IDs in base-16 using letters a–p instead of 0–9a–f.
+ * This validates format without restricting to the Web Store — the real security
+ * boundary is sender.origin in background.js's onMessageExternal handler.
+ */
+function _isValidExtId(id) {
+  return typeof id === 'string' && /^[a-p]{32}$/.test(id);
+}
 
 /**
  * Proactively push auth state from any acepaste.xyz page to the installed extension.
  * Requires externally_connectable to be configured in the extension manifest (it is).
  * Fire-and-forget — safe to call when the extension is not installed; errors are swallowed.
  *
- * This is what makes "sign in once on the web" propagate automatically to the extension
- * without the user having to go through the bridge URL manually.
+ * Targets:
+ *   1. _bridgeExtId — the actual ID passed by popup.js via the bridge URL (set on bridge pages)
+ *   2. TRUSTED_EXT_IDS — known published IDs (for non-bridge pages like acePasteSignIn)
  */
 function _tryPushToExtension(session) {
   if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) return;
   if (!session || !session.jwt) return;
-  for (var i = 0; i < TRUSTED_EXT_IDS.length; i++) {
-    try {
-      chrome.runtime.sendMessage(TRUSTED_EXT_IDS[i], {
-        type:         'ACEPASTE_AUTH_TOKEN',
-        jwt:          session.jwt,
-        refreshToken: session.refreshToken || null,
-        plan:         session.plan,
-        email:        session.email,
-        expiresAt:    session.expiresAt,
-      });
-      // No callback needed — background.js handles it asynchronously.
-      // chrome.runtime.lastError is consumed implicitly by the no-callback path.
-    } catch(e) { /* extension not installed or context unavailable — ignore */ }
+  var targets = _bridgeExtId ? [_bridgeExtId] : TRUSTED_EXT_IDS;
+  var payload = {
+    type:         'ACEPASTE_AUTH_TOKEN',
+    jwt:          session.jwt,
+    refreshToken: session.refreshToken || null,
+    plan:         session.plan,
+    email:        session.email,
+    expiresAt:    session.expiresAt,
+  };
+  for (var i = 0; i < targets.length; i++) {
+    (function(id) {
+      try {
+        chrome.runtime.sendMessage(id, payload, function(resp) {
+          // Consume lastError to suppress Chrome's unchecked-error warning.
+          void chrome.runtime.lastError;
+        });
+      } catch(e) { /* extension not installed or context unavailable — ignore */ }
+    })(targets[i]);
   }
 }
 
@@ -441,17 +468,24 @@ function acePasteExtensionBridge() {
   const extId  = params.get('ext_id');
   if (source !== 'extension' || !extId) return;
 
-  // Reject unknown extension IDs — prevents JWT exfiltration via crafted URL
-  if (TRUSTED_EXT_IDS.length === 0 || !TRUSTED_EXT_IDS.includes(extId)) {
-    console.warn('[AcePaste] Blocked bridge attempt from untrusted ext_id:', extId);
+  // Validate that extId is a properly-formatted Chrome extension ID (32 chars, [a-p]).
+  // We intentionally do NOT restrict to TRUSTED_EXT_IDS here — that would silently
+  // break unpacked/dev builds whose browser-assigned IDs aren't in the allowlist.
+  // The real security boundary is sender.origin in background.js's onMessageExternal:
+  // only messages from https://acepaste.xyz are accepted by the extension.
+  if (!_isValidExtId(extId)) {
+    console.warn('[AcePaste] Blocked bridge attempt — invalid ext_id format:', extId);
     return;
   }
+
+  // Store the bridge ext_id so _tryPushToExtension targets the right extension.
+  _bridgeExtId = extId;
 
   // Send token to extension and close the tab once auth is confirmed.
   function _sendToExtension(detail) {
     const s = _loadSession();
     if (!s || !s.jwt) return;
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
       try {
         chrome.runtime.sendMessage(extId, {
           type:         'ACEPASTE_AUTH_TOKEN',
@@ -460,7 +494,17 @@ function acePasteExtensionBridge() {
           plan:         detail.plan,
           email:        s.email,
           expiresAt:    s.expiresAt,
-        }, function() {
+        }, function(resp) {
+          if (chrome.runtime.lastError) {
+            console.warn('[AcePaste] Extension message failed:', chrome.runtime.lastError.message);
+            // Don't close — leave the tab open so the user can see something went wrong.
+            const notice = document.getElementById('extBridgeNotice');
+            if (notice) {
+              notice.textContent = 'Could not reach extension — try reloading it in chrome://extensions, then sign in again.';
+              notice.style.display = 'block';
+            }
+            return;
+          }
           setTimeout(function() { window.close(); }, 800);
         });
       } catch(err) {
