@@ -372,12 +372,28 @@ function toggleDark() {
 
 // --- Page protection helpers ---------------------------------------------
 
-async function getActiveTabId() {
+async function getActiveTab() {
   return new Promise(resolve => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      resolve(tabs && tabs[0] ? tabs[0].id : null);
+      resolve(tabs && tabs[0] ? tabs[0] : null);
     });
   });
+}
+
+async function getActiveTabId() {
+  const tab = await getActiveTab();
+  return tab ? tab.id : null;
+}
+
+/** True for URLs where Chrome blocks content scripts entirely. */
+function isRestrictedUrl(url) {
+  if (!url) return true;
+  return url.startsWith('chrome://') ||
+         url.startsWith('chrome-extension://') ||
+         url.startsWith('about:') ||
+         url.startsWith('edge://') ||
+         url.startsWith('brave://') ||
+         url.includes('chrome.google.com/webstore');
 }
 
 function setScanStatus(text, kind) {
@@ -410,11 +426,17 @@ async function refreshScanStatus() {
 }
 
 async function requestScanOfActiveTab() {
-  const tabId = await getActiveTabId();
-  if (tabId == null) return;
-  chrome.tabs.sendMessage(tabId, { type: 'ace:request-scan' }, (res) => {
+  const tab = await getActiveTab();
+  if (!tab) return;
+  if (isRestrictedUrl(tab.url)) {
+    setScanStatus('Scanner cannot run on browser system pages.');
+    return;
+  }
+  chrome.tabs.sendMessage(tab.id, { type: 'ace:request-scan' }, (res) => {
     if (chrome.runtime.lastError) {
-      setScanStatus('Cannot scan this page (restricted URL).', 'has-hits');
+      // Content script not reachable — most likely the tab was open before the
+      // extension was installed or last reloaded. Reloading the tab fixes it.
+      setScanStatus('Reload this tab once to enable scanning, then try again.');
       return;
     }
     if (!res) return;
@@ -427,11 +449,15 @@ async function requestScanOfActiveTab() {
 }
 
 async function requestHighlightOnActiveTab() {
-  const tabId = await getActiveTabId();
-  if (tabId == null) return;
-  chrome.tabs.sendMessage(tabId, { type: 'ace:highlight' }, (res) => {
+  const tab = await getActiveTab();
+  if (!tab) return;
+  if (isRestrictedUrl(tab.url)) {
+    setScanStatus('Highlighting cannot run on browser system pages.');
+    return;
+  }
+  chrome.tabs.sendMessage(tab.id, { type: 'ace:highlight' }, (res) => {
     if (chrome.runtime.lastError) {
-      setScanStatus('Cannot highlight on this page (restricted URL).', 'has-hits');
+      setScanStatus('Reload this tab once to enable highlighting, then try again.');
       return;
     }
     if (res && res.highlighted >= 0) {
