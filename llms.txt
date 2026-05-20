@@ -1,0 +1,29 @@
+# AcePaste Cleaner Pro
+
+> AcePaste is a privacy-first, in-browser tool for removing invisible Unicode characters, AI debris, prompt-injection tags, markdown, and HTML from pasted text. All processing happens locally in the browser — pasted text never leaves the device.
+
+AcePaste cleans text for everyday sharing, developer code snippets, AI prompt staging, and editorial work. The site also publishes security research on invisible Unicode as an attack surface.
+
+## Core Content
+
+- [AcePaste Cleaner (home)](https://acepaste.xyz/): The cleaner tool — paste text to strip invisible Unicode, AI markup, formatting, emojis, numerals, dates, and symbols, with a live report of what was removed and custom find/replace.
+- [FAQ](https://acepaste.xyz/faq.html): Common questions on invisible characters, what gets cleaned, privacy, and usage scenarios.
+- [Pricing](https://acepaste.xyz/pricing.html): Free and Pro plans and the features each includes.
+
+## Blog — invisible-character security research
+
+- [AcePaste Blog](https://acepaste.xyz/blog/): Writing on text safety, invisible characters, and prompt injection from the AcePaste team.
+- [Plane 14 Was Supposed to Tag Languages. It Smuggles Instructions Instead.](https://acepaste.xyz/blog/plane-14-tag-character-prompt-injection.html): How Unicode's deprecated Plane 14 tag characters remain a reliable invisible instruction-smuggling channel in prompt injection.
+- [The Invisible Text You're Pasting Into Your LLM](https://acepaste.xyz/blog/invisible-text-llm.html): How invisible Unicode survives copy-paste into LLMs and RAG pipelines — zero-width separators, tag characters, and the broader attack class.
+
+## Resources
+
+- [Chrome Extension](https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci): Browser extension for ongoing, in-place text cleaning while browsing.
+- [About](https://acepaste.xyz/about.html): What AcePaste is and the team behind it.
+- [Founders Lifetime](https://acepaste.xyz/founders.html): Lifetime-access offer for AcePaste Pro.
+
+## Optional
+
+- [Privacy Policy](https://acepaste.xyz/privacy.html): Local-processing, privacy-first data practices. Regional versions: [EU](https://acepaste.xyz/privacy-eu.html), [California](https://acepaste.xyz/privacy-ca.html).
+- [Security & Terms of Service](https://acepaste.xyz/security.html): Security posture and terms of service.
+- [Cookie Policy](https://acepaste.xyz/cookie-policy.html): How the site uses cookies.
