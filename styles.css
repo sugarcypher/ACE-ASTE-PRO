@@ -317,3 +317,8 @@ body.dark-mode .twl-credit{color:#94a3b8}
 body.dark-mode .twl-credit .twl-link{color:#22d3ee}
 body.dark-mode .twl-credit .twl-link:hover{color:#67e8f9}
 .twl-logo{height:20px;width:auto;border-radius:4px;vertical-align:middle}
+
+/* Header brand wordmark — non-heading element so the page keeps a single H1 (the hero .page-h1) */
+.hdr-brand{font-size:2em;font-weight:700;margin:.67em 0}
+@media (max-width:600px){.hdr-brand{font-size:15px;min-width:0}}
+@media (max-width:380px){.hdr-brand{font-size:13px}}
