@@ -311,6 +311,11 @@ body.dark-mode .twl-credit{color:#94a3b8}
 .twl-credit .twl-link:hover{color:#0e7490;text-decoration:underline}
 body.dark-mode .twl-credit .twl-link{color:#22d3ee}
 body.dark-mode .twl-credit .twl-link:hover{color:#67e8f9}
+.footer-donate{max-width:560px;margin:0 auto 14px;font-size:13.5px;line-height:1.55;color:#475569;text-align:center}
+.footer-donate a{color:#0891b2;font-weight:600;text-decoration:none}
+.footer-donate a:hover{color:#0e7490;text-decoration:underline}
+body.dark-mode .footer-donate{color:#94a3b8}
+body.dark-mode .footer-donate a{color:#22d3ee}
 .twl-logo{height:20px;width:auto;border-radius:4px;vertical-align:middle}
 
 /* Header brand wordmark — non-heading element so the page keeps a single H1 (the hero .page-h1) */
