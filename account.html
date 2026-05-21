@@ -3,7 +3,7 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://eqoltjofjlznlirbalrb.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri https://eqoltjofjlznlirbalrb.supabase.co/functions/v1/csp-report">
 <title>Account — AcePaste Cleaner Pro</title>
-<meta name="description" content="Sign in to your AcePaste Cleaner Pro account to manage your subscription.">
+<meta name="description" content="Sign in to your AcePaste Cleaner Pro account.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://acepaste.xyz/account.html">
 <link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
@@ -201,7 +201,6 @@
           <button class="btn-full" id="loginBtn" type="button">Sign in</button>
           <p class="form-switch">No account? <a id="switchToSignup">Create one →</a></p>
           <p class="form-switch" style="margin-top:0.25rem"><a id="switchToRecovery" href="#">Forgot password?</a></p>
-          <p class="form-switch" style="margin-top:0.25rem"><a href="/pricing.html">View pricing →</a></p>
         </div>
       </div>
 
@@ -270,7 +269,7 @@
     <!-- ── Signed-in view ─────────────────────────────────────────────── -->
     <div id="signedIn">
       <div class="account-card">
-        <h2>Account <span class="plan-chip" id="planChip">Demo</span></h2>
+        <h2>Account <span class="plan-chip" id="planChip">Free</span></h2>
         <p class="account-info" id="accountInfo">Loading…</p>
 
         <!-- Restore purchases — shown only on free plan -->
@@ -292,9 +291,6 @@
         <div style="margin-bottom:0.75rem">
           <a href="/" class="btn-full" style="text-align:center;text-decoration:none;display:block">Use AcePaste →</a>
         </div>
-        <div id="upgradeSection">
-          <a href="/pricing.html" class="btn-outline">View plans →</a>
-        </div>
         <div id="manageSection" style="margin-top:0.75rem">
           <button class="btn-outline" id="manageBtn" type="button">Manage billing →</button>
           <button class="btn-danger" id="signoutBtn" type="button">Sign out</button>
@@ -314,7 +310,6 @@
   <nav class="footer-links">
     <a href="/">Home</a>
     <a href="/pricing.html">Pricing</a>
-    <a href="/founders.html">Founders</a>
     <a href="https://blog.acepaste.xyz/">Blog</a>
     <a href="/privacy.html">Privacy</a>
   </nav>
@@ -358,7 +353,7 @@ function getCaptchaToken() {
 
 (function() {
   var PLAN_LABELS = {
-    free: 'Demo', trial: 'Day Pass', monthly: 'Pro · Monthly',
+    free: 'Free', trial: 'Day Pass', monthly: 'Pro · Monthly',
     yearly: 'Pro · Yearly', lifetime: 'Founders Lifetime'
   };
 
@@ -392,11 +387,10 @@ function getCaptchaToken() {
     chip.className   = 'plan-chip' + (plan === 'free' ? ' free' : '');
     var info = document.getElementById('accountInfo');
     info.textContent = email + ' · ' + (plan === 'free'
-      ? 'Demo — upgrade to Pro to unlock all features.'
+      ? 'Free plan — every cleaning feature is unlocked.'
       : 'Active plan: ' + (PLAN_LABELS[plan] || plan) + '.');
-    // Show/hide upgrade + restore sections
+    // Restore-purchase form shows only for grandfathered buyers on the free plan
     var isPaid = plan !== 'free';
-    document.getElementById('upgradeSection').style.display  = isPaid ? 'none'  : 'block';
     document.getElementById('restoreSection').style.display  = isPaid ? 'none'  : 'block';
     // Lifetime users have no recurring subscription — billing portal is irrelevant
     var manageBtn = document.getElementById('manageBtn');
@@ -415,7 +409,6 @@ function getCaptchaToken() {
     chip.textContent = 'Confirming…';
     chip.className   = 'plan-chip';
     document.getElementById('accountInfo').textContent = email + ' · Confirming your purchase…';
-    document.getElementById('upgradeSection').style.display = 'none';
     document.getElementById('restoreSection').style.display = 'none';
   }
 

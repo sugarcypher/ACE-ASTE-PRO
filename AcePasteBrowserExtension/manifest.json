@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AcePaste Cleaner Pro",
   "short_name": "AcePaste",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Strip markup, invisible characters, emojis, HTML, and AI debris from any text. 100% local. Nothing leaves your browser.",
   "homepage_url": "https://acepaste.xyz",
   "author": "ThinkWell Labs",

@@ -139,17 +139,12 @@ body.dark-mode .cleaning-report .report-count{color:#5a9fd2}
 .cleaning-report .report-total{margin-top:12px;padding-top:12px;border-top:1px solid rgba(10,60,120,.1);font-weight:600;color:#0b0d12}
 body.dark-mode .cleaning-report .report-total{border-top-color:rgba(255,255,255,.1);color:#e0e0e0}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
-.upgrade-nudge{display:block;width:100%;box-sizing:border-box;padding:10px 16px;margin:0 0 14px;background:#fffbeb;border:1px solid rgba(202,138,4,.35);border-radius:10px;font-size:14px;color:#78350f;text-align:center;line-height:1.5}.upgrade-nudge a{color:#b45309;font-weight:600;text-decoration:none}.upgrade-nudge a:hover{text-decoration:underline}.dark-mode .upgrade-nudge{background:#2d1f00;border-color:rgba(202,138,4,.4);color:#fcd34d}.dark-mode .upgrade-nudge a{color:#fbbf24}
 .ace-notice{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;padding:12px 20px;border-radius:10px;font-size:14px;max-width:500px;text-align:center;animation:noticeIn .25s ease}
 .ace-notice--error{background:#fdecea;color:#611a15;border:1px solid rgba(211,47,47,.4)}
 .ace-notice--info{background:#e8f4fd;color:#0d3c61;border:1px solid rgba(13,60,97,.3)}
 body.dark-mode .ace-notice--error{background:#3b1515;color:#f5c6cb;border-color:rgba(211,47,47,.5)}
 body.dark-mode .ace-notice--info{background:#0d2b3e;color:#b8dff5;border-color:rgba(13,60,97,.5)}
 @keyframes noticeIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-/* Freemium feature locks */
-.ace-premium-locked{opacity:.4;cursor:not-allowed;pointer-events:none;position:relative}
-.ace-premium-locked::after{content:" 🔒";font-size:.8em}
-body.dark-mode .ace-premium-locked{opacity:.25}
 .hdr-nav{display:flex;gap:4px;align-items:center;margin-left:auto}
 .hdr-nav a{color:#005a8f;text-decoration:none;font-size:14px;font-weight:500;padding:5px 10px;border-radius:8px;transition:background 0.15s ease,color 0.15s ease;white-space:nowrap}
 .hdr-nav a:hover{background:rgba(10,60,120,.1);color:#003d66}

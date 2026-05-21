@@ -216,8 +216,8 @@ function notify(msg, tabId) {
 // --- Auth bridge (externally_connectable from acepaste.xyz) -----------------
 // When the user signs in at acepaste.xyz/account?source=extension&ext_id=...,
 // auth.js calls chrome.runtime.sendMessage with type ACEPASTE_AUTH_TOKEN.
-// We persist the JWT + refresh_token + plan so popup.js can gate premium features
-// and background.js can silently renew the JWT before it expires.
+// We persist the JWT + refresh_token so the extension stays signed in and
+// background.js can silently renew the JWT before it expires.
 chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
   if (!msg || msg.type !== 'ACEPASTE_AUTH_TOKEN') return;
   // SECURITY: use sender.origin (immutable, set by Chrome from the page's actual

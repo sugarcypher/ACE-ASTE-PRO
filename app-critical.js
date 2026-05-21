@@ -198,79 +198,12 @@ if (window.trustedTypes && window.trustedTypes.defaultPolicy) {
   trustedTypesPolicy = window.trustedTypes.defaultPolicy;
 }
 
-// ── Freemium gate ─────────────────────────────────────────────────────────
-// Plan is set by auth.js via sessionStorage. Falls back to 'free' silently.
-const FREE_CHAR_LIMIT = 2000;
-
-// Demo gates EVERYTHING except the always-on invisible-character removal.
-// removeInvisible is intentionally NOT in this list — it's the one cleaning
-// option Demo users get. Every other checkbox is locked + force-unchecked
-// when the user is on the Demo (free) plan.
-const PREMIUM_FEATURE_IDS = [
-  'removeMarkdown','removeAIMarkup','removeEmojis','removeFormatting',
-  'normalizeSmartPunct','privacyMode',
-  'collapseSpaces','collapseNewlines','trimPerLine',
-  'removeHtml','removeNumerals','removeDates','removeSymbolPairs',
-  'removeComments',
-  'customFind','customReplace','customRegex',
-  'removePunctuation'
-];
-const PREMIUM_CASE_RADIOS = true; // all caseTx radios are premium
-
-function _getAcePlan() {
-  try {
-    const s = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
-    if (!s) return 'free';
-    if (s.expiresAt && Date.now() / 1000 > s.expiresAt) return 'free';
-    return s.plan || 'free';
-  } catch(e) { return 'free'; }
-}
-
-function acePasteIsPaidWeb() {
-  return _getAcePlan() !== 'free';
-}
-
-/** Lock or unlock premium features in the UI based on current plan. */
-function applyFreemiumUI() {
-  const paid = acePasteIsPaidWeb();
-
-  // Lock/unlock checkboxes + inputs
-  for (const id of PREMIUM_FEATURE_IDS) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    if (paid) {
-      el.disabled = false;
-      const lbl = el.closest('label') || el.parentElement;
-      if (lbl) lbl.classList.remove('ace-premium-locked');
-    } else {
-      el.disabled = true;
-      el.checked  = false;
-      const lbl = el.closest('label') || el.parentElement;
-      if (lbl) lbl.classList.add('ace-premium-locked');
-    }
-  }
-
-  // Lock/unlock case-transform radios
-  if (PREMIUM_CASE_RADIOS) {
-    document.querySelectorAll('input[name="caseTx"]').forEach(r => {
-      if (r.value === 'none') return;
-      if (paid) {
-        r.disabled = false;
-        const lbl = r.closest('label') || r.parentElement;
-        if (lbl) lbl.classList.remove('ace-premium-locked');
-      } else {
-        r.disabled = true;
-        if (r.checked) { r.checked = false; document.getElementById('caseTxNone') && (document.getElementById('caseTxNone').checked = true); }
-        const lbl = r.closest('label') || r.parentElement;
-        if (lbl) lbl.classList.add('ace-premium-locked');
-      }
-    });
-  }
-
-  // Show/hide upgrade nudge
-  const nudge = document.getElementById('upgradeNudge');
-  if (nudge) nudge.style.display = paid ? 'none' : '';
-}
+// ── All cleaning features are free ────────────────────────────────────────
+// AcePaste's full cleaning pipeline — invisible-character removal, markdown,
+// HTML, case transforms, find/replace, everything — is free for everyone.
+// There is no plan gating. applyFreemiumUI() is kept as a no-op so the
+// existing call sites stay valid without further edits.
+function applyFreemiumUI() { /* no gating — every cleaning feature is free */ }
 
 // Helper function to safely set innerHTML using Trusted Types
 function setInnerHTML(element, html) {
@@ -340,8 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Global Privacy Control (GPC) - lightweight
   initGlobalPrivacyControl();
 
-  // ── Auth + freemium gate ──────────────────────────────────────────────────
-  // Apply UI immediately from cached session (sync, no flash).
+  // ── Auth + account link ───────────────────────────────────────────────────
+  // applyFreemiumUI() is a no-op (all features are free) — kept for call safety.
   if (typeof applyFreemiumUI === 'function') applyFreemiumUI();
 
   // Update header account link to reflect sign-in state.

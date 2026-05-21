@@ -8,7 +8,7 @@ AcePaste cleans text for everyday sharing, developer code snippets, AI prompt st
 
 - [AcePaste Cleaner (home)](https://acepaste.xyz/): The cleaner tool — paste text to strip invisible Unicode, AI markup, formatting, emojis, numerals, dates, and symbols, with a live report of what was removed and custom find/replace.
 - [FAQ](https://acepaste.xyz/faq.html): Common questions on invisible characters, what gets cleaned, privacy, and usage scenarios.
-- [Pricing](https://acepaste.xyz/pricing.html): Free and Pro plans and the features each includes.
+- [Pricing](https://acepaste.xyz/pricing.html): AcePaste is free — the full cleaner and the Chrome extension cost nothing, with no account or character limits. A developer API and Teams product are in development.
 
 ## Blog — invisible-character security research
 
@@ -20,7 +20,6 @@ AcePaste cleans text for everyday sharing, developer code snippets, AI prompt st
 
 - [Chrome Extension](https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci): Browser extension for ongoing, in-place text cleaning while browsing.
 - [About](https://acepaste.xyz/about.html): What AcePaste is and the team behind it.
-- [Founders Lifetime](https://acepaste.xyz/founders.html): Lifetime-access offer for AcePaste Pro.
 
 ## Optional
 

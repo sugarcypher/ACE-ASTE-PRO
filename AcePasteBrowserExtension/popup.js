@@ -6,112 +6,45 @@
 // We use a tiny synchronous loader: in MV3 popup pages, scripts in the HTML run in order.
 // popup.html loads cleaner.js then popup.js. Here we just consume self.AcePasteCleaner.
 
-// ── Freemium gate (extension) ─────────────────────────────────────────────
-const EXT_FREE_CHAR_LIMIT = 2000;
-
-// Demo gates everything except invisible-character removal.
-// removeInvisible is the only cleaning option Demo can use.
-const PREMIUM_FEATURE_IDS_EXT = [
-  'removeMarkdown','removeAIMarkup','removeEmojis','removeFormatting',
-  'collapseSpaces','collapseNewlines','trimPerLine',
-  'removeHtml','removeComments',
-  'customFind','customReplace','customRegex',
-  'removePunctuation'
-];
-// Protection features locked on free tier
-const PREMIUM_PROTECTION_IDS_EXT = [
-  'quarantineCopy','quarantinePaste','quarantineFullPipeline','quarantineSilent',
-  'scanEnabled','bannerEnabled'
-];
-
-let _extPlan = 'free';
+// ── Account state (extension) ─────────────────────────────────────────────
+// AcePaste is free. Every cleaning and page-protection feature is available
+// to everyone — there is no plan gating. Sign-in is optional and is only used
+// to sync the extension with an existing account.
 let _extEmail = '';
 
-function extIsPaid() { return _extPlan !== 'free'; }
-
-/** Load auth state from chrome.storage.local, apply UI gates, return plan.
- *  Triggers a silent JWT refresh via background.js before reading plan state,
- *  so the popup never shows a stale "Free" gate if the token just expired. */
+/** Load account state from chrome.storage.local and update the account UI. */
 async function loadExtAuth() {
-  // Ask background.js to refresh the JWT if near expiry. Fire-and-forget from
-  // our perspective — storage is updated in-place; we re-read after the await.
+  // Ask background.js to refresh the JWT if near expiry, then re-read storage.
   await new Promise(resolve => {
     try {
       chrome.runtime.sendMessage({ type: 'ace:refresh-jwt' }, () => resolve());
     } catch { resolve(); }
   });
   return new Promise(resolve => {
-    chrome.storage.local.get(['ace_plan','ace_email','ace_expires_at'], (r) => {
+    chrome.storage.local.get(['ace_email','ace_expires_at'], (r) => {
       const expires = Number(r.ace_expires_at || 0);
-      if (expires && Date.now() / 1000 > expires) {
-        _extPlan = 'free'; _extEmail = '';
-      } else {
-        _extPlan  = r.ace_plan  || 'free';
-        _extEmail = r.ace_email || '';
-      }
-      applyExtFreemiumUI();
-      resolve(_extPlan);
+      _extEmail = (expires && Date.now() / 1000 > expires) ? '' : (r.ace_email || '');
+      applyExtAccountUI();
+      resolve();
     });
   });
 }
 
-/** Lock or unlock premium feature checkboxes in popup.html. */
-function applyExtFreemiumUI() {
-  const paid = extIsPaid();
-
-  // Account status line
+/** Update the account status line + sign-in/out buttons. No feature gating. */
+function applyExtAccountUI() {
   const statusEl = document.getElementById('aceAccountStatus');
   if (statusEl) {
     if (_extEmail) {
-      const PLAN_LABELS = { free:'Demo', trial:'Day Pass', monthly:'Pro · Monthly', yearly:'Pro · Yearly', lifetime:'Founders Lifetime' };
-      statusEl.textContent = _extEmail.split('@')[0] + ' · ' + (PLAN_LABELS[_extPlan] || _extPlan);
+      statusEl.textContent = _extEmail.split('@')[0] + ' · signed in';
       statusEl.style.display = 'block';
     } else {
       statusEl.style.display = 'none';
     }
   }
-  const signInBtn = document.getElementById('aceSignInBtn');
+  const signInBtn  = document.getElementById('aceSignInBtn');
   const signOutBtn = document.getElementById('aceSignOutBtn');
-  if (signInBtn)  signInBtn.style.display  = paid ? 'none'  : 'inline-block';
-  if (signOutBtn) signOutBtn.style.display = paid ? 'inline-block' : 'none';
-
-  // Show/hide upgrade nudge
-  const nudge = document.getElementById('aceUpgradeNudge');
-  if (nudge) nudge.style.display = paid ? 'none' : 'block';
-
-  // Cleaning features
-  for (const id of PREMIUM_FEATURE_IDS_EXT) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    el.disabled = !paid;
-    if (!paid) el.checked = false;
-    const lbl = el.closest('label') || el.parentElement;
-    if (lbl) lbl.classList.toggle('ace-premium-locked', !paid);
-  }
-
-  // Case radios
-  document.querySelectorAll('input[name="caseTx"]').forEach(r => {
-    r.disabled = !paid;
-    if (!paid) r.checked = false;
-    const lbl = r.closest('label') || r.parentElement;
-    if (lbl) lbl.classList.toggle('ace-premium-locked', !paid);
-  });
-
-  // Protection features
-  for (const id of PREMIUM_PROTECTION_IDS_EXT) {
-    const el = document.getElementById(id);
-    if (!el) continue;
-    el.disabled = !paid;
-    if (!paid) el.checked = false;
-    const lbl = el.closest('label') || el.parentElement;
-    if (lbl) lbl.classList.toggle('ace-premium-locked', !paid);
-  }
-
-  // Scanner buttons
-  const scanBtn      = document.getElementById('scanNowBtn');
-  const highlightBtn = document.getElementById('highlightBtn');
-  if (scanBtn)      scanBtn.disabled      = !paid;
-  if (highlightBtn) highlightBtn.disabled = !paid;
+  if (signInBtn)  signInBtn.style.display  = _extEmail ? 'none' : 'inline-block';
+  if (signOutBtn) signOutBtn.style.display = _extEmail ? 'inline-block' : 'none';
 }
 
 function openSignInPage() {
@@ -123,12 +56,12 @@ function openSignInPage() {
 
 async function extSignOut() {
   chrome.runtime.sendMessage({ type: 'ace:sign-out' }, () => {
-    _extPlan = 'free'; _extEmail = '';
-    applyExtFreemiumUI();
+    _extEmail = '';
+    applyExtAccountUI();
     showNotice('Signed out.', 'info');
   });
 }
-// ── End freemium gate ─────────────────────────────────────────────────────
+// ── End account state ─────────────────────────────────────────────────────
 
 const els = {};
 function $(id) { return els[id] || (els[id] = document.getElementById(id)); }
@@ -298,22 +231,7 @@ function doClean() {
       $('cleaningReport').classList.add('hidden');
       return;
     }
-    // Freemium char limit
-    if (!extIsPaid() && text.length > EXT_FREE_CHAR_LIMIT) {
-      showNotice('Demo: text truncated at 2,000 chars. Upgrade to Pro at acepaste.xyz/pricing', 'warn');
-      text = text.slice(0, EXT_FREE_CHAR_LIMIT);
-      $('paste').value = text;
-    }
-    // Demo: force ONLY invisible-character removal. Every other cleaning
-    // option is overridden to off, regardless of checkbox state.
-    const opts = extIsPaid() ? readOpts() : Object.assign(readOpts(), {
-      removeMarkdown: false,
-      removeAIMarkup: false, removeEmojis: false, removeFormatting: false,
-      collapseSpaces: false, collapseNewlines: false, trimPerLine: false,
-      removeHtml: false, removeComments: false,
-      customFind: '', customRegex: false, caseTx: '', punctuation: []
-    });
-    const result = self.AcePasteCleaner.cleanText(text, opts);
+    const result = self.AcePasteCleaner.cleanText(text, readOpts());
     $('cleaned').value = result.text;
     renderReport(result);
     for (const err of result.errors) showNotice(err, 'error');
@@ -481,7 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyOpts({});
   }
 
-  // Load auth state and apply freemium UI before anything else
+  // Load optional account state (for the account status line)
   await loadExtAuth();
 
   $('cleanBtn').addEventListener('click', doClean);
@@ -491,16 +409,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('darkModeToggle').addEventListener('click', toggleDark);
   $('moreOptions').addEventListener('click', toggleAdvanced);
 
-  // Auth buttons
+  // Account buttons (sign-in is optional — used only to sync the extension)
   const signInBtn  = document.getElementById('aceSignInBtn');
   const signOutBtn = document.getElementById('aceSignOutBtn');
-  const upgradeBtn = document.getElementById('aceUpgradeBtn');
   if (signInBtn)  signInBtn.addEventListener('click',  openSignInPage);
   if (signOutBtn) signOutBtn.addEventListener('click', extSignOut);
-  if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://acepaste.xyz/pricing.html', active: true });
-    window.close();
-  });
 
   // Persist on change.
   for (const id of OPTION_KEYS) {

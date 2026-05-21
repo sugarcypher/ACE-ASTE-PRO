@@ -2,13 +2,14 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>Pricing — AcePaste Cleaner Pro</title>
-<meta name="description" content="Pricing for AcePaste Cleaner Pro: free local cleaning, $2.99 Day Pass, $14.99/mo and $119/yr Pro plans, $499 Founders Lifetime, and Enterprise. One subscription covers web + extension.">
+<meta name="description" content="AcePaste is free. The full text-cleaning pipeline and the Chrome extension cost nothing — no account, no character limits, no feature gates. A developer API and Teams product are in development.">
 <meta property="og:title" content="Pricing — AcePaste Cleaner Pro">
+<meta property="og:description" content="AcePaste is free — the full cleaner and the Chrome extension cost nothing. No account, no limits, no feature gates.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://acepaste.xyz/pricing">
 <link rel="canonical" href="https://acepaste.xyz/pricing.html">
 <link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
-<link rel="stylesheet" href="/styles.css?v=3.2">
+<link rel="stylesheet" href="/styles.css?v=3.3">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -16,26 +17,26 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Does one subscription really cover both the web app and the extension?",
+      "name": "Is AcePaste really free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Sign in with the same email on acepaste.xyz and in the extension. Both check the same backend, so a single active subscription unlocks everything on both surfaces simultaneously."
+        "text": "Yes. The web app cleans text with the full pipeline — invisible-character removal, markdown, HTML, formatting, case transforms, find and replace — with no character limit, no account, and no feature gates. The Chrome extension is free too."
       }
     },
     {
       "@type": "Question",
-      "name": "What happens after I buy a Day Pass?",
+      "name": "Is there a catch? Will you add paid consumer tiers later?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Your account is upgraded to full Pro access for 24 hours from the moment of purchase. After that, features revert to the free tier unless you subscribe. The $2.99 Day Pass is a standalone access fee and is not credited toward a subscription."
+        "text": "No catch. The web cleaner and the browser extension are free and are intended to stay free. Cleaning text is a commodity; we do not charge consumers for it."
       }
     },
     {
       "@type": "Question",
-      "name": "Can I cancel my subscription?",
+      "name": "Do I need an account to use AcePaste?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, at any time from your account page. Pro Monthly billing stops immediately on cancellation; Pro Yearly stops renewing at the end of your current period. Founders Lifetime is a one-time purchase and never expires."
+        "text": "No. Cleaning never requires an account. An optional sign-in exists only to sync settings to the browser extension."
       }
     },
     {
@@ -43,650 +44,223 @@
       "name": "Does my data leave my browser?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Text you paste and clean is never sent to any server. All cleaning runs locally in your browser. The only requests we make are for account sign-in and subscription-status checks so the same login works on the web and in the extension. Cleaning is, and will remain, entirely local."
+        "text": "No. All cleaning runs locally in your browser. Text you paste is never sent to any server, stored, or logged."
       }
     },
     {
       "@type": "Question",
-      "name": "How is the yearly savings calculated?",
+      "name": "Is there anything you do charge for?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pro Monthly is $14.99/mo, which is $179.88 over a year. Pro Yearly is $119/yr — about $60.88 less, roughly four months free versus paying month-to-month."
+        "text": "We are developing a product for developers and teams — an API and SDK for sanitizing untrusted text at ingestion into LLM, RAG, and content pipelines, plus team and enterprise options. It is not generally available yet. If that is a need for your team, email enterprise@acepaste.xyz."
       }
     },
     {
       "@type": "Question",
-      "name": "What does Founders Lifetime include?",
+      "name": "I previously bought a paid plan. What happens to it?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A one-time $499 payment for lifetime Pro access on both the web app and the browser extension, including every future update. Limited founders cohort while we grow; once the allotment is sold, lifetime pricing rises."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about Enterprise or teams?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For teams, compliance, SSO, audit logging, custom DLP rules, or private/on-prem deployment, email enterprise@acepaste.xyz and we will set up a call."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What payment methods are accepted?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "All major credit and debit cards via Stripe. Stripe also supports Apple Pay and Google Pay where available. We do not store any card details ourselves."
+        "text": "Every past purchase is honored. Sign in at acepaste.xyz/account.html to view or manage your account. Since the full toolset is now free for everyone, there is nothing more to buy."
       }
     }
   ]
 }
 </script>
 <style>
-/* ── Pricing page styles ─────────────────────────────────────────────────── */
-.pricing-hero {
-  text-align: center;
-  padding: 2.5rem 1rem 1rem;
-}
+/* ── Pricing page ─────────────────────────────────────────────────────────── */
+.pricing-hero { text-align: center; padding: 2.75rem 1rem 0.5rem; }
 .pricing-hero h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem;
-  color: var(--text, #111);
+  font-size: 2.1rem; font-weight: 800; margin: 0 0 0.5rem; color: var(--text, #111);
 }
+.dark-mode .pricing-hero h2 { color: #e8edf3; }
 .pricing-hero p {
-  font-size: 1.05rem;
-  color: var(--muted, #555);
-  max-width: 520px;
-  margin: 0 auto 1rem;
-  line-height: 1.55;
+  font-size: 1.05rem; color: var(--muted, #555); max-width: 540px;
+  margin: 0 auto; line-height: 1.6;
 }
-.shared-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #e8f4fd;
-  color: #1a6ea8;
-  border: 1px solid #b3d9f5;
-  border-radius: 999px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  margin-bottom: 0.5rem;
+.free-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;
+  border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.82rem;
+  font-weight: 700; letter-spacing: 0.02em; margin-bottom: 0.75rem;
 }
-.dark-mode .shared-badge {
-  background: #1a2f42;
-  color: #7fc4f5;
-  border-color: #2e5373;
-}
+.dark-mode .free-pill { background: #14432a; color: #4ade80; border-color: #2e5a3e; }
 
-/* ── Tier grid ───────────────────────────────────────────────────────────── */
 .tier-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-  max-width: 960px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem; max-width: 880px; margin: 2rem auto 1rem; padding: 0 1rem;
 }
 .tier-card {
-  border: 1.5px solid var(--border, #ddd);
-  border-radius: 12px;
-  padding: 1.5rem 1.25rem 1.25rem;
-  background: var(--card-bg, #fff);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: box-shadow 0.18s, border-color 0.18s;
+  border: 1.5px solid var(--border, #ddd); border-radius: 14px;
+  padding: 1.6rem 1.35rem; background: var(--card-bg, #fff);
+  display: flex; flex-direction: column;
 }
-.tier-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-.tier-card.featured {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-}
-.dark-mode .tier-card {
-  background: #1e2530;
-  border-color: #2e3a4a;
-}
-.dark-mode .tier-card.featured {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 3px rgba(74,144,226,0.18);
-}
-
-.tier-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted, #666);
-  margin-bottom: 0.5rem;
-}
-.tier-card.featured .tier-label { color: #2563eb; }
-.dark-mode .tier-card.featured .tier-label { color: #7eb8f7; }
-
+.dark-mode .tier-card { background: #1e2530; border-color: #2e3a4a; }
+.tier-card.soon { border-style: dashed; }
 .tier-name {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem;
-  color: var(--text, #111);
+  font-size: 1.2rem; font-weight: 700; margin: 0 0 0.2rem; color: var(--text, #111);
 }
 .dark-mode .tier-name { color: #e8edf3; }
-
-.tier-price {
-  display: flex;
-  align-items: baseline;
-  gap: 0.2rem;
-  margin: 0.6rem 0 0.2rem;
-}
-.tier-price .amount {
-  font-size: 2.1rem;
-  font-weight: 800;
-  color: var(--text, #111);
-  line-height: 1;
-}
-.dark-mode .tier-price .amount { color: #e8edf3; }
-.tier-price .period {
-  font-size: 0.85rem;
-  color: var(--muted, #666);
-  align-self: flex-end;
-  padding-bottom: 0.15rem;
-}
-.tier-vs {
-  font-size: 0.78rem;
-  color: var(--muted, #888);
-  margin-bottom: 0.3rem;
-  min-height: 1.1em;
-}
-
-.savings-badge {
-  display: inline-block;
-  background: #dcfce7;
-  color: #166534;
-  border-radius: 6px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  margin-bottom: 0.75rem;
-  letter-spacing: 0.02em;
-}
-.dark-mode .savings-badge {
-  background: #14432a;
-  color: #4ade80;
-}
-.savings-badge.invisible { visibility: hidden; }
-
+.tier-price { font-size: 2rem; font-weight: 800; color: var(--text, #111); margin: 0.4rem 0 0.1rem; }
+.dark-mode .tier-price { color: #e8edf3; }
+.tier-price .note { font-size: 0.82rem; font-weight: 600; color: var(--muted, #888); }
 .tier-desc {
-  font-size: 0.86rem;
-  color: var(--muted, #666);
-  line-height: 1.45;
-  margin-bottom: 1rem;
-  flex: 1;
+  font-size: 0.9rem; color: var(--muted, #666); line-height: 1.55;
+  margin: 0.6rem 0 1rem; flex: 1;
 }
 .dark-mode .tier-desc { color: #8a9ab0; }
-
+.tier-card ul { margin: 0 0 1.1rem; padding-left: 1.1rem; }
+.tier-card li { font-size: 0.87rem; color: var(--text, #333); line-height: 1.7; }
+.dark-mode .tier-card li { color: #cdd5e0; }
 .tier-btn {
-  display: block;
-  width: 100%;
-  text-align: center;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
+  display: block; width: 100%; box-sizing: border-box; text-align: center;
+  padding: 0.7rem 1rem; border-radius: 9px; font-size: 0.94rem;
+  font-weight: 600; text-decoration: none; cursor: pointer; margin-top: auto;
   transition: opacity 0.15s, transform 0.1s;
-  margin-top: auto;
 }
-.tier-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.tier-btn.primary {
-  background: #2563eb;
-  color: #fff;
+.tier-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.tier-btn.primary { background: #16a34a; color: #fff; border: none; }
+.tier-btn.outline {
+  background: transparent; border: 1.5px solid #2563eb; color: #2563eb;
 }
-.tier-btn.secondary {
-  background: #eff6ff;
-  border: 1.5px solid #2563eb;
-  color: #2563eb;
-}
-.dark-mode .tier-btn.secondary {
-  background: #1a2a45;
-  border-color: #4a90e2;
-  color: #7eb8f7;
-}
+.dark-mode .tier-btn.outline { border-color: #4a90e2; color: #7eb8f7; }
 
-/* Popular ribbon */
-.ribbon {
-  position: absolute;
-  top: -1px;
-  right: 16px;
-  background: #2563eb;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 0.22rem 0.65rem 0.28rem;
-  border-radius: 0 0 8px 8px;
-  text-transform: uppercase;
+.why-free {
+  max-width: 620px; margin: 1.75rem auto 0; padding: 0 1.25rem;
+  font-size: 0.92rem; color: var(--muted, #666); line-height: 1.65; text-align: center;
 }
+.dark-mode .why-free { color: #8a9ab0; }
 
-/* ── Feature comparison table ────────────────────────────────────────────── */
-.compare-section {
-  max-width: 780px;
-  margin: 2.5rem auto 3rem;
-  padding: 0 1rem;
-}
-.compare-section h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.25rem;
-  color: var(--text, #111);
-}
-.dark-mode .compare-section h3 { color: #e8edf3; }
-
-.compare-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-.compare-table th {
-  text-align: center;
-  padding: 0.6rem 0.75rem;
-  font-weight: 700;
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted, #666);
-  border-bottom: 2px solid var(--border, #e5e5e5);
-}
-.compare-table th:first-child { text-align: left; }
-.compare-table td {
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--border, #eee);
-  vertical-align: middle;
-  color: var(--text, #222);
-}
-.dark-mode .compare-table td { color: #cdd5e0; border-color: #2a3344; }
-.dark-mode .compare-table th { border-color: #2a3344; }
-.compare-table td:not(:first-child) { text-align: center; }
-.compare-table tr:last-child td { border-bottom: none; }
-.compare-table .cat-row td {
-  font-weight: 700;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted, #888);
-  padding-top: 1rem;
-  padding-bottom: 0.3rem;
-  background: none;
-}
-.check { color: #16a34a; font-size: 1.1rem; }
-.cross { color: #aaa; font-size: 1rem; }
-.limit { color: #d97706; font-size: 0.82rem; font-weight: 600; }
-
-/* ── Free tier notice ─────────────────────────────────────────────────────── */
-.free-notice {
-  text-align: center;
-  font-size: 0.88rem;
-  color: var(--muted, #666);
-  margin-bottom: 2rem;
-}
-.free-notice a { color: #2563eb; text-decoration: none; font-weight: 600; }
-.free-notice a:hover { text-decoration: underline; }
-
-/* ── FAQ strip ────────────────────────────────────────────────────────────── */
-.faq-strip {
-  max-width: 680px;
-  margin: 0 auto 3.5rem;
-  padding: 0 1rem;
-}
+.faq-strip { max-width: 680px; margin: 2.5rem auto 3.5rem; padding: 0 1rem; }
 .faq-strip h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1rem;
-  color: var(--text, #111);
+  font-size: 1.15rem; font-weight: 700; text-align: center;
+  margin-bottom: 1rem; color: var(--text, #111);
 }
 .dark-mode .faq-strip h3 { color: #e8edf3; }
-.faq-item { margin-bottom: 1rem; }
+.faq-item { margin-bottom: 0.5rem; }
 .faq-item summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text, #222);
-  padding: 0.5rem 0;
-  list-style: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--text, #222);
+  padding: 0.55rem 0; list-style: none; display: flex;
+  justify-content: space-between; align-items: center;
   border-bottom: 1px solid var(--border, #eee);
 }
-.faq-item summary::after { content: "＋"; font-size: 1rem; color: #2563eb; }
-details[open] summary::after { content: "－"; }
+.faq-item summary::after { content: "\FF0B"; font-size: 1rem; color: #2563eb; }
+details[open] summary::after { content: "\FF0D"; }
 .faq-item p {
-  font-size: 0.87rem;
-  color: var(--muted, #555);
-  line-height: 1.55;
-  padding: 0.6rem 0 0.2rem;
-  margin: 0;
+  font-size: 0.87rem; color: var(--muted, #555); line-height: 1.55;
+  padding: 0.6rem 0 0.4rem; margin: 0;
 }
 .dark-mode .faq-item summary { color: #cdd5e0; border-color: #2a3344; }
 .dark-mode .faq-item p { color: #8a9ab0; }
-
-/* ── Golden ratio stagger ─────────────────────────────────────────────────
-   Offsets use Fibonacci values: 8 / 13 / 21 px — each adjacent pair ≈ 1:φ.
-   Featured card (4th) is the anchor at translateY(0).
-   Grid gets extra vertical breathing room so the deepest offset never clips.
-────────────────────────────────────────────────────────────────────────── */
-.tier-grid {
-  padding-bottom: 2.75rem; /* absorb max 21px drop + safe margin */
-}
-.tier-grid .tier-card:nth-child(1) { transform: translateY(13px); } /* 13 — 1 level below anchor */
-.tier-grid .tier-card:nth-child(2) { transform: translateY(0);    } /* 0  — secondary anchor     */
-.tier-grid .tier-card:nth-child(3) { transform: translateY(21px); } /* 21 — φ × 13               */
-.tier-grid .tier-card:nth-child(4) { transform: translateY(0);    } /* 0  — featured anchor      */
-.tier-grid .tier-card:nth-child(5) { transform: translateY(8px);  } /* 8  — 13 ÷ φ               */
-.tier-grid .tier-card:nth-child(6) { transform: translateY(13px); } /* 13 — 1 level below anchor */
-
-/* On narrow screens the stagger collapses to a single column — reset offsets */
-@media (max-width: 420px) {
-  .tier-grid .tier-card { transform: none; }
-}
-
-/* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .tier-grid { grid-template-columns: 1fr 1fr; gap: 0.85rem; }
-  .tier-price .amount { font-size: 1.6rem; }
-  .compare-table { font-size: 0.8rem; }
-  .compare-table th, .compare-table td { padding: 0.45rem 0.4rem; }
-}
-@media (max-width: 420px) {
-  .tier-grid { grid-template-columns: 1fr; }
-}
 </style>
 </head>
 <body>
 <header class="hdr">
   <a href="/" aria-label="AcePaste Cleaner Pro home" style="display:inline-flex;align-items:center;text-decoration:none">
     <picture>
-      <source srcset="/brand-56.webp?v=1.0 1x, /brand-112.webp?v=1.0 2x" type="image/webp">
-      <img src="/brand-56.jpg?v=1.0" srcset="/brand-56.jpg?v=1.0 1x, /brand-112.jpg?v=1.0 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
+      <source srcset="/brand-56.webp?v=2.1 1x, /brand-112.webp?v=2.1 2x" type="image/webp">
+      <img src="/brand-56.jpg?v=2.1" srcset="/brand-56.jpg?v=2.1 1x, /brand-112.jpg?v=2.1 2x" class="logo" alt="AcePaste Cleaner Pro" width="28" height="28" loading="eager">
     </picture>
   </a>
-  <h1>AcePaste Cleaner Pro</h1>
+  <span class="hdr-brand">AcePaste Cleaner Pro</span>
   <span class="domain">acepaste.xyz</span>
+  <nav class="hdr-nav">
+    <a href="https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci" rel="noopener" target="_blank">Add to Chrome</a>
+    <a href="https://blog.acepaste.xyz/">Blog</a>
+    <a href="/account.html">Account</a>
+  </nav>
   <button id="darkModeToggle" class="dark-toggle" aria-label="Toggle dark mode">🌙</button>
 </header>
 
 <main class="wrap">
   <section class="pricing-hero">
-    <div class="shared-badge">🔗 One subscription — web &amp; extension</div>
-    <h2>Simple, honest pricing</h2>
-    <p>Pay once on acepaste.xyz or the browser extension — your subscription covers both. No hidden fees. Cancel anytime.</p>
+    <div class="free-pill">✓ Free — no account, no limits</div>
+    <h2>AcePaste is free</h2>
+    <p>Cleaning text is a commodity, so we don't charge for it. The full pipeline and the Chrome extension cost nothing — no character caps, no locked features, no ads gate.</p>
   </section>
 
-  <!-- ── Tier cards ─────────────────────────────────────────────────────── -->
   <div class="tier-grid">
 
-    <!-- Demo -->
+    <!-- Web tool -->
     <div class="tier-card">
-      <div class="tier-label">Demo</div>
-      <div class="tier-name">Demo</div>
-      <div class="tier-price">
-        <span class="amount">$0</span>
-      </div>
-      <div class="tier-vs">Invisible-character removal only · up to 2,000 chars</div>
-      <div class="savings-badge invisible">—</div>
-      <div class="tier-desc">Try the cleaner. Invisible / hidden character removal only, up to 2,000 characters. Every other cleaning option is locked. No auto-paste, no scanner, no account required.</div>
-      <a href="/" class="tier-btn secondary">Open demo →</a>
+      <div class="tier-name">Web app</div>
+      <div class="tier-price">$0</div>
+      <div class="tier-desc">The complete cleaner at acepaste.xyz. Everything runs locally in your browser.</div>
+      <ul>
+        <li>Invisible Unicode &amp; prompt-injection tag removal</li>
+        <li>Markdown, HTML, AI-debris &amp; formatting cleanup</li>
+        <li>Smart-punctuation normalization</li>
+        <li>Case transforms &amp; punctuation removal</li>
+        <li>Batch find &amp; replace (up to 25 pairs, regex)</li>
+        <li>No character limit · no sign-in required</li>
+      </ul>
+      <a href="/" class="tier-btn primary">Open the cleaner →</a>
     </div>
 
-    <!-- Day Pass -->
+    <!-- Extension -->
     <div class="tier-card">
-      <div class="tier-label">Day Pass</div>
-      <div class="tier-name">Day Pass</div>
-      <div class="tier-price">
-        <span class="amount">$2.99</span>
-        <span class="period">one-time</span>
-      </div>
-      <div class="tier-vs">Full access for 24 hours</div>
-      <div class="savings-badge invisible">—</div>
-      <div class="tier-desc">Every premium feature unlocked for 24 hours. Full pipeline, scanner, custom rules, unlimited text — no commitment.</div>
-      <a href="https://buy.stripe.com/cNi5kDd3b7Kf4s5eYccEw04" class="tier-btn secondary" id="trialBtn" rel="noopener">Get Day Pass →</a>
+      <div class="tier-name">Chrome extension</div>
+      <div class="tier-price">$0</div>
+      <div class="tier-desc">Bring AcePaste to every paste box on the web — clean straight from your clipboard.</div>
+      <ul>
+        <li>Clean text on demand from any page</li>
+        <li>Page scanner for hostile invisible characters</li>
+        <li>On-page warnings for tag-character payloads</li>
+        <li>The same cleaning pipeline as the web app</li>
+      </ul>
+      <a href="https://chromewebstore.google.com/detail/kgnnilelmfchdblcoefmokgcbpccbcci" class="tier-btn outline" rel="noopener" target="_blank">Add to Chrome →</a>
     </div>
 
-    <!-- Pro Monthly -->
-    <div class="tier-card">
-      <div class="tier-label">Pro · Monthly</div>
-      <div class="tier-name">Pro · Monthly</div>
-      <div class="tier-price">
-        <span class="amount">$14.99</span>
-        <span class="period">/mo</span>
-      </div>
-      <div class="tier-vs">Unlimited cleaning + extension</div>
-      <div class="savings-badge invisible">—</div>
-      <div class="tier-desc">Unlimited cleaning, full pipeline, and the protection extension. Billed month-to-month. Works on web and extension under one login.</div>
-      <a href="https://buy.stripe.com/7sYbJ1d3b2pV8Il8zOcEw07" class="tier-btn secondary" id="monthlyBtn" rel="noopener">Start Pro Monthly →</a>
-    </div>
-
-    <!-- Pro Yearly — featured -->
-    <div class="tier-card featured">
-      <div class="ribbon">Best value</div>
-      <div class="tier-label">Pro · Yearly</div>
-      <div class="tier-name">Pro · Yearly</div>
-      <div class="tier-price">
-        <span class="amount">$119</span>
-        <span class="period">/yr</span>
-      </div>
-      <div class="tier-vs">vs $179.88 at monthly rate</div>
-      <div class="savings-badge">~4 months free</div>
-      <div class="tier-desc">Everything in Pro Monthly, billed once a year. You save about $60 versus paying month-to-month.</div>
-      <a href="https://buy.stripe.com/00w28r9QZ5C72jXg2gcEw06" class="tier-btn primary" id="yearlyBtn" rel="noopener">Get Pro Yearly →</a>
-    </div>
-
-    <!-- Founders Lifetime -->
-    <div class="tier-card">
-      <div class="tier-label">Founders</div>
-      <div class="tier-name">Founders Lifetime</div>
-      <div class="tier-price">
-        <span class="amount">$499</span>
-        <span class="period">one-time</span>
-      </div>
-      <div class="tier-vs">Limited founders pricing</div>
-      <div class="savings-badge">Pay once · keep forever</div>
-      <div class="tier-desc">A one-time payment for lifetime Pro access — web and extension, every future update included. Limited founders allotment; price rises once it sells out. <a href="/founders.html" style="white-space:nowrap">See seats remaining →</a></div>
-      <a href="https://buy.stripe.com/7sY5kDaV3c0v0bP2bqcEw05" class="tier-btn secondary" id="lifetimeBtn" rel="noopener">Become a Founder →</a>
-    </div>
-
-    <!-- Enterprise -->
-    <div class="tier-card">
-      <div class="tier-label">Enterprise</div>
-      <div class="tier-name">Enterprise</div>
-      <div class="tier-price">
-        <span class="amount">Contact</span>
-      </div>
-      <div class="tier-vs">Teams · compliance · private deploy</div>
-      <div class="savings-badge invisible">—</div>
-      <div class="tier-desc">Volume seats, SSO, audit logs, custom DLP rules, on-prem or private deployment, and security review support. Built for teams that handle sensitive copy.</div>
-      <a href="mailto:enterprise@acepaste.xyz?subject=AcePaste%20Cleaner%20Pro%20%E2%80%94%20Enterprise%20inquiry" class="tier-btn secondary" id="enterpriseBtn">Contact sales →</a>
+    <!-- Teams & API -->
+    <div class="tier-card soon">
+      <div class="tier-name">Teams &amp; API</div>
+      <div class="tier-price">In development <span class="note">— get in touch</span></div>
+      <div class="tier-desc">A developer API and SDK for sanitizing untrusted text at ingestion into LLM, RAG, and content pipelines — plus team and enterprise options (SSO, audit, custom rules, private deploy).</div>
+      <ul>
+        <li>Ingestion-time text-integrity API / SDK</li>
+        <li>Team admin console &amp; per-seat management</li>
+        <li>Enterprise: SSO, audit logs, on-prem</li>
+        <li>Tell us what you need — we're scoping it now</li>
+      </ul>
+      <a href="mailto:enterprise@acepaste.xyz?subject=AcePaste%20%E2%80%94%20Teams%20%2F%20API%20interest" class="tier-btn outline">Contact us →</a>
     </div>
 
   </div>
 
-  <p class="free-notice">Already have an account? <a href="/account.html">Sign in →</a></p>
+  <p class="why-free">
+    The consumer text-cleaning category is a free commodity, and AcePaste competes there on quality, not price. Where we may charge is up-market: protecting developer and team pipelines from invisible-character and prompt-injection payloads. If that's your problem, <a href="mailto:enterprise@acepaste.xyz">tell us about it</a>.
+  </p>
 
-  <!-- ── Feature comparison ─────────────────────────────────────────────── -->
-  <section class="compare-section">
-    <h3>What's included</h3>
-    <table class="compare-table" role="table">
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th>Demo</th>
-          <th>Pro</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="cat-row"><td colspan="3">Core Cleaning</td></tr>
-        <tr>
-          <td>Remove invisible / hidden characters</td>
-          <td><span class="check">✓</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Strip markdown formatting</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Whitespace cleanup (collapse spaces / newlines, trim)</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Strip basic formatting</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Remove AI debris (##, ***, +++)</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Strip HTML tags &amp; comments</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Remove emojis</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Case transforms (upper / lower / title / sentence)</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Punctuation normalization</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Custom find &amp; replace (with regex)</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Character limit</td>
-          <td><span class="limit">2,000 chars</span></td>
-          <td><span class="check">Unlimited</span></td>
-        </tr>
-
-        <tr class="cat-row"><td colspan="3">Extension — Auto-Protect</td></tr>
-        <tr>
-          <td>Auto-clean text on paste into any page</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Auto-clean text on copy from any page</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Full pipeline quarantine (apply all rules on copy/paste)</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-
-        <tr class="cat-row"><td colspan="3">Extension — Page Scanner</td></tr>
-        <tr>
-          <td>Scan pages for hostile invisible characters</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Highlight contaminated text on-page</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>On-page warning banner</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-
-        <tr class="cat-row"><td colspan="3">Account</td></tr>
-        <tr>
-          <td>Works on acepaste.xyz</td>
-          <td><span class="check">✓</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Works in browser extension</td>
-          <td><span class="limit">Limited</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Single login covers both web &amp; extension</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-        <tr>
-          <td>Priority support</td>
-          <td><span class="cross">—</span></td>
-          <td><span class="check">✓</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ── FAQ ────────────────────────────────────────────────────────────── -->
   <section class="faq-strip">
     <h3>Common questions</h3>
 
     <details class="faq-item">
-      <summary>Does one subscription really cover both the web app and the extension?</summary>
-      <p>Yes. Sign in with the same email on acepaste.xyz and in the extension. Both check the same backend, so a single active subscription unlocks everything on both surfaces simultaneously.</p>
+      <summary>Is AcePaste really free?</summary>
+      <p>Yes. The web app cleans text with the full pipeline — invisible-character removal, markdown, HTML, formatting, case transforms, find and replace — with no character limit, no account, and no feature gates. The Chrome extension is free too.</p>
     </details>
 
     <details class="faq-item">
-      <summary>What happens after I buy a Day Pass?</summary>
-      <p>Your account is upgraded to full Pro access for 24 hours from the moment of purchase. After that, features revert to the free tier unless you subscribe. The $2.99 Day Pass is a standalone access fee — it isn't credited toward a subscription.</p>
+      <summary>Is there a catch? Will you add paid consumer tiers later?</summary>
+      <p>No catch. The web cleaner and the browser extension are free and are intended to stay free. Cleaning text is a commodity; we don't charge consumers for it.</p>
     </details>
 
     <details class="faq-item">
-      <summary>Can I cancel my subscription?</summary>
-      <p>Yes, at any time from your account page. Pro Monthly billing stops immediately on cancellation; Pro Yearly stops renewing at the end of your current period. Founders Lifetime is a one-time purchase and never expires.</p>
+      <summary>Do I need an account to use AcePaste?</summary>
+      <p>No. Cleaning never requires an account. An optional sign-in exists only to sync settings to the browser extension.</p>
     </details>
 
     <details class="faq-item">
       <summary>Does my data leave my browser?</summary>
-      <p>Text you paste and clean is <strong>never</strong> sent to any server — all cleaning runs locally in your browser. The only requests we make are for account sign-in and subscription-status checks (so the same login works on web and the extension). Cleaning is, and will remain, entirely local.</p>
+      <p>No. All cleaning runs locally in your browser. Text you paste is <strong>never</strong> sent to any server, stored, or logged.</p>
     </details>
 
     <details class="faq-item">
-      <summary>How is the yearly savings calculated?</summary>
-      <p>Pro Monthly is $14.99/mo, which is $179.88 over a year. Pro Yearly is $119/yr — about $60.88 less, roughly four months free versus paying month-to-month.</p>
+      <summary>Is there anything you do charge for?</summary>
+      <p>We're developing a product for developers and teams — an API and SDK for sanitizing untrusted text at ingestion into LLM, RAG, and content pipelines, plus team and enterprise options. It isn't generally available yet. If that's a need for your team, email <a href="mailto:enterprise@acepaste.xyz">enterprise@acepaste.xyz</a>.</p>
     </details>
 
     <details class="faq-item">
-      <summary>What does Founders Lifetime include?</summary>
-      <p>A one-time $499 payment for lifetime Pro access on both the web app and the browser extension, including every future update. We're offering it to a limited founders cohort while we grow; once that allotment is sold, lifetime pricing rises.</p>
-    </details>
-
-    <details class="faq-item">
-      <summary>What about Enterprise / teams?</summary>
-      <p>For teams, compliance, SSO, audit logging, custom DLP rules, or private/on-prem deployment, email <a href="mailto:enterprise@acepaste.xyz">enterprise@acepaste.xyz</a> and we'll set up a call.</p>
-    </details>
-
-    <details class="faq-item">
-      <summary>What payment methods are accepted?</summary>
-      <p>All major credit and debit cards via Stripe. Stripe also supports Apple Pay and Google Pay where available. We do not store any card details ourselves.</p>
+      <summary>I previously bought a paid plan. What happens to it?</summary>
+      <p>Every past purchase is honored. Sign in at <a href="/account.html">your account page</a> to view or manage it. Since the full toolset is now free for everyone, there's nothing more to buy.</p>
     </details>
   </section>
 
@@ -696,14 +270,13 @@ details[open] summary::after { content: "－"; }
   <nav class="footer-links">
     <a href="/">Home</a>
     <a href="/about.html">About</a>
-    <a href="/founders.html">Founders</a>
     <a href="https://blog.acepaste.xyz/">Blog</a>
     <a href="/faq.html">FAQ</a>
     <a href="/privacy.html">Privacy</a>
     <a href="/security.html">Security</a>
     <a href="/account.html">Account</a>
   </nav>
-  <p class="footer-copy">© 2025 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a></p>
+  <p class="footer-copy">© 2026 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a></p>
 </footer>
 
 <script>
@@ -714,19 +287,6 @@ details[open] summary::after { content: "－"; }
     var isDark = document.body.classList.toggle('dark-mode');
     btn.textContent = isDark ? '☀️' : '🌙';
   });
-
-  // Append session token to Stripe links so returning users are recognised
-  try {
-    var sub = JSON.parse(sessionStorage.getItem('acepaste_sub') || 'null');
-    if (sub && sub.email) {
-      var links = document.querySelectorAll('[id$="Btn"]');
-      links.forEach(function(a) {
-        var url = new URL(a.href, location.href);
-        url.searchParams.set('prefilled_email', sub.email);
-        a.href = url.toString();
-      });
-    }
-  } catch(e) {}
 })();
 </script>
 </body>

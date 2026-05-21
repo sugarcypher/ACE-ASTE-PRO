@@ -36,11 +36,9 @@
   "image": "https://acepaste.xyz/brand-640.jpg?v=2.1",
   "screenshot": "https://acepaste.xyz/assets/video-poster.jpg",
   "offers": {
-    "@type": "AggregateOffer",
+    "@type": "Offer",
+    "price": "0",
     "priceCurrency": "USD",
-    "lowPrice": "0",
-    "highPrice": "499",
-    "offerCount": "5",
     "availability": "https://schema.org/InStock"
   },
   "featureList": [
@@ -137,10 +135,7 @@ body.dark-mode .ap-video__sub{color:#8a9ab0}
 
   <label class="lbl">Paste text</label>
   <textarea id="paste" class="ta" rows="8" placeholder="Paste here…"></textarea>
-  
-  <div id="upgradeNudge" class="upgrade-nudge" style="display:none">
-    🔒 <strong>Demo:</strong> some features are locked. <a href="/pricing.html">Upgrade to Pro to unlock everything →</a>
-  </div>
+
   <div class="paste-actions">
     <button id="pasteBtn" class="btn-secondary" type="button">Paste</button>
     <button id="clearInputBtn" class="btn-secondary" type="button">Clear</button>
@@ -304,12 +299,12 @@ Please review when you can.</div>
 <section class="privacy-trust" aria-label="Privacy">
     <h2>🔒 Your pasted text never leaves your browser</h2>
     <p>Cleaning runs entirely on your device — no upload, no server-side processing, no logging of what you paste. The text in the box stays in the box.</p>
-    <p class="pt-fineprint">For Pro features, the app makes account sign-in and subscription-status requests so the same login works on the web app and the extension. Those requests carry your account credentials only — never your pasted text.</p>
+    <p class="pt-fineprint">AcePaste is free and cleaning never requires an account. An optional sign-in exists only to sync the browser extension; those requests carry your account credentials only — never your pasted text.</p>
   </section>
 
   <section class="ext-value" aria-label="Browser extension">
     <h2>🧩 Get protection everywhere with the browser extension</h2>
-    <p class="ext-sub">Bring AcePaste to every paste box on the web. One subscription covers the web app and the extension — same login, same account.</p>
+    <p class="ext-sub">Bring AcePaste to every paste box on the web. The web app and the Chrome extension are both free.</p>
     <ul class="ext-feats">
       <li>Auto-clean on copy and paste — every site, every input</li>
       <li>Page scanner: spot hostile invisible characters before you copy</li>
@@ -417,11 +412,10 @@ Please review when you can.</div>
     <a href="/faq.html">FAQ</a> |
     <a href="/about.html">About</a> |
     <a href="https://blog.acepaste.xyz/">Blog</a> |
-    <a href="/founders.html">Founders</a> |
 © 2025 AcePaste Cleaner Pro. Client-side processing. No data stored.
   </small>
 </footer>
-<script defer src="/app-critical.js?v=2.3"></script>
+<script defer src="/app-critical.js?v=2.4"></script>
 <script>
 (function(){
   var f=document.querySelector('.ap-video__facade');
