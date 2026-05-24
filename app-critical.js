@@ -441,41 +441,46 @@ async function copyToClipboard() {
     alert('Nothing to copy. Clean some text first!');
     return;
   }
-  // Read textContent BEFORE any DOM writes to avoid forced reflow
   const originalText = copyBtn.textContent;
+
+  // Prefer the textarea-native copy path. Some mobile browsers (observed on
+  // Brave iOS) URL-encode text written via navigator.clipboard.writeText, so
+  // try select + execCommand('copy') first — it mirrors what a manual
+  // long-press → Copy does and reliably writes plain text.
+  let copied = false;
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      // Batch style changes together
-      requestAnimationFrame(() => {
-        copyBtn.textContent = 'Copied!';
-        copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
-      });
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          copyBtn.textContent = originalText;
-          copyBtn.style.background = '';
-        });
-      }, 2000);
-      return;
-    }
+    cleanedField.focus();
     cleanedField.select();
-    cleanedField.setSelectionRange(0, 99999);
-    document.execCommand('copy');
-    // Batch style changes together
-    requestAnimationFrame(() => {
-      copyBtn.textContent = 'Copied!';
-      copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
-    });
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        copyBtn.textContent = originalText;
-        copyBtn.style.background = '';
-      });
-    }, 2000);
-  } catch (err) {
-    alert('Failed to copy to clipboard. Please select and copy manually.');
+    cleanedField.setSelectionRange(0, cleanedField.value.length);
+    copied = document.execCommand('copy');
+  } catch (e) {
+    copied = false;
   }
+
+  if (!copied && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch (e) {
+      copied = false;
+    }
+  }
+
+  if (!copied) {
+    alert('Failed to copy to clipboard. Please select and copy manually.');
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    copyBtn.textContent = 'Copied!';
+    copyBtn.style.background = 'linear-gradient(#2fd163, #28b856)';
+  });
+  setTimeout(() => {
+    requestAnimationFrame(() => {
+      copyBtn.textContent = originalText;
+      copyBtn.style.background = '';
+    });
+  }, 2000);
 }
 
 function cleanText() {
