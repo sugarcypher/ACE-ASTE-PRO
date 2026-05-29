@@ -298,7 +298,8 @@ function cleanText() {
     if (document.getElementById('removeComments').checked) {
       const beforeComments = text.length;
       text = text.replace(/#\s*(italic|bold|comment)[^\n]*/gi, '');
-      text = text.replace(/\/\/[^\n]*/g, '');
+      // Skip // inside URL schemes (https://, etc.) so URLs survive.
+      text = text.replace(/([^:]|^)\/\/[^\n]*/g, '$1');
       text = text.replace(/\/\*[\s\S]*?\*\//g, '');
       // Remove HTML comments recursively until no more matches
       let prevText;

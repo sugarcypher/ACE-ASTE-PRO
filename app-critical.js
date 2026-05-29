@@ -623,7 +623,10 @@ function cleanText() {
     if (getElement('removeComments').checked) {
       const beforeComments = text.length;
       text = text.replace(/#\s*(italic|bold|comment)[^\n]*/gi, '');
-      text = text.replace(/\/\/[^\n]*/g, '');
+      // Only treat // as a line comment when it is NOT part of a URL scheme
+      // (https://, http://, ftp://, etc.). Without this guard, pasting a URL
+      // would strip everything after "https:" and leave just the scheme.
+      text = text.replace(/([^:]|^)\/\/[^\n]*/g, '$1');
       text = text.replace(/\/\*[\s\S]*?\*\//g, '');
       let prevText;
       do {
