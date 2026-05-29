@@ -36,6 +36,7 @@ jobs:
           path: '.'
           exclude-paths: |
             public/
+            test/
             .github/
             .git/
             node_modules/
