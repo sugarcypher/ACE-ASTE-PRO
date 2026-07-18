@@ -75,6 +75,24 @@ eq('NEL U+0085',              stripInvisible('ab'), 'ab');
 eq('line separator U+2028',   stripInvisible('a b'), 'ab');
 eq('normal text untouched',   stripInvisible('Hello, world! 123'), 'Hello, world! 123');
 
+console.log('\n=== Newly added invisible/junk codepoints ===');
+eq('Mongolian vowel sep U+180E',   stripInvisible('a\u180Eb'), 'ab');
+eq('Mongolian FVS4 U+180F',        stripInvisible('a\u180Fb'), 'ab');
+eq('Braille blank U+2800',         stripInvisible('a\u2800b'), 'ab');
+eq('Object replacement U+FFFC',    stripInvisible('a\uFFFCb'), 'ab');
+eq('NULL U+0000',                  stripInvisible('a\u0000b'), 'ab');
+eq('BELL U+0007',                  stripInvisible('a\u0007b'), 'ab');
+eq('ESC U+001B',                   stripInvisible('a\u001Bb'), 'ab');
+eq('C1 control U+009F',            stripInvisible('a\u009Fb'), 'ab');
+
+console.log('\n=== Legitimate whitespace must be preserved (not stripped) ===');
+eq('TAB U+0009 kept',              stripInvisible('a\u0009b'), 'a\u0009b');
+eq('LF U+000A kept',               stripInvisible('a\u000Ab'), 'a\u000Ab');
+eq('CR U+000D kept',               stripInvisible('a\u000Db'), 'a\u000Db');
+eq('SPACE U+0020 kept',            stripInvisible('a\u0020b'), 'a\u0020b');
+eq('NBSP U+00A0 kept',             stripInvisible('a\u00A0b'), 'a\u00A0b');
+eq('EN QUAD U+2000 kept',          stripInvisible('a\u2000b'), 'a\u2000b');
+
 console.log('\n----------------------------------------');
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

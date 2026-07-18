@@ -48,10 +48,18 @@ let elements = {};
 //   U+180B-180D   Mongolian Free Variation Selectors 1-3
 //   U+FE00-FE0F   Variation Selectors 1-16
 //   U+E0100-E01EF Variation Selectors Supplement (17-256)
-const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u0085\u034F\u115F\u1160\u17B4\u17B5\u2028\u2029\u3164\uFFA0]|[\u180B-\u180D\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
-// \u0085 \u2014 NEL / NEXT LINE (C1 control, Cc \u2014 not Cf, used as hidden line break)
-// \u2028 \u2014 LINE SEPARATOR (Zl \u2014 not Cf, can break JS strings, used in injection)
-// \u2029 \u2014 PARAGRAPH SEPARATOR (Zp \u2014 not Cf, same risk as \u2028)
+// Escapes only (no literal invisibles) so this line stays auditable in any editor.
+const INVISIBLE_CHAR_REGEX = /\p{Cf}|[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u0084\u0086-\u009F]|[\u0085\u034F\u115F\u1160\u17B4\u17B5\u2028\u2029\u2800\u3164\uFFA0\uFFFC]|[\u180B-\u180F\uFE00-\uFE0F]|[\u{E0100}-\u{E01EF}]/gu;
+// \u0000-\u0008,\u000B,\u000C,\u000E-\u001F - C0 control chars (Cc). EXCLUDES \t \n \r
+//   (legitimate whitespace we must preserve). Covers NUL, BEL, BACKSPACE, VT, FF, ESC, etc.
+// \u007F-\u0084,\u0086-\u009F - DEL + C1 controls (Cc), EXCLUDES \u0085 NEL (its own category).
+// \u0085 - NEL / NEXT LINE (C1 control, Cc - not Cf, hidden line break)
+// \u2028 - LINE SEPARATOR (Zl - not Cf, can break JS strings, injection)
+// \u2029 - PARAGRAPH SEPARATOR (Zp - not Cf, same risk as \u2028)
+// \u2800 - BRAILLE PATTERN BLANK (So - renders empty, invisible padding)
+// \u3164 HANGUL FILLER, \uFFA0 HALFWIDTH HANGUL FILLER (Lo - visual spoof)
+// \uFFFC - OBJECT REPLACEMENT CHARACTER (So - orphaned embed placeholder)
+// \u180E-\u180F - Mongolian vowel separator / free variation selector 4 (matches classifier)
 
 // Classify an invisible/format codepoint by attack-surface severity.
 // CRITICAL: real attack surface — tag-character prompt-injection payloads,
@@ -90,6 +98,12 @@ function classifyInvisibleCodepoint(cp) {
     return { key:'lineparasep', severity:'medium',   label:'Line / paragraph separator' };
   if (cp === 0x0085)
     return { key:'nel',         severity:'medium',   label:'Next-line control character' };
+  if (cp <= 0x001F || (cp >= 0x007F && cp <= 0x009F))
+    return { key:'control',     severity:'high',     label:'Control character (C0/C1)' };
+  if (cp === 0x2800)
+    return { key:'braille',     severity:'medium',   label:'Braille blank (invisible padding)' };
+  if (cp === 0xFFFC)
+    return { key:'objreplace',  severity:'medium',   label:'Object replacement character' };
   return   { key:'other',       severity:'medium',   label:'Other invisible / format character' };
 }
 
@@ -548,6 +562,48 @@ function cleanText() {
     report.invisibleByCategory = stripped.byCategory;
   }
 
+  // Batch find/replace — runs FIRST (right after invisible removal), so rules
+  // match the text exactly as it was pasted, BEFORE smart-punctuation, markdown,
+  // whitespace-collapse, and the other transforms rewrite it. Invisible chars are
+  // already gone at this point, so a plain-text find matches what the user sees.
+  // Three ways to match, in priority order:
+  //   1. Per-row /pattern/flags literal (e.g. /\d+/gi) — always treated as regex,
+  //      honoring its own flags. This is what the "Find text or /regex/" placeholder
+  //      promises, and previously did nothing (the slashes were matched literally).
+  //   2. Global "Use regex" checkbox — the whole field is a bare regex pattern.
+  //   3. Otherwise — a plain literal find-and-replace.
+  {
+    const batchContainer = document.getElementById('batchFindReplace');
+    const globalRegex = getElement('batchRegex') && getElement('batchRegex').checked;
+    if (batchContainer) {
+      const rows = batchContainer.querySelectorAll('.batch-row');
+      let totalCustom = 0;
+      rows.forEach(row => {
+        const findInput = row.querySelector('.batch-find');
+        const replaceInput = row.querySelector('.batch-replace');
+        if (!findInput || !findInput.value) return;
+        const findRaw = findInput.value;
+        const replaceWith = replaceInput ? replaceInput.value : '';
+        try {
+          const before = text.length;
+          const slash = findRaw.match(/^\/(.+)\/([gimsuy]*)$/);
+          if (slash) {
+            const flags = slash[2].includes('g') ? slash[2] : slash[2] + 'g';
+            text = text.replace(new RegExp(slash[1], flags), replaceWith);
+          } else if (globalRegex) {
+            text = text.replace(new RegExp(findRaw, 'g'), replaceWith);
+          } else {
+            text = text.split(findRaw).join(replaceWith);
+          }
+          totalCustom += Math.abs(before - text.length);
+        } catch (e) {
+          // Invalid regex — skip this row, don't abort the whole clean.
+        }
+      });
+      report.custom = totalCustom;
+    }
+  }
+
   // Smart punctuation normalization (curly quotes, em dash, ellipsis, etc.)
   if (getElement('normalizeSmartPunct') && getElement('normalizeSmartPunct').checked) {
     const normalized = normalizeSmartPunctuation(text);
@@ -728,34 +784,8 @@ function cleanText() {
       report.symbolPairs = beforeSymbol - text.length;
     }
 
-    // Batch find/replace
-    const batchContainer = document.getElementById('batchFindReplace');
-    const useRegex = getElement('batchRegex') && getElement('batchRegex').checked;
-    if (batchContainer) {
-      const rows = batchContainer.querySelectorAll('.batch-row');
-      let totalCustom = 0;
-      rows.forEach(row => {
-        const findInput = row.querySelector('.batch-find');
-        const replaceInput = row.querySelector('.batch-replace');
-        if (findInput && findInput.value) {
-          try {
-            const beforeCustom = text.length;
-            if (useRegex) {
-              const regex = new RegExp(findInput.value, 'g');
-              text = text.replace(regex, replaceInput ? replaceInput.value : '');
-            } else {
-              text = text.split(findInput.value).join(replaceInput ? replaceInput.value : '');
-            }
-            totalCustom += Math.abs(beforeCustom - text.length);
-          } catch (e) {
-            // Regex error - skip this row
-          }
-        }
-      });
-      report.custom = totalCustom;
-    }
   }
-  
+
   const finalLength = text.length;
   const totalRemoved = originalLength - finalLength;
   displayCleaningReport(report, originalLength, finalLength, totalRemoved);
