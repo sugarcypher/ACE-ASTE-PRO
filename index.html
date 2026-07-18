@@ -83,7 +83,7 @@
 <link rel="canonical" href="https://acepaste.xyz/">
 <link rel="icon" type="image/jpeg" sizes="56x56" href="/brand-56.jpg?v=2.1">
 <link rel="icon" type="image/webp" sizes="56x56" href="/brand-56.webp?v=2.1">
-<link rel="stylesheet" href="/styles.css?v=3.4">
+<link rel="stylesheet" href="/styles.css?v=3.5">
 <style>
 /* AcePaste demo video — privacy-first facade */
 .ap-video{margin:24px auto;max-width:760px;background:rgba(255,255,255,.7);border:1px solid rgba(10,60,120,.12);border-radius:12px;padding:18px}
@@ -267,6 +267,16 @@ body.dark-mode .ap-video__sub{color:#8a9ab0}
     <p>AcePaste Cleaner Pro <strong>strips them all</strong> — across every script and language, on the client, instantly, with zero data leaving your device. Then it cleans up everything else: markdown, AI markup, smart quotes, em dashes, extra whitespace, broken formatting from PDFs and websites, dates, numerals, symbol-word pairs, and up to 25 custom find/replace pairs in one pass. Built for developers staging code snippets, writers prepping drafts, students organizing notes, and anyone who pastes AI output and wants to be sure nothing is riding along that shouldn't be.</p>
   </section>
 
+  <section class="threat-classes" aria-label="What gets removed and why">
+    <h2>Not everything hidden is a threat — the report tells you which is which</h2>
+    <p>AcePaste sorts what it finds onto a severity scale, so a genuine attack doesn't get lost next to cosmetic tidy-up. After each clean, the report colour-codes every removal:</p>
+    <ul class="threat-list">
+      <li><strong>Security (critical / high)</strong> — characters with real attack surface: invisible <em>tag-character</em> prompt-injection payloads that other AI systems read and act on, <em>bidirectional overrides</em> that make code and text display differently from how they're parsed (the "Trojan Source" trick), and <em>control characters</em> that can hijack terminals, falsify logs, or slip past naive parsers.</li>
+      <li><strong>Cleanup (medium / low)</strong> — characters that hide or clutter rather than attack: zero-width padding and steganographic blanks used to conceal data or dodge filters, plus ordinary formatting junk — markdown, emoji, smart punctuation, stray placeholders, and runaway whitespace.</li>
+    </ul>
+    <p class="threat-note">Both classes are removed on every paste. The distinction is there so you understand <em>why</em> — a prompt-injection payload and a leftover emoji are not the same problem, even though both vanish.</p>
+  </section>
+
   <section class="demo-block" aria-label="Before and after example">
     <h2>See what AcePaste removes</h2>
     <p class="demo-sub">Real example: text copied out of an AI chat. The red highlights are invisible characters and markup your eyes don't see — but other systems do.</p>
@@ -416,7 +426,7 @@ Please review when you can.</div>
 © 2025 AcePaste Cleaner Pro. Client-side processing. No data stored.
   </small>
 </footer>
-<script defer src="/app-critical.js?v=2.6"></script>
+<script defer src="/app-critical.js?v=2.7"></script>
 <script>
 (function(){
   var f=document.querySelector('.ap-video__facade');

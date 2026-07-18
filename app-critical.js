@@ -905,6 +905,12 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
           </div>
         </div>`;
     }
+    // Legend — spells out that the colours are a security scale, not just tidiness.
+    html += `
+      <div class="report-legend">
+        <span class="legend-row"><span class="severity-badge severity-critical">critical</span><span class="severity-badge severity-high">high</span> &mdash; <strong>security:</strong> invisible prompt-injection payloads, bidi/visual spoofing (Trojan Source), and terminal/parser control characters.</span>
+        <span class="legend-row"><span class="severity-badge severity-medium">medium</span><span class="severity-badge severity-low">low</span> &mdash; <strong>cleanup:</strong> hidden padding &amp; data-hiding chars, plus formatting junk (markdown, emoji, smart punctuation, extra whitespace, stray placeholders).</span>
+      </div>`;
   }
 
   // Total summary line — same logic as before, three cases.

@@ -16,6 +16,19 @@ body.dark-mode .hero-description{background:rgba(30,30,30,.7);border-bottom-colo
 .hero-description p{margin:0 auto 16px;color:#0b0d12;font-size:15px;line-height:1.7;max-width:800px}.hero-description p:last-child{margin-bottom:0}
 body.dark-mode .hero-description p{color:#e0e0e0}
 @media (max-width:768px){.hero-description{padding:20px 16px;margin-bottom:20px}.hero-description p{font-size:14px;line-height:1.6}}
+
+/* "Not everything hidden is a threat" note — the two-class explainer */
+.threat-classes{margin:0 auto 24px;padding:20px 22px;background:rgba(255,255,255,.7);border:1px solid rgba(10,60,120,.12);border-radius:12px}
+body.dark-mode .threat-classes{background:rgba(30,30,30,.7);border-color:rgba(255,255,255,.1)}
+.threat-classes h2{margin:0 0 12px;font-size:17px;color:#0b0d12}
+body.dark-mode .threat-classes h2{color:#f1f5f9}
+.threat-classes p{margin:0 0 12px;color:#0b0d12;font-size:14.5px;line-height:1.7}
+body.dark-mode .threat-classes p{color:#e0e0e0}
+.threat-list{margin:0 0 12px;padding-left:20px}
+.threat-list li{margin:0 0 10px;color:#0b0d12;font-size:14.5px;line-height:1.65}
+body.dark-mode .threat-list li{color:#e0e0e0}
+.threat-note{font-size:13.5px;color:#475569}
+body.dark-mode .threat-note{color:#94a3b8}
 .hero{display:block;margin:10px auto 18px;max-width:320px;border-radius:12px;box-shadow:0 10px 24px rgba(10,60,120,.18)}
 body.dark-mode .hero{box-shadow:0 10px 24px rgba(0,0,0,.5)}
 .privacy-notice{background:linear-gradient(135deg,#e8f7fb,#d0f0f5);border:2px solid rgba(10,166,194,.3);border-radius:12px;padding:14px 18px;margin:0 auto 20px;text-align:center;max-width:600px;color:#0b0d12;font-size:15px;line-height:1.5}
@@ -114,6 +127,16 @@ body.dark-mode .report-section.severity-info   {background:linear-gradient(rgba(
 .severity-medium   .severity-badge{background:#ca8a04}
 .severity-low      .severity-badge{background:#0891b2}
 .severity-info     .severity-badge{background:#16a34a}
+
+/* Legend under the report: what the severity colours actually mean */
+.report-legend{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(10,60,120,.15);font-size:12px;line-height:1.9;color:#475569}
+body.dark-mode .report-legend{border-top-color:rgba(255,255,255,.12);color:#94a3b8}
+.report-legend .severity-badge{margin-right:2px}
+.report-legend .severity-badge.severity-critical{background:#dc2626}
+.report-legend .severity-badge.severity-high{background:#ea580c}
+.report-legend .severity-badge.severity-medium{background:#ca8a04}
+.report-legend .severity-badge.severity-low{background:#0891b2}
+.report-legend .legend-row{display:block;margin:2px 0}
 
 .report-title{font-weight:600;color:#0b0d12;font-size:14px}
 body.dark-mode .report-title{color:#f1f5f9}
