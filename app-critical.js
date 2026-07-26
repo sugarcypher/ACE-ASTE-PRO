@@ -92,8 +92,9 @@ function classifyInvisibleCodepoint(cp) {
     return { key:'variation',   severity:'medium',   label:'Variation selector' };
   if (cp >= 0xE0100 && cp <= 0xE01EF)
     return { key:'variation',   severity:'medium',   label:'Variation selector supplement' };
-  if (cp >= 0x2000 && cp <= 0x200A)
-    return { key:'unispace',    severity:'medium',   label:'Unicode whitespace (non-breaking, em/en, etc.)' };
+  // NOTE: Unicode "space separator" chars (U+2000-U+200A, NBSP, ideographic, …)
+  // are NOT stripped here — they are normalized to a plain space and reported as
+  // 'unispace' by normalizeInvisibleSpaces(), so they never reach this classifier.
   if (cp === 0x2028 || cp === 0x2029)
     return { key:'lineparasep', severity:'medium',   label:'Line / paragraph separator' };
   if (cp === 0x0085)
@@ -131,6 +132,32 @@ function stripInvisibleChars(text) {
 }
 
 // =============================================================================
+// INVISIBLE / UNICODE WHITESPACE NORMALIZATION  (always-on, core promise)
+// =============================================================================
+// Unicode "space separator" (Zs) characters plus the Ogham space mark. These
+// render blank — or at a bogus width — and are a common invisible padding /
+// width-tracking vector. Unlike zero-width chars they occupy the slot of a real
+// space, so we NORMALIZE them to U+0020 rather than delete them (deleting would
+// fuse adjacent words). Handled here — not only in the optional smart-punctuation
+// pass — so they are always cleaned and always reported, under 'unispace'.
+// Escapes only (no literal invisibles), so the line stays auditable in any editor:
+//   U+00A0 NBSP, U+1680 OGHAM SPACE MARK, U+2000-U+200A EN QUAD..HAIR SPACE,
+//   U+202F NARROW NBSP, U+205F MEDIUM MATH SPACE, U+3000 IDEOGRAPHIC SPACE.
+const INVISIBLE_SPACE_REGEX = /[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g;
+
+function normalizeInvisibleSpaces(text) {
+  let count = 0;
+  const codepoints = Object.create(null); // U+xxxx -> count
+  const out = text.replace(INVISIBLE_SPACE_REGEX, (ch) => {
+    count++;
+    const cpKey = 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    codepoints[cpKey] = (codepoints[cpKey] || 0) + 1;
+    return ' ';
+  });
+  return { text: out, count, codepoints };
+}
+
+// =============================================================================
 // SMART PUNCTUATION NORMALIZATION
 // =============================================================================
 // Maps "smart" / typographic / Unicode punctuation to plain ASCII equivalents.
@@ -151,11 +178,10 @@ const SMART_PUNCT_MAP = {
   '\u2026': '...',
   // Bullets / middle dots
   '\u2022': '*', '\u00B7': '*', '\u2027': '*', '\u2043': '-',
-  // Spaces (normalize to regular space)
-  '\u00A0': ' ', '\u2000': ' ', '\u2001': ' ', '\u2002': ' ',
-  '\u2003': ' ', '\u2004': ' ', '\u2005': ' ', '\u2006': ' ',
-  '\u2007': ' ', '\u2008': ' ', '\u2009': ' ', '\u200A': ' ',
-  '\u202F': ' ', '\u205F': ' ', '\u3000': ' ',
+  // NOTE: Unicode/invisible spaces (NBSP, Ogham, em/en, narrow, ideographic, \u2026)
+  // are normalized to a regular space by the always-on normalizeInvisibleSpaces()
+  // pass above, so they are cleaned and reported even when this optional toggle is
+  // off. Do not re-add them here \u2014 that would double-count them in the report.
   // Math operators commonly substituted
   '\u00D7': 'x', '\u00F7': '/', '\u2212': '-',
   // Fraction slash
@@ -201,6 +227,15 @@ function normalizeSmartPunctuation(text) {
   const result = stripInvisibleChars(sample);
   if (result.text !== expected) {
     console.error('[ACEPASTE] CRITICAL: invisible character self-test FAILED. Got:', JSON.stringify(result.text), 'expected:', JSON.stringify(expected));
+  }
+
+  // Invisible/Unicode whitespace must normalize to a single space (not delete,
+  // not survive). Guards the Ogham space mark + the Zs class, incl. NBSP.
+  const spaceSample = 'a\u00A0b\u1680c\u2009d\u202Fe\u205Ff\u3000g';
+  const spaceExpected = 'a b c d e f g';
+  const spaceResult = normalizeInvisibleSpaces(spaceSample);
+  if (spaceResult.text !== spaceExpected) {
+    console.error('[ACEPASTE] CRITICAL: invisible-space self-test FAILED. Got:', JSON.stringify(spaceResult.text), 'expected:', JSON.stringify(spaceExpected));
   }
 })();
 
@@ -528,6 +563,7 @@ function cleanText() {
     dates: 0,
     symbolPairs: 0,
     smartPunct: 0,
+    spaceNormalized: 0,
     custom: 0,
     // Detail breakdowns populated by stripInvisibleChars / normalizeSmartPunctuation
     invisibleByCategory: null,
@@ -560,6 +596,23 @@ function cleanText() {
     text = stripped.text;
     report.zeroWidth = stripped.count;
     report.invisibleByCategory = stripped.byCategory;
+
+    // Also part of the core promise: normalize invisible / Unicode whitespace
+    // (NBSP, Ogham, em/en, narrow, ideographic spaces, …) to a plain space. These
+    // aren't deleted (they hold a real space's slot) but they ARE invisible width
+    // vectors, so they're cleaned and reported here — always on, toggle-independent.
+    const spaced = normalizeInvisibleSpaces(text);
+    text = spaced.text;
+    report.spaceNormalized = spaced.count;
+    if (spaced.count > 0) {
+      report.invisibleByCategory['unispace'] = {
+        count: spaced.count,
+        severity: 'medium',
+        label: 'Unicode whitespace (non-breaking, em/en, ideographic, ...)',
+        action: 'Normalized to space',
+        codepoints: spaced.codepoints
+      };
+    }
   }
 
   // Batch find/replace — runs FIRST (right after invisible removal), so rules
@@ -832,7 +885,7 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
       severity: b.severity,
       title: b.label,
       count: b.count,
-      action: b.severity === 'critical' ? 'Stripped (security)' : 'Removed',
+      action: b.action || (b.severity === 'critical' ? 'Stripped (security)' : 'Removed'),
       detailHtml: `<span class="report-codepoints">${fmtCps(b.codepoints)}</span>`
     });
   }
@@ -914,7 +967,9 @@ function displayCleaningReport(report, originalLength, finalLength, totalRemoved
   }
 
   // Total summary line — same logic as before, three cases.
-  const inPlaceChanges = report.smartPunct || 0;
+  // Both smart-punctuation and invisible-space normalization are in-place (they
+  // substitute rather than delete), so they count toward "normalized in place".
+  const inPlaceChanges = (report.smartPunct || 0) + (report.spaceNormalized || 0);
   let summary;
   if (totalRemoved !== 0) {
     const pct = originalLength > 0 ? ((totalRemoved / originalLength) * 100).toFixed(1) : '0.0';
