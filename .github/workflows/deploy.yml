@@ -30,28 +30,24 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
+      # upload-pages-artifact has no exclude-paths input; it silently ignored the
+      # old list and deployed every file. Delete non-site files from the runner's
+      # checkout before upload instead. .well-known/ must stay (security.txt);
+      # upload-pages-artifact@v4 drops dot-folders, so stay on v3 or handle that first.
+      - name: Remove files that are not part of the site
+        run: |
+          rm -rf public test node_modules .claude supabase
+          find . -path ./.git -prune -o -path ./.github -prune -o -path ./.well-known -prune -o -type f \( \
+            -name '*.md' -o -name '*.sh' -o -name '*.conf' -o -name '*.php' \
+            -o -name '.gitignore' -o -name '.htaccess' -o -name '.fuse_hidden*' \
+            -o -name 'cloudflare-worker-*.js' \
+          \) -exec rm -f {} +
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-          exclude-paths: |
-            public/
-            test/
-            .github/
-            .git/
-            node_modules/
-            *.md
-            .gitignore
-            .htaccess
-            *.sh
-            *.conf
-            *.php
-            cloudflare-worker-*.js
-            nginx-*.conf
-            monitor-*.sh
-            optimize-*.sh
-            refresh-*.sh
-      
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

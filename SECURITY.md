@@ -7,8 +7,7 @@
 | < 1.0 | ❌ |
 
 
-If you discover a security vulnerability, You can report security issues privately at https://github.com/sugarcypher/ace-aste-pro/security/advisories/new
-.
+If you discover a security vulnerability, report it privately by email to security@acepaste.xyz or through https://github.com/sugarcypher/ace-aste-pro/security/advisories/new
 
 We will:
 - Acknowledge receipt within 48 hours.
