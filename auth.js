@@ -403,12 +403,13 @@ async function _fetchPlan(jwt, userId) {
 // it's the actual installed extension ID, which may differ from TRUSTED_EXT_IDS
 // for unpacked/dev builds.
 //
-// SECURITY: The real security boundary is sender.origin === 'https://acepaste.xyz'
-// in background.js's onMessageExternal handler — that check is immutable from the
-// extension side and cannot be bypassed via a crafted URL. We still validate that
-// ext_id is a properly-formatted Chrome extension ID to prevent obviously malformed
-// inputs. TRUSTED_EXT_IDS is kept for the proactive-push path (_tryPushToExtension
-// on non-bridge pages) where we don't have the ext_id from the URL.
+// SECURITY (2026-09-10): the page only sends sessions to extension IDs listed in
+// TRUSTED_EXT_IDS. The sender.origin check in background.js protects OUR extension
+// from forged messages, but it cannot stop this page from handing the JWT and
+// refresh token to a DIFFERENT extension whose ID an attacker puts in ?ext_id=.
+// Unpacked/dev builds with other IDs are accepted only when the page itself is
+// served from localhost. To test a dev build against production, give it a fixed
+// ID with a "key" in manifest.json and add that ID below.
 
 var TRUSTED_EXT_IDS = [
   'kgnnilelmfchdblcoefmokgcbpccbcci', // AcePaste Cleaner Pro (Chrome Web Store)
@@ -420,13 +421,14 @@ var TRUSTED_EXT_IDS = [
 var _bridgeExtId = null;
 
 /**
- * Returns true if `id` is a valid Chrome extension ID format: exactly 32 chars, [a-p].
- * Chrome encodes extension IDs in base-16 using letters a–p instead of 0–9a–f.
- * This validates format without restricting to the Web Store — the real security
- * boundary is sender.origin in background.js's onMessageExternal handler.
+ * Returns true only for a well-formed Chrome extension ID (32 chars, a–p) that is
+ * either a published AcePaste ID or, on a localhost dev server, any well-formed ID.
  */
 function _isValidExtId(id) {
-  return typeof id === 'string' && /^[a-p]{32}$/.test(id);
+  if (typeof id !== 'string' || !/^[a-p]{32}$/.test(id)) return false;
+  if (TRUSTED_EXT_IDS.indexOf(id) !== -1) return true;
+  var h = location.hostname;
+  return h === 'localhost' || h === '127.0.0.1';
 }
 
 /**
@@ -468,13 +470,9 @@ function acePasteExtensionBridge() {
   const extId  = params.get('ext_id');
   if (source !== 'extension' || !extId) return;
 
-  // Validate that extId is a properly-formatted Chrome extension ID (32 chars, [a-p]).
-  // We intentionally do NOT restrict to TRUSTED_EXT_IDS here — that would silently
-  // break unpacked/dev builds whose browser-assigned IDs aren't in the allowlist.
-  // The real security boundary is sender.origin in background.js's onMessageExternal:
-  // only messages from https://acepaste.xyz are accepted by the extension.
+  // Only the published extension may receive the session (see SECURITY note above).
   if (!_isValidExtId(extId)) {
-    console.warn('[AcePaste] Blocked bridge attempt — invalid ext_id format:', extId);
+    console.warn('[AcePaste] Blocked bridge attempt — untrusted ext_id:', extId);
     return;
   }
 

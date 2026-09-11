@@ -4,6 +4,5 @@
 User-agent: *
 Allow: /
 Disallow: /account.html
-Disallow: /indeBADx.html
 
 Sitemap: https://acepaste.xyz/sitemap.xml

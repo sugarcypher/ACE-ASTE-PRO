@@ -36,7 +36,7 @@ jobs:
       # upload-pages-artifact@v4 drops dot-folders, so stay on v3 or handle that first.
       - name: Remove files that are not part of the site
         run: |
-          rm -rf public test node_modules .claude supabase
+          rm -rf public test node_modules .claude supabase AcePasteBrowserExtension ace-paste-extension.zip indeBADx.html _headers _redirects ads-fallback.txt
           find . -path ./.git -prune -o -path ./.github -prune -o -path ./.well-known -prune -o -type f \( \
             -name '*.md' -o -name '*.sh' -o -name '*.conf' -o -name '*.php' \
             -o -name '.gitignore' -o -name '.htaccess' -o -name '.fuse_hidden*' \
