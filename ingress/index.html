@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
+<title>AcePaste Ingress: a security gate for AI agents</title>
+<meta name="description" content="AcePaste Ingress sits between the web and your AI agent. It refuses pages that hide instructions from people, logs every refusal and gives every verdict a signed receipt. Free to use, on npm.">
+<link rel="canonical" href="https://acepaste.xyz/ingress/">
+<meta property="og:title" content="AcePaste Ingress: a security gate for AI agents">
+<meta property="og:description" content="Refuses what the model would see but you wouldn't. Every refusal logged, every verdict signed. Free on npm.">
+<meta property="og:url" content="https://acepaste.xyz/ingress/">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="/styles.css?v=3.0">
+<style>
+:root{--ink:#0b0d12;--ink2:#3a4a5e;--ink3:#5a6e87;--card:rgba(255,255,255,.72);--card2:rgba(255,255,255,.9);--line:rgba(10,60,120,.13);--link:#005a8f;--teal:#0e7490;--teal-bg:rgba(8,145,178,.07);--code:#0f172a;--code-ink:#e2e8f0;--hostile:#b42318;--hostile-bg:#fef3f2;--suspect:#a15c07;--suspect-bg:#fffaeb;--clean:#067647;--clean-bg:#ecfdf3}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#e8edf3;--ink2:#aab4c4;--ink3:#8a9ab0;--card:rgba(36,38,44,.78);--card2:rgba(28,30,36,.92);--line:rgba(255,255,255,.1);--link:#7bb3e0;--teal:#67e8f9;--teal-bg:rgba(34,211,238,.08);--code:#0b1020;--hostile:#fda29b;--hostile-bg:rgba(180,35,24,.18);--suspect:#fec84b;--suspect-bg:rgba(161,92,7,.2);--clean:#75e0a7;--clean-bg:rgba(6,118,71,.2)}
+  body{background:#15171c;color:var(--ink)}
+  .hdr{background:rgba(24,26,31,.88);border-bottom-color:rgba(255,255,255,.1)}
+  .hdr h1,.domain{color:var(--ink)} .hdr-nav a{color:#7bb3e0} .hdr-nav a:hover{background:rgba(255,255,255,.08);color:#a8d4f5}
+  .trust-line{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.35);color:#67e8f9}
+}
+.ig{max-width:880px;margin:0 auto;padding:0 16px 56px;box-sizing:border-box;width:100%;min-width:0;color:var(--ink)}
+/* body is a flex column (styles.css): without min-width:0 the long code lines would widen the whole page on phones */
+.ig section,.ig .panel,.grid>*,.two>*,.tiers>*,.nums>*,.pkgs>*{min-width:0}
+.code{max-width:100%;box-sizing:border-box}
+.ig a{color:var(--link)}
+.ig h2{font-size:1.3rem;line-height:1.3;margin:0 0 .4rem;letter-spacing:-.01em}
+.ig h3{font-size:1rem;margin:0 0 .35rem}
+.ig p{line-height:1.65}
+.ig section{margin:46px 0 0}
+.ig code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.sec-sub{color:var(--ink2);margin:0 0 18px;max-width:690px}
+
+.ig-hero{padding:44px 0 6px;text-align:center}
+.ig-hero .trust-line{margin-bottom:14px}
+.ig-hero .big{font-size:clamp(1.65rem,4.2vw,2.4rem);line-height:1.18;font-weight:800;margin:0 auto 14px;max-width:720px;letter-spacing:-.02em}
+.ig-hero .lede{font-size:1.08rem;color:var(--ink2);max-width:640px;margin:0 auto 22px}
+.rule{display:inline-block;font-weight:600;color:var(--ink);background:var(--teal-bg);border:1px solid rgba(8,145,178,.25);border-radius:12px;padding:12px 16px;max-width:620px;margin:0 auto 24px;line-height:1.5}
+.cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:15px;padding:11px 18px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--ink)!important}
+.cta:hover{border-color:rgba(8,145,178,.5)}
+.cta.primary{background:linear-gradient(135deg,#0e7490,#06b6d4);color:#fff!important;border-color:transparent;box-shadow:0 2px 8px rgba(8,145,178,.3)}
+.cta.primary:hover{background:linear-gradient(135deg,#0891b2,#22d3ee)}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.code{position:relative;background:var(--code);color:var(--code-ink);border-radius:10px;padding:14px 16px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;margin:10px 0 0;-webkit-overflow-scrolling:touch}
+.code .c{color:#94a3b8}.code .h{color:#fda29b}.code .t{color:#67e8f9}
+.copy{position:absolute;top:8px;right:8px;font:600 12px system-ui,sans-serif;background:rgba(255,255,255,.1);color:#e2e8f0;border:1px solid rgba(255,255,255,.22);border-radius:7px;padding:5px 10px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.18)}
+.note{font-size:14px;color:var(--ink2);margin:12px 0 0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card p{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.6}
+.k{display:inline-block;font:700 11px/1 system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tier{border-radius:12px;padding:14px;border:1px solid var(--line)}
+.tier b{display:block;font-size:15px;margin-bottom:4px}
+.tier p{margin:0;font-size:14px;line-height:1.55;color:var(--ink2)}
+.tier.clean{background:var(--clean-bg)} .tier.clean b{color:var(--clean)}
+.tier.suspect{background:var(--suspect-bg)} .tier.suspect b{color:var(--suspect)}
+.tier.hostile{background:var(--hostile-bg)} .tier.hostile b{color:var(--hostile)}
+@media (max-width:640px){.tiers{grid-template-columns:1fr}}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.log{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.log ul{margin:8px 0 0;padding-left:18px;font-size:14.5px;line-height:1.6;color:var(--ink2)}
+.log li{margin:0 0 6px}
+.who{font-size:13px;color:var(--ink3);margin:0 0 6px}
+.fields{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.fields code{font-size:12px;background:var(--teal-bg);border:1px solid rgba(8,145,178,.2);border-radius:6px;padding:2px 7px;color:var(--ink)}
+.cap{font-size:13px;color:var(--ink3);margin:8px 0 0}
+
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.num{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.num b{display:block;font-size:1.6rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.num span{font-size:13.5px;color:var(--ink2)}
+.fine{font-size:13.5px;color:var(--ink3);margin:12px 0 0;max-width:720px}
+
+.pkgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.pkg{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;color:var(--ink)!important}
+.pkg:hover{border-color:rgba(8,145,178,.5)}
+.pkg code{font-weight:600;font-size:14px;color:var(--teal)}
+.pkg p{margin:6px 0 0;font-size:14px;color:var(--ink2);line-height:1.55}
+.go{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:var(--link)}
+
+.dashed{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:14px 16px}
+.dashed ul{margin:6px 0 0;padding-left:18px;color:var(--ink2);font-size:14.5px;line-height:1.6}
+.dashed p{margin:0;color:var(--ink2);font-size:14.5px}
+.dashed p+p{margin-top:8px}
+
+.ig-foot{border-top:1px solid var(--line);padding:22px 16px;text-align:center;font-size:13px;color:var(--ink3)}
+.ig-foot nav{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.ig-foot a{color:var(--link);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" aria-label="AcePaste home" style="display:inline-flex;align-items:center;text-decoration:none">
+    <picture>
+      <source srcset="/brand-56.webp?v=2.1 1x, /brand-112.webp?v=2.1 2x" type="image/webp">
+      <img src="/brand-56.jpg?v=2.1" srcset="/brand-56.jpg?v=2.1 1x, /brand-112.jpg?v=2.1 2x" class="logo" alt="Ace" width="28" height="28" loading="eager">
+    </picture>
+  </a>
+  <h1>AcePaste Ingress</h1>
+  <span class="domain">acepaste.xyz</span>
+  <nav class="hdr-nav">
+    <a href="/">Cleaner</a>
+    <a href="#install">Install</a>
+    <a href="https://www.npmjs.com/package/@acepaste/ingress-mcp" rel="noopener" target="_blank">npm</a>
+    <a href="https://github.com/sugarcypher/acepasteINGRESS" rel="noopener" target="_blank">GitHub</a>
+  </nav>
+</header>
+
+<main class="ig">
+
+  <div class="ig-hero">
+    <span class="trust-line"><span class="dot"></span>Now live · v0.9 on npm · free to use</span>
+    <h2 class="big">A security gate between the web and your AI agent</h2>
+    <p class="lede">The same invisible-text defense that powers the AcePaste cleaner, placed in front of your agent's fetch. Pages that hide instructions from people are refused before the model reads them. Every refusal is logged and every verdict gets a signed receipt.</p>
+    <p class="rule">Anything the model would receive that a person looking at the same page would not see is suspect by default.</p>
+    <div class="cta-row">
+      <a class="cta primary" href="https://www.npmjs.com/package/@acepaste/ingress-mcp" rel="noopener" target="_blank">Get it on npm</a>
+      <a class="cta" href="#refusal">See a real refusal</a>
+      <a class="cta" href="https://github.com/sugarcypher/acepasteINGRESS" rel="noopener" target="_blank">Read the source</a>
+    </div>
+  </div>
+
+  <section id="install" aria-labelledby="install-h">
+    <h2 id="install-h">Install in one step</h2>
+    <p class="sec-sub">Add it to any agent that speaks the Model Context Protocol, such as Claude Desktop, Claude Code or Cursor. The agent then reads the web through <code>ingress_fetch</code> and <code>ingress_scan</code> instead of a raw fetch.</p>
+    <div class="panel">
+      <div class="code" data-copy>{
+  "mcpServers": {
+    "acepaste-ingress": {
+      "command": "npx",
+      "args": ["-y", "@acepaste/ingress-mcp@0.9.0"],
+      "env": {
+        "INGRESS_SANDBOX": "off",
+        "INGRESS_LOG": "/absolute/path/acepaste-ingress.jsonl"
+      }
+    }
+  }
+}</div>
+      <p class="note">Want receipts anyone can verify? Make a key pair once with <code>npx -p @acepaste/ingress ingress --keygen</code> and point <code>INGRESS_SIGNING_PRIVATE_KEY_FILE</code> at the private key. To try one page from a terminal:</p>
+      <div class="code" data-copy>npx @acepaste/ingress https://example.com</div>
+      <p class="note">It runs on your machine or your own server. No ThinkWell Labs service sits in the loop, and your logs and receipts stay with you.</p>
+    </div>
+  </section>
+
+  <section id="benefits" aria-labelledby="benefits-h">
+    <h2 id="benefits-h">What it gives you</h2>
+    <p class="sec-sub">Most tools score text after it has been pulled out of the page, so some of the evidence is already gone. Ingress works on the page itself, and it refuses by default.</p>
+    <div class="grid">
+      <div class="card"><span class="k">Refuses by default</span><h3>Suspect content waits for a person</h3><p>A refused page never reaches the model. A person can release a suspect page, but not a hostile one. Any internal error counts as a refusal, never a pass.</p></div>
+      <div class="card"><span class="k">Sees the blind spots</span><h3>What the model reads but you don't</h3><p>Invisible Unicode (tag characters, zero-width channels, bidi overrides, look-alike letters), text hidden by CSS or coloured to match its background, and payloads tucked into attributes, comments, SVG or <code>srcdoc</code>.</p></div>
+      <div class="card"><span class="k">Catches cloaking</span><h3>One page for you, another for the bot</h3><p>It fetches twice and compares, which catches sites that detect automation and serve agents a different page. It can also render the page in a throwaway browser and compare again.</p></div>
+      <div class="card"><span class="k">Signed receipts</span><h3>Proof of what your agent read</h3><p>Every verdict, clean ones included, gets a hash-chained receipt signed with ECDSA P-256. Anyone with the public key can check it, and nobody without the private key can forge one.</p></div>
+      <div class="card"><span class="k">Quarantine</span><h3>Block a source and see where it already reached</h3><p>Quarantine a host or URL and future fetches of it are refused. You also get its blast radius: every earlier receipt from that source, including what was delivered.</p></div>
+      <div class="card"><span class="k">Action broker</span><h3>Outside content can't approve itself</h3><p>Once a run has read outside content, side-effecting tool calls need a person to approve that exact call. The approval comes through a channel the model can't drive, a native dialog on macOS.</p></div>
+      <div class="card"><span class="k">Secrets stay out</span><h3>Credentials are redacted</h3><p>Cloud, Git, registry, payment and model-provider tokens and private keys are identified by type, redacted from delivered text and never written to a log.</p></div>
+      <div class="card"><span class="k">Environment audit</span><h3>Has something already got in?</h3><p><code>ingress audit</code> checks your machine for anything that changes what agents receive before a gate sees it: hosts and DNS, proxies, browser extensions and policies, trusted certificates, MCP configs and hooks.</p></div>
+    </div>
+  </section>
+
+  <section id="verdicts" aria-labelledby="verdicts-h">
+    <h2 id="verdicts-h">Three verdicts</h2>
+    <p class="sec-sub">Every page or piece of text gets one. Only clean content is delivered.</p>
+    <div class="tiers">
+      <div class="tier clean"><b>Clean</b><p>The model gets the visible text inside a provenance envelope, with a signed receipt.</p></div>
+      <div class="tier suspect"><b>Suspect</b><p>Nothing is delivered. A person can override it, and the receipt records that they did.</p></div>
+      <div class="tier hostile"><b>Hostile</b><p>Nothing is delivered and it can't be overridden. The refusal is logged.</p></div>
+    </div>
+  </section>
+
+  <section id="logs" aria-labelledby="logs-h">
+    <h2 id="logs-h">Every capture and every refusal is on the record</h2>
+    <p class="sec-sub">Ingress keeps two records. Both are files you own, on the machine or server where it runs.</p>
+    <div class="two">
+      <div class="log">
+        <h3>The refusal log</h3>
+        <p class="who">One JSON line per refusal, written to <code>INGRESS_LOG</code>.</p>
+        <ul>
+          <li>What was found and where: the page location of each finding, the matched excerpt and its digest.</li>
+          <li>Hidden payloads decoded into readable text: tag characters, base64, hex and the rest.</li>
+          <li>The hosts a payload tried to reach, and the redirect chain the fetch followed.</li>
+          <li>Each finding is labelled as an inference or a hypothesis, with a confidence band and the harmless explanation a reviewer should rule out.</li>
+        </ul>
+      </div>
+      <div class="log">
+        <h3>The receipt log</h3>
+        <p class="who">One receipt per verdict, clean or refused.</p>
+        <ul>
+          <li>What came in, what was delivered and what was stripped, each fixed by a digest.</li>
+          <li>Chained to the receipt before it, so a deleted or edited entry shows.</li>
+          <li>With <code>@acepaste/ingress-http</code>: search by URL, host, verdict, finding type or date, browse it in <code>/console</code> and export it as JSON.</li>
+          <li>Verify any receipt offline with <code>ingress --verify</code>.</li>
+        </ul>
+        <div class="fields" aria-label="Receipt fields">
+          <code>rawDigest</code><code>deliveredDigest</code><code>previous</code><code>engineVersion</code><code>rulesetVersion</code><code>findings</code><code>signatureAlg</code><code>keyId</code><code>signature</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="refusal" aria-labelledby="refusal-h">
+    <h2 id="refusal-h">A real refusal</h2>
+    <p class="sec-sub">This is what Ingress 0.9.0 returned for our <a href="/demo/ingress-test.html">labelled test page</a>, a kettle review with harmless hidden instructions. To a person it looks like an ordinary review. Underneath are an off-screen note, a white-on-white line and 64 invisible tag characters.</p>
+    <div class="two">
+      <div class="log">
+        <h3>What the agent receives</h3>
+        <p class="who">Instead of the page: an envelope with the verdict and nothing from the source.</p>
+        <div class="code"><span class="c">&lt;&lt;acepaste-ingress&gt;&gt;</span>
+verdict: <span class="h">hostile</span> (score 1)
+receipt: d00b5fb539be8b4f
+         engine 0.9.0 · ruleset 2026.11.03-2
+content: REFUSED. Nothing from this source
+         was delivered. Not overridable.
+  - [inference, medium] visibility.offscreen
+    24 words of offscreen text
+  - [inference, medium] visibility.tiny_or_transparent
+    21 words, contrast 1.01:1
+  - [inference, high] unicode.tag_characters
+    64 Plane 14 tag characters spelling
+    hidden ASCII
+  - [inference, high] meaning.instruction_shaped
+    in text a human would not see
+<span class="c">&lt;&lt;/acepaste-ingress&gt;&gt;</span></div>
+      </div>
+      <div class="log">
+        <h3>What lands in your refusal log</h3>
+        <p class="who">The same refusal, kept for you. Shortened here.</p>
+        <div class="code">{
+  "event": "ingress.verdict",
+  "tier": <span class="h">"hostile"</span>, "score": 1,
+  "contentKind": "html",
+  "passes": ["visibility","character","meaning"],
+  "findings": [
+    { "kind": <span class="t">"unicode.tag_characters"</span>,
+      "band": "high", "confidence": 0.98,
+      "location": "offset 404",
+      "artifactDigest": "9cbe5f895e10…",
+      "altExplanation": "emoji flag sequences
+        for subdivisions legitimately use
+        tag characters" },
+    <span class="c">… 3 more findings</span>
+  ],
+  "decodedPayloads": [ <span class="c">"the hidden text, decoded"</span> ],
+  "rawDigest": "3ed078fd8283…",
+  "receiptDigest": "d00b5fb539be…"
+}</div>
+        <p class="cap">The log keeps the full excerpts and the decoded hidden text. We left them out here so this page doesn't quote instructions aimed at AI.</p>
+      </div>
+    </div>
+    <p class="fine">Analysis took 31 ms on a laptop. Run it yourself with <code>npx @acepaste/ingress https://acepaste.xyz/demo/ingress-test.html</code>.</p>
+  </section>
+
+  <section id="numbers" aria-labelledby="numbers-h">
+    <h2 id="numbers-h">Measured, honestly</h2>
+    <div class="nums">
+      <div class="num"><b>85 / 85</b><span>attacks in the corpus refused</span></div>
+      <div class="num"><b>45 / 45</b><span>ordinary documents passed clean</span></div>
+      <div class="num"><b>3 / 3</b><span>ambiguous documents held as suspect, never hostile</span></div>
+      <div class="num"><b>0.2 ms</b><span>median analysis time per document</span></div>
+    </div>
+    <p class="fine">These come from a test set written for this project and hardened over three rounds of adversarial review. They set a minimum, not a claim about the open web. The browser render step adds about 2 seconds and runs only when something looks off. Found a bypass? Please <a href="https://github.com/sugarcypher/acepasteINGRESS/issues" rel="noopener" target="_blank">send it</a>. Each one becomes a test case.</p>
+  </section>
+
+  <section id="packages" aria-labelledby="packages-h">
+    <h2 id="packages-h">On npm</h2>
+    <p class="sec-sub">One engine in three forms. Node.js 20 or newer.</p>
+    <div class="pkgs">
+      <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress-mcp" rel="noopener" target="_blank"><code>@acepaste/ingress-mcp</code><p>The MCP server you put in front of an agent's fetch. Includes the action broker and a proxy for your other MCP servers.</p><span class="go">View on npm →</span></a>
+      <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress" rel="noopener" target="_blank"><code>@acepaste/ingress</code><p>The engine as a library and CLI: <code>fetch</code>, <code>scan</code>, <code>verify</code> and <code>audit</code>.</p><span class="go">View on npm →</span></a>
+      <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress-http" rel="noopener" target="_blank"><code>@acepaste/ingress-http</code><p>The engine as an HTTP service you host: API keys with rate limits, the searchable receipt log and console, and quarantine.</p><span class="go">View on npm →</span></a>
+    </div>
+  </section>
+
+  <section id="operators" aria-labelledby="operators-h">
+    <h2 id="operators-h">Seeing AcePasteIngress in your server logs?</h2>
+    <div class="dashed">
+      <p>An AI agent fetched your page through AcePaste Ingress, which identifies itself with the user agent <code>AcePasteIngress/0.8 (+https://acepaste.xyz/ingress)</code>. It fetches only the page the agent asked for. It reads it twice to check for cloaking, and in a headless browser too if its operator turned that on. It doesn't crawl or index anything.</p>
+      <p>The person who runs the agent operates it, not ThinkWell Labs, so we can't see or stop a particular instance. To keep agents off your site, use <code>robots.txt</code> or block that user agent. Questions: <a href="mailto:help@acepaste.xyz">help@acepaste.xyz</a>.</p>
+    </div>
+  </section>
+
+  <section id="limits" aria-labelledby="limits-h">
+    <h2 id="limits-h">What it doesn't do</h2>
+    <div class="dashed">
+      <ul>
+        <li>It keeps its judgement of plain visible prose narrow on purpose. Only the strongest instruction shapes in visible text are refused, and those can be overridden. Its weight is on what the model can't see.</li>
+        <li>The broker governs only the calls routed through it. A tool the agent can reach directly is outside it.</li>
+        <li>It's pre-1.0, so interfaces may still change.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-label="License">
+    <p class="fine">Source-available under FSL-1.1-ALv2: free to use for anything except a competing product, and each version becomes Apache 2.0 two years after release. Built by <a href="https://twl.today" rel="noopener" target="_blank">ThinkWell Labs</a>, makers of the AcePaste cleaner. For enterprise or self-hosted audit: <a href="mailto:enterprise@acepaste.xyz">enterprise@acepaste.xyz</a>.</p>
+  </section>
+
+</main>
+
+<footer class="ig-foot">
+  <nav>
+    <a href="/">Cleaner</a>
+    <a href="/pricing.html">Pricing</a>
+    <a href="/faq.html">FAQ</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/security.html">Security</a>
+    <a href="https://github.com/sugarcypher/acepasteINGRESS" rel="noopener" target="_blank">GitHub</a>
+  </nav>
+  © 2026 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a>
+</footer>
+
+<script src="/ingress/ingress.js" defer></script>
+</body>
+</html>
