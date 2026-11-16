@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://acepaste-ingress-log.13531nxt.workers.dev; object-src 'none'; base-uri 'self'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
 <title>AcePaste Ingress: a security gate for AI agents</title>
 <meta name="description" content="AcePaste Ingress sits between the web and your AI agent. It refuses pages that hide instructions from people, logs every refusal and gives every verdict a signed receipt. Free to use, on npm.">
 <link rel="canonical" href="https://acepaste.xyz/ingress/">
@@ -94,6 +94,24 @@
 .dashed p{margin:0;color:var(--ink2);font-size:14.5px}
 .dashed p+p{margin-top:8px}
 
+.livelog{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 16px 12px}
+.ll-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 0 8px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink3)}
+.ll-status{display:inline-flex;align-items:center;gap:8px}
+.ll-status .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+.ll-status.live .dot{background:#12b76a;box-shadow:0 0 0 3px rgba(18,183,106,.2)}
+.ll-status.down .dot{background:#f04438}
+.ll-list{list-style:none;margin:0;padding:0}
+.ll-item{padding:11px 0;border-bottom:1px solid var(--line)}
+.ll-item:last-child{border-bottom:0}
+.ll-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.ll-badge{font:700 10.5px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 8px;background:var(--hostile-bg);color:var(--hostile);border:1px solid currentColor}
+.ll-host{font-weight:600}
+.ll-host.third{font-weight:500;color:var(--ink2);font-style:italic}
+.ll-date{margin-left:auto;color:var(--ink3);font-size:12.5px;white-space:nowrap}
+.ll-kinds{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0 0}
+.ll-kinds span{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink2)}
+.ll-note{font-size:13px;color:var(--ink3);margin:6px 0 0}
+.ll-empty{color:var(--ink2);font-size:14.5px;padding:14px 0 4px;margin:0}
 .ig-foot{border-top:1px solid var(--line);padding:22px 16px;text-align:center;font-size:13px;color:var(--ink3)}
 .ig-foot nav{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 .ig-foot a{color:var(--link);text-decoration:none}
@@ -140,7 +158,7 @@
   "mcpServers": {
     "acepaste-ingress": {
       "command": "npx",
-      "args": ["-y", "@acepaste/ingress-mcp@0.9.0"],
+      "args": ["-y", "@acepaste/ingress-mcp@0.9.1"],
       "env": {
         "INGRESS_SANDBOX": "off",
         "INGRESS_LOG": "/absolute/path/acepaste-ingress.jsonl"
@@ -206,6 +224,19 @@
           <code>rawDigest</code><code>deliveredDigest</code><code>previous</code><code>engineVersion</code><code>rulesetVersion</code><code>findings</code><code>signatureAlg</code><code>keyId</code><code>signature</code>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="live-log" aria-labelledby="live-log-h">
+    <h2 id="live-log-h">Our refusal log: the last 48 hours</h2>
+    <p class="sec-sub">The most severe refusals (hostile) from the Ingress gate we run ourselves, updated every few minutes. To protect our own privacy, only our own sites are named; any other source shows as "a third-party site", with the date but not the time. No page content is shown.</p>
+    <div class="livelog">
+      <div class="ll-head">
+        <span class="ll-status" id="ll-status" role="status"><span class="dot"></span><span id="ll-status-text">Loading the log…</span></span>
+        <span id="ll-updated"></span>
+      </div>
+      <ul class="ll-list" id="ll-list" aria-live="polite"></ul>
+      <noscript><p class="ll-empty">The live log needs JavaScript.</p></noscript>
     </div>
   </section>
 
