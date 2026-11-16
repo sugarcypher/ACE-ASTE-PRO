@@ -152,7 +152,7 @@ body.dark-mode .ap-video__sub{color:#8a9ab0}
     </button>
     <div id="optionsBody" class="options-body" hidden>
     <div class="options-top">
-      <label title="Always on \u2014 the core feature of this tool"><input type="checkbox" id="removeInvisible" data-tier="free" checked disabled> Remove invisible characters <span style="font-size:11px;opacity:.7">(always on)</span></label>
+      <label title="Always on — the core feature of this tool"><input type="checkbox" id="removeInvisible" data-tier="free" checked disabled> Remove invisible characters <span style="font-size:11px;opacity:.7">(always on)</span></label>
       <label><input type="checkbox" id="removeMarkdown" data-tier="free" checked> Remove markdown</label>
       <label><input type="checkbox" id="removeAIMarkup" data-tier="free" checked> Remove AI debris (##, ***, +++)</label>
       <label><input type="checkbox" id="removeEmojis" data-tier="free"> Remove emojis</label>
@@ -173,8 +173,8 @@ body.dark-mode .ap-video__sub{color:#8a9ab0}
         <label><input type="checkbox" id="removeDates" data-tier="free"> Remove all dates (all formats)</label>
         <label><input type="checkbox" id="removeSymbolPairs" data-tier="free"> Remove symbol+word pairs</label>
         <div id="symbolPairsConfig" class="symbol-pairs-config">
-          <p style="font-size:12px;color:#888;margin:4px 0 8px">Enter specific strings to remove, one per line. Examples: $4.43, user:, #tag, @mention</p>
-          <textarea id="symbolPairsList" class="input-small" rows="3" placeholder="$4.43&#10;user:&#10;#tag&#10;@mention"></textarea>
+          <p style="font-size:12px;color:#888;margin:4px 0 8px">Enter specific strings to remove, one per line. Examples: $4.43, note:, #tag, @mention</p>
+          <textarea id="symbolPairsList" class="input-small" rows="3" placeholder="$4.43&#10;note:&#10;#tag&#10;@mention"></textarea>
           <div style="margin-top:6px">
             <label style="font-size:12px;min-height:auto;padding:4px 0"><input type="checkbox" id="symbolPairsSmartMode" style="width:16px;height:16px"> Smart mode: also remove any word attached to these symbols: <input id="symbolChars" class="input-small" style="width:120px;display:inline;margin:0 4px;padding:4px 6px;font-family:monospace" placeholder="$ # @ : %" value="$ # @ : %"></label>
           </div>
@@ -283,18 +283,18 @@ body.dark-mode .ap-video__sub{color:#8a9ab0}
 
   <section class="demo-block" aria-label="Before and after example">
     <h2>See what AcePaste removes</h2>
-    <p class="demo-sub">Real example: text copied out of an AI chat. The red highlights are invisible characters and markup your eyes don't see — but other systems do.</p>
+    <p class="demo-sub">Real example: text copied out of an AI chat. The red highlights are invisible characters and markup your eyes don't see — but other systems do. Invisible characters are shown by name here (ZWSP, TAG …) so you can see where they sit.</p>
     <div class="demo-grid">
       <div>
         <span class="demo-col-label">Before — pasted</span>
-        <div class="demo-col before"><span class="junk">​</span>**Project<span class="junk">‌</span> Update**<span class="junk">󠀀󠁰󠁲󠁯󠁭󠁰󠁴</span>
+        <div class="demo-col before"><span class="junk" title="zero-width space, U+200B">ZWSP</span>**Project<span class="junk" title="zero-width non-joiner, U+200C">ZWNJ</span> Update**<span class="junk" title="seven invisible Unicode tag characters (U+E0000 block) spelling the word prompt">TAG “prompt”</span>
 
 ## Summary
 - Migration is <span class="junk">"</span>complete<span class="junk">"</span> &mdash; tested on staging<span class="junk">…</span>
 - ETA <span class="junk">→</span> Friday&nbsp;EOD
 &lt;!-- internal: ping @leah --&gt;
 
-Please <span class="junk">‍</span>review<span class="junk">​</span> when you can. 🙏✨</div>
+Please <span class="junk" title="zero-width joiner, U+200D">ZWJ</span>review<span class="junk" title="zero-width space, U+200B">ZWSP</span> when you can. 🙏✨</div>
       </div>
       <div>
         <span class="demo-col-label">After — cleaned</span>
