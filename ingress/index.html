@@ -107,6 +107,7 @@
 .ll-badge{font:700 10.5px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 8px;background:var(--hostile-bg);color:var(--hostile);border:1px solid currentColor}
 .ll-host{font-weight:600}
 .ll-host.third{font-weight:500;color:var(--ink2);font-style:italic}
+.ll-ref{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink3)}
 .ll-date{margin-left:auto;color:var(--ink3);font-size:12.5px;white-space:nowrap}
 .ll-kinds{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0 0}
 .ll-kinds span{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink2)}
@@ -170,7 +171,7 @@
   "mcpServers": {
     "acepaste-ingress": {
       "command": "npx",
-      "args": ["-y", "@acepaste/ingress-mcp@0.9.1"],
+      "args": ["-y", "@acepaste/ingress-mcp@0.9.30"],
       "env": {
         "INGRESS_SANDBOX": "off",
         "INGRESS_LOG": "/absolute/path/acepaste-ingress.jsonl"
@@ -241,7 +242,7 @@
 
   <section id="live-log" aria-labelledby="live-log-h">
     <h2 id="live-log-h">Our refusal log</h2>
-    <p class="sec-sub">From the Ingress gate we run ourselves, updated every few minutes: how much it checked, and the most severe refusals (hostile) on public websites. To protect our own privacy, only our own sites are named; any other source shows as "a third-party site", with the date but not the time. No page content is shown.</p>
+    <p class="sec-sub">From the Ingress gate we run ourselves, updated every few minutes: how much it checked, and the most severe refusals (hostile) on public websites. Each row is a real entry in our own refusal log, shown with a reference to it. The sites are not named, to protect our own privacy and because a refusal is a finding, not a verdict on a site's owner. Each row gives the date but not the time, and no page content. Our own sites are left out, because what the gate catches there is our own demo and test material.</p>
     <div class="livelog">
       <div class="ll-head">
         <span class="ll-status" id="ll-status" role="status"><span class="dot"></span><span id="ll-status-text">Loading the log…</span></span>
@@ -363,6 +364,6 @@ content: REFUSED. Nothing from this source
   © 2026 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a>
 </footer>
 
-<script src="/ingress/ingress.js?v=2" defer></script>
+<script src="/ingress/ingress.js?v=3" defer></script>
 </body>
 </html>

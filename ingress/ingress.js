@@ -118,7 +118,9 @@
       var li = el("li", "ll-item");
       var top = el("div", "ll-top");
       top.appendChild(el("span", "ll-badge", "hostile"));
-      top.appendChild(el("span", it.own ? "ll-host" : "ll-host third", str(it.host, 80) || "a third-party site"));
+      top.appendChild(el("span", "ll-host", str(it.host, 80) || "a public website, name withheld"));
+      // the reference ties the row to its entry in our own log
+      if (/^[0-9a-f]{12}$/.test(str(it.id, 12))) top.appendChild(el("span", "ll-ref", "log ref " + it.id));
       if (typeof it.score === "number") top.appendChild(el("span", "ll-date", "score " + it.score.toFixed(2)));
       top.appendChild(el("span", "ll-date", str(it.date, 10)));
       li.appendChild(top);
@@ -128,7 +130,6 @@
         kinds.forEach(function (k) { kd.appendChild(el("span", null, k.slice(0, 70))); });
         li.appendChild(kd);
       }
-      if (it.own && it.note) li.appendChild(el("p", "ll-note", str(it.note, 160)));
       list.appendChild(li);
     });
   }
