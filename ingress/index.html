@@ -112,6 +112,18 @@
 .ll-kinds span{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink2)}
 .ll-note{font-size:13px;color:var(--ink3);margin:6px 0 0}
 .ll-empty{color:var(--ink2);font-size:14.5px;padding:14px 0 4px;margin:0}
+.ll-sum{padding:12px 0;border-bottom:1px solid var(--line)}
+.ll-sumhead{margin:0 0 8px;font-size:13px;color:var(--ink3)}
+.ll-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ll-stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0}
+.ll-stat b{display:block;font-size:20px;line-height:1.15;font-variant-numeric:tabular-nums}
+.ll-stat span{display:block;font-size:12.5px;color:var(--ink3);margin-top:2px}
+.ll-src{list-style:none;margin:10px 0 0;padding:0;font-size:13.5px;color:var(--ink2)}
+.ll-src li{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;padding:3px 0}
+.ll-srcname::first-letter{text-transform:uppercase}
+.ll-srcnum{color:var(--ink3);font-variant-numeric:tabular-nums}
+.ll-cap{font-size:12.5px;line-height:1.5;color:var(--ink3);margin:8px 0 0}
+@media (max-width:520px){.ll-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ig-foot{border-top:1px solid var(--line);padding:22px 16px;text-align:center;font-size:13px;color:var(--ink3)}
 .ig-foot nav{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 .ig-foot a{color:var(--link);text-decoration:none}
@@ -228,13 +240,14 @@
   </section>
 
   <section id="live-log" aria-labelledby="live-log-h">
-    <h2 id="live-log-h">Our refusal log: the last 48 hours</h2>
-    <p class="sec-sub">The most severe refusals (hostile) from the Ingress gate we run ourselves, updated every few minutes. To protect our own privacy, only our own sites are named; any other source shows as "a third-party site", with the date but not the time. No page content is shown.</p>
+    <h2 id="live-log-h">Our refusal log</h2>
+    <p class="sec-sub">From the Ingress gate we run ourselves, updated every few minutes: how much it checked, and the most severe refusals (hostile) on public websites. To protect our own privacy, only our own sites are named; any other source shows as "a third-party site", with the date but not the time. No page content is shown.</p>
     <div class="livelog">
       <div class="ll-head">
         <span class="ll-status" id="ll-status" role="status"><span class="dot"></span><span id="ll-status-text">Loading the log…</span></span>
         <span id="ll-updated"></span>
       </div>
+      <div class="ll-sum" id="ll-sum" hidden></div>
       <ul class="ll-list" id="ll-list" aria-live="polite"></ul>
       <noscript><p class="ll-empty">The live log needs JavaScript.</p></noscript>
     </div>
@@ -350,6 +363,6 @@ content: REFUSED. Nothing from this source
   © 2026 ThinkWell Labs · <a href="https://acepaste.xyz">acepaste.xyz</a>
 </footer>
 
-<script src="/ingress/ingress.js" defer></script>
+<script src="/ingress/ingress.js?v=2" defer></script>
 </body>
 </html>
