@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '17 13 * * *'   # daily, refreshes the download counters
   workflow_dispatch:
 
 permissions:
@@ -34,11 +36,14 @@ jobs:
       # old list and deployed every file. Delete non-site files from the runner's
       # checkout before upload instead. .well-known/ must stay (security.txt);
       # upload-pages-artifact@v4 drops dot-folders, so stay on v3 or handle that first.
+      - name: Write download counters into index.html
+        run: python3 .github/scripts/write-counters.py
+
       - name: Remove files that are not part of the site
         run: |
           rm -rf public test node_modules .claude supabase AcePasteBrowserExtension ace-paste-extension.zip indeBADx.html _headers _redirects ads-fallback.txt
           find . -path ./.git -prune -o -path ./.github -prune -o -path ./.well-known -prune -o -type f \( \
-            -name '*.md' -o -name '*.sh' -o -name '*.conf' -o -name '*.php' \
+            -name '*.md' -o -name '*.sh' -o -name 'counters.json' -o -name '*.conf' -o -name '*.php' \
             -o -name '.gitignore' -o -name '.htaccess' -o -name '.fuse_hidden*' \
             -o -name 'cloudflare-worker-*.js' \
           \) -exec rm -f {} +
