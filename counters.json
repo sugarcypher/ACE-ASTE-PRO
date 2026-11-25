@@ -1,0 +1,6 @@
+{
+  "extension_installs": 930,
+  "extension_installs_note": "Chrome Web Store developer dashboard, Stats > Installs. Update by hand; Google publishes no API for it.",
+  "npm_packages": ["@acepaste/ingress", "@acepaste/ingress-http", "@acepaste/ingress-mcp"],
+  "npm_start": "2026-10-01"
+}
