@@ -330,7 +330,7 @@ content: REFUSED. Nothing from this source
   <section id="operators" aria-labelledby="operators-h">
     <h2 id="operators-h">Seeing AcePasteIngress in your server logs?</h2>
     <div class="dashed">
-      <p>An AI agent fetched your page through AcePaste Ingress, which identifies itself with the user agent <code>AcePasteIngress/0.8 (+https://acepaste.xyz/ingress)</code>. It fetches only the page the agent asked for. It reads it twice to check for cloaking, and in a headless browser too if its operator turned that on. It doesn't crawl or index anything.</p>
+      <p>An AI agent fetched your page through AcePaste Ingress. Its own user agent is <code>AcePasteIngress/0.9 (+https://acepaste.xyz/ingress)</code> (<code>0.8</code> in releases before 0.9.31). It fetches only the page the agent asked for. It reads it twice to check for cloaking: once as an AI assistant (ChatGPT-User, Claude-User or Perplexity-User) and once as a desktop browser, and in a headless browser too if its operator turned that on. It uses its own name when a site refuses AI assistants, or always if its operator chooses. It doesn't crawl or index anything. <a href="https://github.com/sugarcypher/acepasteINGRESS/blob/main/PRIVACY.md">Everything it contacts</a>.</p>
       <p>The person who runs the agent operates it, not ThinkWell Labs, so we can't see or stop a particular instance. To keep agents off your site, use <code>robots.txt</code> or block that user agent. Questions: <a href="mailto:help@acepaste.xyz">help@acepaste.xyz</a>.</p>
     </div>
   </section>
