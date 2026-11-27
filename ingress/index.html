@@ -197,6 +197,7 @@
       <div class="card"><span class="k">Action broker</span><h3>Outside content can't approve itself</h3><p>Once a run has read outside content, side-effecting tool calls need a person to approve that exact call. The approval comes through a channel the model can't drive, a native dialog on macOS.</p></div>
       <div class="card"><span class="k">Secrets stay out</span><h3>Credentials are redacted</h3><p>Cloud, Git, registry, payment and model-provider tokens and private keys are identified by type, redacted from delivered text and never written to a log.</p></div>
       <div class="card"><span class="k">Environment audit</span><h3>Has something already got in?</h3><p><code>ingress audit</code> checks your machine for anything that changes what agents receive before a gate sees it: hosts and DNS, proxies, browser extensions and policies, trusted certificates, MCP configs and hooks.</p></div>
+      <div class="card"><span class="k">API scan</span><h3>Is your own API safe to point an agent at?</h3><p><code>ingress apiscan https://api.example.com</code> checks an API you own for exposed files, open CORS, routes that answer without auth, leaked keys, stack traces and responses an agent would read as instructions. It sends only read requests (GET, HEAD, OPTIONS), about 60 at most, and never an attack payload.</p></div>
     </div>
   </section>
 
