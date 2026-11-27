@@ -6,10 +6,10 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://acepaste-ingress-log.13531nxt.workers.dev; object-src 'none'; base-uri 'self'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'; upgrade-insecure-requests">
 <title>AcePaste Ingress: a security gate for AI agents</title>
-<meta name="description" content="AcePaste Ingress sits between the web and your AI agent. It refuses pages that hide instructions from people, logs every refusal and gives every verdict a signed receipt. Free to use, on npm.">
+<meta name="description" content="AcePaste Ingress is a security gate and toolkit for AI agents. It refuses web pages that hide instructions from people, signs a receipt for every verdict, and scans MCP servers, repos, packages, documents and agent replies for hidden instructions and data leaks. Free to use, on npm.">
 <link rel="canonical" href="https://acepaste.xyz/ingress/">
 <meta property="og:title" content="AcePaste Ingress: a security gate for AI agents">
-<meta property="og:description" content="Refuses what the model would see but you wouldn't. Every refusal logged, every verdict signed. Free on npm.">
+<meta property="og:description" content="Refuses what the model would see but you wouldn't, and scans MCP servers, repos, packages, documents and agent replies for hidden instructions. Every verdict signed. Free on npm.">
 <meta property="og:url" content="https://acepaste.xyz/ingress/">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="/styles.css?v=3.0">
@@ -152,7 +152,7 @@
 <main class="ig">
 
   <div class="ig-hero">
-    <span class="trust-line"><span class="dot"></span>Now live · v0.9 on npm · free to use</span>
+    <span class="trust-line"><span class="dot"></span>Now live · v0.10.0 on npm · free to use</span>
     <h2 class="big">A security gate between the web and your AI agent</h2>
     <p class="lede">The same invisible-text defense that powers the AcePaste cleaner, placed in front of your agent's fetch. Pages that hide instructions from people are refused before the model reads them. Every refusal is logged and every verdict gets a signed receipt.</p>
     <p class="rule">Anything the model would receive that a person looking at the same page would not see is suspect by default.</p>
@@ -171,7 +171,7 @@
   "mcpServers": {
     "acepaste-ingress": {
       "command": "npx",
-      "args": ["-y", "@acepaste/ingress-mcp@0.9.30"],
+      "args": ["-y", "@acepaste/ingress-mcp@0.10.0"],
       "env": {
         "INGRESS_SANDBOX": "off",
         "INGRESS_LOG": "/absolute/path/acepaste-ingress.jsonl"
@@ -198,6 +198,12 @@
       <div class="card"><span class="k">Secrets stay out</span><h3>Credentials are redacted</h3><p>Cloud, Git, registry, payment and model-provider tokens and private keys are identified by type, redacted from delivered text and never written to a log.</p></div>
       <div class="card"><span class="k">Environment audit</span><h3>Has something already got in?</h3><p><code>ingress audit</code> checks your machine for anything that changes what agents receive before a gate sees it: hosts and DNS, proxies, browser extensions and policies, trusted certificates, MCP configs and hooks.</p></div>
       <div class="card"><span class="k">API scan</span><h3>Is your own API safe to point an agent at?</h3><p><code>ingress apiscan https://api.example.com</code> checks an API you own for exposed files, open CORS, routes that answer without auth, leaked keys, stack traces and responses an agent would read as instructions. It sends only read requests (GET, HEAD, OPTIONS), about 60 at most, and never an attack payload.</p></div>
+      <div class="card"><span class="k">MCP scan</span><h3>Are your MCP servers' tools telling the model something?</h3><p><code>ingress mcpscan --connect</code> reads the tool descriptions of the MCP servers your AI apps use and flags hidden instructions (tool poisoning), orders about other tools and look-alike tool names. It pins each server's tools and warns when they change after you pinned them (a rug pull).</p></div>
+      <div class="card"><span class="k">Show</span><h3>See what your agent sees</h3><p><code>ingress show https://example.com --out report.html</code> writes one static HTML report: what a person sees beside what your AI agent receives, with every piece of hidden text highlighted where it sits. It works on a URL or a local file.</p></div>
+      <div class="card"><span class="k">Repo scan</span><h3>A gate for coding agents, on every pull request</h3><p><code>ingress reposcan --diff origin/main</code> checks AGENTS.md, CLAUDE.md, .cursorrules, READMEs, MCP configs, package scripts and code for hidden instructions and Trojan Source Unicode. It writes SARIF for GitHub code scanning, and the GitHub Action fails a pull request on any high finding.</p></div>
+      <div class="card"><span class="k">Out check</span><h3>Data can't leave in a link or a picture</h3><p><code>ingress outcheck &lt; reply.md</code> reads an agent's reply before it is shown and catches data hidden in image and link URLs, which the chat window would send out just by rendering them. Tool calls get egress checks too: a call that carries what the run read to a new host needs a person.</p></div>
+      <div class="card"><span class="k">Package check</span><h3>Check a package before you install it</h3><p><code>ingress pkgcheck npm left-padd express</code> looks npm and PyPI packages up first and flags names that don't exist (made up by an AI), look-alikes of popular names, brand-new packages with install scripts and READMEs written to steer an AI agent.</p></div>
+      <div class="card"><span class="k">File and corpus scan</span><h3>Hidden text in documents and knowledge bases</h3><p><code>ingress filescan invoice.pdf</code> finds text a person doesn't see in PDF, Word, Excel and PowerPoint files and image metadata. <code>ingress corpusscan ./docs --quarantine ./held</code> checks a whole RAG folder and moves poisoned files aside, deleting nothing.</p></div>
     </div>
   </section>
 
@@ -323,7 +329,7 @@ content: REFUSED. Nothing from this source
     <p class="sec-sub">One engine in three forms. Node.js 20 or newer.</p>
     <div class="pkgs">
       <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress-mcp" rel="noopener" target="_blank"><code>@acepaste/ingress-mcp</code><p>The MCP server you put in front of an agent's fetch. Includes the action broker and a proxy for your other MCP servers.</p><span class="go">View on npm →</span></a>
-      <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress" rel="noopener" target="_blank"><code>@acepaste/ingress</code><p>The engine as a library and CLI: <code>fetch</code>, <code>scan</code>, <code>verify</code> and <code>audit</code>.</p><span class="go">View on npm →</span></a>
+      <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress" rel="noopener" target="_blank"><code>@acepaste/ingress</code><p>The engine as a library and CLI: <code>fetch</code>, <code>scan</code>, <code>verify</code> and <code>audit</code>, plus <code>show</code>, <code>mcpscan</code>, <code>reposcan</code>, <code>pkgcheck</code>, <code>outcheck</code>, <code>filescan</code> and <code>corpusscan</code>.</p><span class="go">View on npm →</span></a>
       <a class="pkg" href="https://www.npmjs.com/package/@acepaste/ingress-http" rel="noopener" target="_blank"><code>@acepaste/ingress-http</code><p>The engine as an HTTP service you host: API keys with rate limits, the searchable receipt log and console, and quarantine.</p><span class="go">View on npm →</span></a>
     </div>
   </section>
@@ -331,7 +337,7 @@ content: REFUSED. Nothing from this source
   <section id="operators" aria-labelledby="operators-h">
     <h2 id="operators-h">Seeing AcePasteIngress in your server logs?</h2>
     <div class="dashed">
-      <p>An AI agent fetched your page through AcePaste Ingress. Its own user agent is <code>AcePasteIngress/0.9 (+https://acepaste.xyz/ingress)</code> (<code>0.8</code> in releases before 0.9.31). It fetches only the page the agent asked for. It reads it twice to check for cloaking: once as an AI assistant (ChatGPT-User, Claude-User or Perplexity-User) and once as a desktop browser, and in a headless browser too if its operator turned that on. It uses its own name when a site refuses AI assistants, or always if its operator chooses. It doesn't crawl or index anything. <a href="https://github.com/sugarcypher/acepasteINGRESS/blob/main/PRIVACY.md">Everything it contacts</a>.</p>
+      <p>An AI agent fetched your page through AcePaste Ingress. Its own user agent is <code>AcePasteIngress/0.10 (+https://acepaste.xyz/ingress)</code> (<code>0.9</code> in releases 0.9.31 to 0.9.33, <code>0.8</code> before 0.9.31). It fetches only the page the agent asked for. It reads it twice to check for cloaking: once as an AI assistant (ChatGPT-User, Claude-User or Perplexity-User) and once as a desktop browser, and in a headless browser too if its operator turned that on. It uses its own name when a site refuses AI assistants, or always if its operator chooses. It doesn't crawl or index anything. <a href="https://github.com/sugarcypher/acepasteINGRESS/blob/main/PRIVACY.md">Everything it contacts</a>.</p>
       <p>The person who runs the agent operates it, not ThinkWell Labs, so we can't see or stop a particular instance. To keep agents off your site, use <code>robots.txt</code> or block that user agent. Questions: <a href="mailto:help@acepaste.xyz">help@acepaste.xyz</a>.</p>
     </div>
   </section>
